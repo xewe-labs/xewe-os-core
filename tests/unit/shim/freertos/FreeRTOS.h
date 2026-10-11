@@ -11,7 +11,7 @@
 #include <cstdint>
 
 typedef uint32_t TickType_t;
-typedef int      BaseType_t;
-#define portMAX_DELAY  ((TickType_t)0xffffffffUL)
-#define pdTRUE         ((BaseType_t)1)
-#define pdFALSE        ((BaseType_t)0)
+typedef int BaseType_t;
+#define portMAX_DELAY ((TickType_t)0xffffffffUL)
+#define pdTRUE ((BaseType_t)1)
+#define pdFALSE ((BaseType_t)0)

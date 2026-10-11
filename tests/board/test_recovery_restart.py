@@ -13,13 +13,17 @@ BOOT_TIMEOUT = 90.0
 def wait_boot(cli, t0):
     """Wait for the end-of-boot banner; if the port reopen reset the chip once more (native USB:
     the reopen asserts DTR), wait for that boot too. Returns (banner, seconds since t0)."""
-    m = wait_for_banner(cli.c, f"{BOOT_READY}|{BOOT_UNPROVISIONED}", BOOT_TIMEOUT, reset=False)
+    m = wait_for_banner(
+        cli.c, f"{BOOT_READY}|{BOOT_UNPROVISIONED}", BOOT_TIMEOUT, reset=False
+    )
     while m[0] == BOOT_READY:
         tail = cli.c.collect(silence=2.0, limit=30)
         rst = [i for i, l in enumerate(tail) if l.startswith("rst:")]
-        if not rst or any(BOOT_READY in l for l in tail[rst[-1]:]):
+        if not rst or any(BOOT_READY in l for l in tail[rst[-1] :]):
             break
-        m = wait_for_banner(cli.c, f"{BOOT_READY}|{BOOT_UNPROVISIONED}", BOOT_TIMEOUT, reset=False)
+        m = wait_for_banner(
+            cli.c, f"{BOOT_READY}|{BOOT_UNPROVISIONED}", BOOT_TIMEOUT, reset=False
+        )
     return m[0], time.monotonic() - t0
 
 
@@ -40,19 +44,41 @@ def test_rapid_restart_cycles(cli, log_dir, csv_writer):
         wifi = "\n".join(cli.run("$wifi status"))
         connected = bool(re.search(r"^Connected to ", wifi, re.M))
         free, total, up = cli.mem()
-        rows.append([n, round(boot_s, 2), roms, int(joined), int(connected), up, free, total])
-        print(f"cycle {n}: boot {boot_s:.1f} s, ROM banners {roms}, joined {joined}, "
-              f"wifi connected {connected}, uptime {up} s, free {free}")
+        rows.append(
+            [n, round(boot_s, 2), roms, int(joined), int(connected), up, free, total]
+        )
+        print(
+            f"cycle {n}: boot {boot_s:.1f} s, ROM banners {roms}, joined {joined}, "
+            f"wifi connected {connected}, uptime {up} s, free {free}"
+        )
         assert connected, f"cycle {n}: Wi-Fi not connected after boot:\n{wifi}"
         assert up <= boot_s + 10, f"cycle {n}: uptime {up} s; the board did not restart"
-    csv_writer("restart-cycles", ["cycle", "boot_s", "rom_banners", "joined", "wifi_connected",
-                                  "uptime_s", "free", "total"], rows)
+    csv_writer(
+        "restart-cycles",
+        [
+            "cycle",
+            "boot_s",
+            "rom_banners",
+            "joined",
+            "wifi_connected",
+            "uptime_s",
+            "free",
+            "total",
+        ],
+        rows,
+    )
     if log_dir is not None:
-        (log_dir / f"{time.strftime('%H%M')}-restart-cycles.log").write_text("\n".join(cli.c.lines) + "\n")
+        (log_dir / f"{time.strftime('%H%M')}-restart-cycles.log").write_text(
+            "\n".join(cli.c.lines) + "\n"
+        )
     boots = [r[1] for r in rows]
-    print(f"boot times: {boots}; min {min(boots)} max {max(boots)} mean {sum(boots) / len(boots):.1f}")
+    print(
+        f"boot times: {boots}; min {min(boots)} max {max(boots)} mean {sum(boots) / len(boots):.1f}"
+    )
     frees = [r[6] for r in rows]
-    assert max(frees) - min(frees) <= 8192, f"free heap after boot varies by > 8 KB: {frees}"
+    assert max(frees) - min(frees) <= 8192, (
+        f"free heap after boot varies by > 8 KB: {frees}"
+    )
 
 
 def test_reboot_alias(cli):

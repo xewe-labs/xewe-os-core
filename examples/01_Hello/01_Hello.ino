@@ -18,14 +18,15 @@
 // Skip the first-boot name prompt with a build-time name. A #define here does not reach the
 // library, so pass it as a build flag:
 //   xewe build --define 'XEWE_DEVICE_NAME="Desk Lamp"'
-//   arduino-cli compile --build-property "compiler.cpp.extra_flags='-DXEWE_DEVICE_NAME=\"Desk Lamp\"'" ...
+//   arduino-cli compile --build-property "compiler.cpp.extra_flags='-DXEWE_DEVICE_NAME=\"Desk
+//   Lamp\"'" ...
 
 XeWeOs os({.project_name = "hello", .version = "0.1.0"});
 
 void setup() {
-    os.begin();   // console, NVS, built-in commands; prompts for a name on first boot
+    os.begin(); // console, NVS, built-in commands; prompts for a name on first boot
 }
 
 void loop() {
-    os.loop();    // reads the console and runs commands; must be called often
+    os.loop(); // reads the console and runs commands; must be called often
 }

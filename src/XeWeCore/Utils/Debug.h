@@ -18,16 +18,16 @@
 //     arduino-cli compile --build-property "compiler.cpp.extra_flags=-DDEBUG_MyClass=1"
 // or in PlatformIO: build_flags = -DDEBUG_MyClass=1
 
-#define DBG_ENABLED(cls)       (DEBUG_##cls)
+#define DBG_ENABLED(cls) (DEBUG_##cls)
 
-#define DBG_PRINTLN(cls, msg)                           \
-    do {                                                \
-        if (DBG_ENABLED(cls)) {                         \
-            Serial.print("[DBG] [");                    \
-            Serial.print(#cls);                         \
-            Serial.print("]: ");                        \
-            Serial.println(msg);                        \
-        }                                               \
+#define DBG_PRINTLN(cls, msg) \
+    do { \
+        if (DBG_ENABLED(cls)) { \
+            Serial.print("[DBG] ["); \
+            Serial.print(#cls); \
+            Serial.print("]: "); \
+            Serial.println(msg); \
+        } \
     } while (0)
 
 // Formats into a fixed stack buffer rather than calling Serial.printf, which the
@@ -37,15 +37,14 @@
 #define DBG_PRINTF_BUFFER_SIZE 128
 #endif
 
-#define DBG_PRINTF(cls, fmt, ...)                       \
-    do {                                                \
-        if (DBG_ENABLED(cls)) {                         \
-            char _dbg_buf[DBG_PRINTF_BUFFER_SIZE];      \
-            snprintf(_dbg_buf, sizeof(_dbg_buf),        \
-                     (fmt), ##__VA_ARGS__);             \
-            Serial.print("[DBG] [");                    \
-            Serial.print(#cls);                         \
-            Serial.print("]: ");                        \
-            Serial.print(_dbg_buf);                     \
-        }                                               \
+#define DBG_PRINTF(cls, fmt, ...) \
+    do { \
+        if (DBG_ENABLED(cls)) { \
+            char _dbg_buf[DBG_PRINTF_BUFFER_SIZE]; \
+            snprintf(_dbg_buf, sizeof(_dbg_buf), (fmt), ##__VA_ARGS__); \
+            Serial.print("[DBG] ["); \
+            Serial.print(#cls); \
+            Serial.print("]: "); \
+            Serial.print(_dbg_buf); \
+        } \
     } while (0)

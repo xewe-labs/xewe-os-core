@@ -14,19 +14,19 @@
 #include "SensorModule.h"
 #include "AlertModule.h"
 
-#define LED_PIN 8   // onboard on most C3/C6/S3 dev boards; change for yours
+#define LED_PIN 8 // onboard on most C3/C6/S3 dev boards; change for yours
 
 // Declaration order is registration order is begin() order is loop() order.
 // The Os comes first; a module comes after everything it depends on.
 XeWeOs os({
-    .project_name    = "sensor-alert",
-    .version         = "0.1.0",
+    .project_name = "sensor-alert",
+    .version = "0.1.0",
     .build_timestamp = __DATE__ " " __TIME__,
-    .url             = "",            // clear the default, which points at the library repo
+    .url = "", // clear the default, which points at the library repo
 });
 
 SensorModule sensor(os, {.pin = 1, .default_limit = 500});
-AlertModule  alert(os, sensor, LED_PIN);   // after `sensor`: it holds a reference to it
+AlertModule alert(os, sensor, LED_PIN); // after `sensor`: it holds a reference to it
 
 void setup() {
     os.begin();
@@ -37,9 +37,8 @@ void setup() {
     // Modules can also be looked up by id. Prefer a constructor reference plus
     // add_requirement() for a real dependency; this is for the loose cases.
     if (xewe::Module* m = os.get_module("sensor")) {
-        os.serial.printf("found module '%s' (%s)",
-                         std::string(m->get_name()).c_str(),
-                         m->is_enabled() ? "enabled" : "disabled");
+        os.serial.printf("found module '%s' (%s)", std::string(m->get_name()).c_str(),
+            m->is_enabled() ? "enabled" : "disabled");
     }
 
     // Run a command from code, exactly as if it had been typed.
@@ -50,5 +49,5 @@ void setup() {
 }
 
 void loop() {
-    os.loop();   // CLI first, then each ENABLED module's loop()
+    os.loop(); // CLI first, then each ENABLED module's loop()
 }

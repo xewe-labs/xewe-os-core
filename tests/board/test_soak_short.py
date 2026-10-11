@@ -1,14 +1,20 @@
 """Short soak: 200 mixed commands with heap sampled every 20 (Cli, SerialPort, Nvs, modules)."""
 
-CYCLE = [   # {pin}: the free test GPIO (cli.test_pin)
+CYCLE = [  # {pin}: the free test GPIO (cli.test_pin)
     ("$system status", r"\|\s*Web Interface\s*\|"),
     ("$wifi status", r"^Wifi module enabled"),
     ("$time status", r"^Time module enabled"),
     ("$pins status", r"^Pins module enabled"),
-    ("$buttons add {pin} \"$system status\" pullup on_press 50", r"^Buttons: button mapping added"),
+    (
+        '$buttons add {pin} "$system status" pullup on_press 50',
+        r"^Buttons: button mapping added",
+    ),
     ("$buttons status", r"^\|\s*0\s*\|\s*{pin}\s*\|"),
     ("$buttons remove 0", r"^Buttons: button mapping removed"),
-    ("$schedule add 1439 1439 6 00FF00 \"$system status\"", r"^Scheduler: schedule saved"),
+    (
+        '$schedule add 1439 1439 6 00FF00 "$system status"',
+        r"^Scheduler: schedule saved",
+    ),
     ("$schedule status", r'"id":0'),
     ("$schedule remove 0", r"^Scheduler: schedule removed"),
     ("$help pins", r"Pins Commands \[pins\]"),
@@ -26,7 +32,10 @@ def test_soak_200_commands(cli, csv_writer):
     samples.append([0, f, total, up])
     for n in range(1, 201):
         cmd, rx = CYCLE[(n - 1) % len(CYCLE)]
-        cmd, rx = cmd.replace("{pin}", str(cli.test_pin)), rx.replace("{pin}", str(cli.test_pin))
+        cmd, rx = (
+            cmd.replace("{pin}", str(cli.test_pin)),
+            rx.replace("{pin}", str(cli.test_pin)),
+        )
         cli.c.send(cmd)
         cli.c.expect(rx, 15)
         cli.settle(0.25)
@@ -37,7 +46,9 @@ def test_soak_200_commands(cli, csv_writer):
     cli.clear_schedules()
     csv_writer("heap-soak-200", ["commands", "free", "total", "uptime_s"], samples)
     frees = [s[1] for s in samples]
-    print(f"soak heap free min {min(frees)} max {max(frees)} start {frees[0]} end {frees[-1]}; {frees}")
+    print(
+        f"soak heap free min {min(frees)} max {max(frees)} start {frees[0]} end {frees[-1]}; {frees}"
+    )
     monotonic_drop = all(b <= a for a, b in zip(frees, frees[1:]))
     assert frees[-1] >= frees[0] - 4096, frees
     assert not (monotonic_drop and frees[0] - frees[-1] > 4096), frees

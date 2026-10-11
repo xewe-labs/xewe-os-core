@@ -10,17 +10,23 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # --import-mode=importlib: soak.py is a sibling
+sys.path.insert(
+    0, str(Path(__file__).resolve().parent)
+)  # --import-mode=importlib: soak.py is a sibling
 from soak import run_soak  # noqa: E402
 
 DURATION = float(os.environ.get("XEWE_SOAK_SECONDS", "60"))
 
 
 def test_soak_mixed(cli, log_dir):
-    csv_path = None if log_dir is None else log_dir / f"{time.strftime('%H%M')}-soak-mixed.csv"
+    csv_path = (
+        None if log_dir is None else log_dir / f"{time.strftime('%H%M')}-soak-mixed.csv"
+    )
     res = run_soak(cli.c, DURATION, csv_path=csv_path)
     if log_dir is not None:
-        (log_dir / f"{time.strftime('%H%M')}-soak-mixed.log").write_text("\n".join(cli.c.lines) + "\n")
+        (log_dir / f"{time.strftime('%H%M')}-soak-mixed.log").write_text(
+            "\n".join(cli.c.lines) + "\n"
+        )
     print(res.summary())
     assert res.ok, res.summary()
     h = res.heap_stats()

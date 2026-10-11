@@ -33,7 +33,10 @@ def test_group_help_forms(cli):
 
 def test_help_errors(cli):
     """Cli::execute: `$help` with two args, and `$help <unknown>`."""
-    assert "Error: Argument count mismatch for '$help'; usage: $help <group>" in cli.run("$help system extra")
+    assert (
+        "Error: Argument count mismatch for '$help'; usage: $help <group>"
+        in cli.run("$help system extra")
+    )
     assert "Error: Unknown command group 'nope'" in cli.run("$help nope")
 
 
@@ -45,39 +48,54 @@ def test_case_insensitive(cli):
 
 def test_missing_dollar(cli):
     """Cli::execute: a line not starting with '$'."""
-    assert cli.run("system status") == ["Error: commands must start with '$'; type $help"]
+    assert cli.run("system status") == [
+        "Error: commands must start with '$'; type $help"
+    ]
 
 
 def test_bare_dollar(cli):
     """Cli::execute: `$` and `$   ` → missing group."""
     for cmd in ("$", "$    "):
-        assert "Error: Missing command group; usage: $<group> <command> [args...]" in cli.run(cmd)
+        assert (
+            "Error: Missing command group; usage: $<group> <command> [args...]"
+            in cli.run(cmd)
+        )
 
 
 def test_unknown_group_and_command(cli):
     """Cli::execute: unknown group, unknown command (names echoed as typed)."""
     assert "Error: Unknown command group 'nope'" in cli.run("$nope status")
-    assert "Error: Unknown command 'Frob' in command group 'system'" in cli.run("$system Frob")
+    assert "Error: Unknown command 'Frob' in command group 'system'" in cli.run(
+        "$system Frob"
+    )
 
 
 def test_wrong_arg_count(cli):
     """Cli::execute: argument count mismatch prints expected/got and the sample usage."""
     out = cli.run("$system restart now")
-    assert "Error: Argument count mismatch for '$system restart'; expected 0, got 1" in out
+    assert (
+        "Error: Argument count mismatch for '$system restart'; expected 0, got 1" in out
+    )
     assert "Usage: $system restart" in out
     out = cli.run("$pins adc_read")
-    assert "Error: Argument count mismatch for '$pins adc_read'; expected 1, got 0" in out
+    assert (
+        "Error: Argument count mismatch for '$pins adc_read'; expected 1, got 0" in out
+    )
 
 
 def test_unterminated_quote(cli):
     """Cli::tokenize: an unclosed quote is rejected before dispatch."""
-    assert "Error: Unterminated quote in command." in cli.run('$system set_device_name "abc')
+    assert "Error: Unterminated quote in command." in cli.run(
+        '$system set_device_name "abc'
+    )
 
 
 def test_quoted_args_with_spaces_and_escapes(cli):
     """Cli::tokenize: quoted arg keeps spaces, \\" becomes ", round-trips through $buttons add/status."""
     cli.clear_buttons()
-    out = cli.run(f'$buttons add {cli.test_pin} "$system \\"a b\\" status" pullup on_press 50')
+    out = cli.run(
+        f'$buttons add {cli.test_pin} "$system \\"a b\\" status" pullup on_press 50'
+    )
     assert "Buttons: button mapping added" in out
     rows = [l for l in cli.run("$buttons status") if l.strip().startswith("| 0 ")]
     assert rows and '$system "a b" status' in rows[0], rows
@@ -87,7 +105,9 @@ def test_quoted_args_with_spaces_and_escapes(cli):
 def test_quoted_pipe_list_in_schedule(cli):
     """Cli::tokenize: double spaces inside quotes are kept; escaped quotes survive into JSON."""
     cli.clear_schedules()
-    assert "Scheduler: schedule saved" in cli.run('$schedule add 1439 1439 6 00FF00 "$pins  status|\\"q\\""')
+    assert "Scheduler: schedule saved" in cli.run(
+        '$schedule add 1439 1439 6 00FF00 "$pins  status|\\"q\\""'
+    )
     out = "\n".join(cli.run("$schedule status"))
     assert '"commands":["$pins  status","\\"q\\""]' in out, out
     assert "Scheduler: schedule removed" in cli.run("$schedule remove 0")
@@ -133,5 +153,7 @@ def test_long_line_tail_does_not_run(cli):
     line = "$pins status".ljust(254) + "$time status"
     out = cli.run(line)
     assert sum(TOO_LONG in l for l in out) == 1, out
-    assert not any("Pins module enabled" in l or "Time module enabled" in l for l in out), out
+    assert not any(
+        "Pins module enabled" in l or "Time module enabled" in l for l in out
+    ), out
     assert any("Pins module enabled" in l for l in cli.run("$pins status"))

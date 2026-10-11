@@ -5,10 +5,26 @@
 
 #include "FreeRTOS.h"
 
-struct HostSemaphore { int held = 0; int takes = 0; int gives = 0; };
+struct HostSemaphore {
+    int held = 0;
+    int takes = 0;
+    int gives = 0;
+};
 typedef HostSemaphore* SemaphoreHandle_t;
 
-inline SemaphoreHandle_t xSemaphoreCreateMutex () { return new HostSemaphore{}; }
-inline void              vSemaphoreDelete      (SemaphoreHandle_t m) { delete m; }
-inline BaseType_t        xSemaphoreTake        (SemaphoreHandle_t m, TickType_t) { ++m->held; ++m->takes; return pdTRUE; }
-inline BaseType_t        xSemaphoreGive        (SemaphoreHandle_t m) { --m->held; ++m->gives; return pdTRUE; }
+inline SemaphoreHandle_t xSemaphoreCreateMutex() {
+    return new HostSemaphore{};
+}
+inline void vSemaphoreDelete(SemaphoreHandle_t m) {
+    delete m;
+}
+inline BaseType_t xSemaphoreTake(SemaphoreHandle_t m, TickType_t) {
+    ++m->held;
+    ++m->takes;
+    return pdTRUE;
+}
+inline BaseType_t xSemaphoreGive(SemaphoreHandle_t m) {
+    --m->held;
+    ++m->gives;
+    return pdTRUE;
+}

@@ -12,7 +12,10 @@ def test_status_table(cli):
     """System::status: header, column titles, one row per registered module with Yes/No and status."""
     out = [l.strip() for l in cli.run("$system status")]
     assert any(re.fullmatch(r"\|\s+System Status\s+\|", l) for l in out), out
-    assert any(re.fullmatch(r"\|\s*Module Name\s*\|\s*Enabled\s*\|\s*Status\s*\|", l) for l in out)
+    assert any(
+        re.fullmatch(r"\|\s*Module Name\s*\|\s*Enabled\s*\|\s*Status\s*\|", l)
+        for l in out
+    )
     rows = cli.status_rows(out)
     # System first, then the modules in registration order; extra modules (the template's two,
     # a product's own) are allowed, the six the core tests drive must be there, enabled
@@ -21,9 +24,15 @@ def test_status_table(cli):
     assert required == cli.required_modules, rows
     for name in cli.required_modules:
         assert rows[name] == ("Yes", f"{name} module enabled"), (name, rows[name])
-    for name, (enabled, first) in list(rows.items())[1:]:     # Yes/No agrees with the status text
+    for name, (enabled, first) in list(rows.items())[
+        1:
+    ]:  # Yes/No agrees with the status text
         text = f"{name} module " + ("enabled" if enabled == "Yes" else "disabled")
-        assert first.startswith(text) or text.startswith(first), (name, enabled, first)   # may wrap
+        assert first.startswith(text) or text.startswith(first), (
+            name,
+            enabled,
+            first,
+        )  # may wrap
     assert any(re.search(r"Connected to ", l) for l in out), "Wi-Fi not connected"
 
 
@@ -61,7 +70,9 @@ def test_heap_stable_over_50_status_calls(cli, csv_writer):
             rows.append([i, f, total, up])
     f1 = rows[-1][1]
     csv_writer("heap-50-status", ["calls", "free", "total", "uptime_s"], rows)
-    print(f"heap free before {f0} after {f1} delta {f1 - f0}; samples {[r[1] for r in rows]}")
+    print(
+        f"heap free before {f0} after {f1} delta {f1 - f0}; samples {[r[1] for r in rows]}"
+    )
     assert abs(f1 - f0) <= 2048, rows
 
 
@@ -71,7 +82,9 @@ def test_restart_keeps_provisioning(cli):
     cli.restart()
     print(f"restart: banner after {cli.boot_seconds:.1f} s")
     out = cli.run("$wifi status", quiet=1.0)
-    assert "Wifi module enabled" in out and any(l.startswith("Connected to ") for l in out), out
+    assert "Wifi module enabled" in out and any(
+        l.startswith("Connected to ") for l in out
+    ), out
     _, _, up_after = cli.mem()
     assert up_after < 90, up_after
     assert any("System Status" in l for l in cli.run("$system status"))

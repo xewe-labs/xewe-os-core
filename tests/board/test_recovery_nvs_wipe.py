@@ -18,10 +18,20 @@ import pytest
 from xewe.board.serialio import BOOT_READY, BOOT_UNPROVISIONED, wait_for_banner
 
 BOOT_TIMEOUT = 90.0
-MODULES = ["System", "Buttons", "Pins", "Wifi", "Time", "Scheduler", "Web Interface"]  # core set; a project may add more
+MODULES = [
+    "System",
+    "Buttons",
+    "Pins",
+    "Wifi",
+    "Time",
+    "Scheduler",
+    "Web Interface",
+]  # core set; a project may add more
 
-pytestmark = pytest.mark.skipif(os.environ.get("XEWE_HWTEST_DESTRUCTIVE") != "1",
-                                reason="destructive (erases NVS, re-provisions); set XEWE_HWTEST_DESTRUCTIVE=1")
+pytestmark = pytest.mark.skipif(
+    os.environ.get("XEWE_HWTEST_DESTRUCTIVE") != "1",
+    reason="destructive (erases NVS, re-provisions); set XEWE_HWTEST_DESTRUCTIVE=1",
+)
 
 
 def _provision(project: Path, port: str, log: Path) -> tuple[int, str]:
@@ -64,11 +74,15 @@ def test_factory_reset_then_reprovision(cli, xewe, log_dir, tmp_path):
     t0 = time.monotonic()
     c.send("y")
     c.expect(r"Rebooting", 30)
-    m = wait_for_banner(c, f"{BOOT_READY}|{BOOT_UNPROVISIONED}", BOOT_TIMEOUT, reset=False)
+    m = wait_for_banner(
+        c, f"{BOOT_READY}|{BOOT_UNPROVISIONED}", BOOT_TIMEOUT, reset=False
+    )
     wipe_to_prompt = time.monotonic() - t0
     (logs / f"{stamp}-nvs-wipe.log").write_text("\n".join(c.lines[start:]) + "\n")
     print(f"wipe -> {m[0]!r} after {wipe_to_prompt:.1f} s")
-    assert m[0] == BOOT_UNPROVISIONED, "after the factory reset the board did not ask for its name"
+    assert m[0] == BOOT_UNPROVISIONED, (
+        "after the factory reset the board did not ask for its name"
+    )
     reset_lines = "\n".join(c.lines[start:])
     for name in MODULES[1:]:
         assert f"{name} module reset" in reset_lines, f"{name} was not reset"
@@ -80,27 +94,47 @@ def test_factory_reset_then_reprovision(cli, xewe, log_dir, tmp_path):
     attempts = []
     for attempt in (1, 2):
         t1 = time.monotonic()
-        rc, out = _provision(project, port, logs / f"{time.strftime('%H%M')}-reprovision-{attempt}.log")
+        rc, out = _provision(
+            project, port, logs / f"{time.strftime('%H%M')}-reprovision-{attempt}.log"
+        )
         attempts.append((rc, round(time.monotonic() - t1, 1), "Unable to join" in out))
-        print(f"provision attempt {attempt}: exit {rc} in {attempts[-1][1]} s; tail:\n" + "\n".join(out.splitlines()[-3:]))
+        print(
+            f"provision attempt {attempt}: exit {rc} in {attempts[-1][1]} s; tail:\n"
+            + "\n".join(out.splitlines()[-3:])
+        )
         if rc == 0:
             break
-    assert attempts[-1][0] == 0, f"RE-PROVISIONING FAILED TWICE, BOARD IS UNPROVISIONED: {attempts}"
+    assert attempts[-1][0] == 0, (
+        f"RE-PROVISIONING FAILED TWICE, BOARD IS UNPROVISIONED: {attempts}"
+    )
 
     # 4. reopen (resets the board) and check the full system is back
     c.open()
-    m = wait_for_banner(c, f"{BOOT_READY}|{BOOT_UNPROVISIONED}", BOOT_TIMEOUT, reset=False)
+    m = wait_for_banner(
+        c, f"{BOOT_READY}|{BOOT_UNPROVISIONED}", BOOT_TIMEOUT, reset=False
+    )
     assert m[0] == BOOT_READY, "board still unprovisioned after xewe provision"
     c.collect(silence=2.0, limit=30)
-    if any(l.startswith("rst:") for l in c.lines[-40:]) and not any(BOOT_READY in l for l in c.lines[-5:]):
+    if any(l.startswith("rst:") for l in c.lines[-40:]) and not any(
+        BOOT_READY in l for l in c.lines[-5:]
+    ):
         wait_for_banner(c, BOOT_READY, BOOT_TIMEOUT, reset=False)
         c.collect(silence=2.0, limit=30)
     out = [l.strip() for l in cli.run("$system status")]
-    rows = {m[1]: (m[2], m[3]) for l in out
-            if (m := re.fullmatch(r"\|\s*([^|\s][^|]*?)\s*\|\s*(Yes|No)\s*\|\s*(.*?)\s*\|", l))}
+    rows = {
+        m[1]: (m[2], m[3])
+        for l in out
+        if (
+            m := re.fullmatch(
+                r"\|\s*([^|\s][^|]*?)\s*\|\s*(Yes|No)\s*\|\s*(.*?)\s*\|", l
+            )
+        )
+    }
     print(f"status after re-provisioning: {rows}")
     assert set(MODULES) <= set(rows), rows
     assert all(rows[name][0] == "Yes" for name in MODULES), rows
     wifi = "\n".join(cli.run("$wifi status"))
     assert re.search(r"^Connected to ", wifi, re.M), wifi
-    (logs / f"{time.strftime('%H%M')}-post-reprovision.log").write_text("\n".join(c.lines[start:]) + "\n")
+    (logs / f"{time.strftime('%H%M')}-post-reprovision.log").write_text(
+        "\n".join(c.lines[start:]) + "\n"
+    )

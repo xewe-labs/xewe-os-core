@@ -16,38 +16,36 @@
 #include "Module.h"
 
 // library version (library.properties); `$system schema` reports it in its header line
-#define XEWE_CORE_VERSION       "2.1.0"
+#define XEWE_CORE_VERSION "2.1.0"
 #define XEWE_CORE_VERSION_MAJOR 2
 #define XEWE_CORE_VERSION_MINOR 1
 #define XEWE_CORE_VERSION_PATCH 0
 
-
 namespace xewe {
 
 struct OsConfig {
-    std::string      project_name    = "xewe-device";
-    std::string      version         = "0.0.0";
-    std::string      build_timestamp = {};
-    std::string      url             = "https://github.com/xewe-labs/xewe-os-core";
-    SerialPortConfig serial          = {};
-    bool             print_banner    = true;
+    std::string project_name = "xewe-device";
+    std::string version = "0.0.0";
+    std::string build_timestamp = {};
+    std::string url = "https://github.com/xewe-labs/xewe-os-core";
+    SerialPortConfig serial = {};
+    bool print_banner = true;
 };
 
 class System : public Module {
 public:
-    explicit    System                  (Os& os);
+    explicit System(Os& os);
 
-    void        begin_routines_required ()                               override;
-    void        begin_routines_init     ()                               override;
-    void        reset                   (const bool verbose      = false,
-                                         const bool do_restart   = true,
-                                         const bool keep_enabled = true) override;
-    std::string status                  (const bool verbose = false)     const override;
+    void begin_routines_required() override;
+    void begin_routines_init() override;
+    void reset(const bool verbose = false, const bool do_restart = true,
+        const bool keep_enabled = true) override;
+    std::string status(const bool verbose = false) const override;
 
-    std::string get_device_name         ();
+    std::string get_device_name();
     // `$system schema`: header line, every module's rows (with "module"), end line
-    void        print_schema_all        ();
-    void        restart                 (uint16_t delay_ms = 1000);
+    void print_schema_all();
+    void restart(uint16_t delay_ms = 1000);
 };
 
 // Owns the core services (serial, nvs, cli, system) and every registered module.
@@ -57,36 +55,37 @@ public:
 // top to bottom.
 class Os {
     // declared first: `system` registers itself during construction
-    std::vector<Module*>        modules;
-    std::string                 pending_errors;   // registration errors raised before begin(), one per line
-    bool                        begun = false;
-    OsConfig                    config;
+    std::vector<Module*> modules;
+    std::string pending_errors; // registration errors raised before begin(), one per line
+    bool begun = false;
+    OsConfig config;
 
 public:
-    explicit                    Os              (OsConfig config = {});
+    explicit Os(OsConfig config = {});
 
-                                Os              (const Os&) = delete;
-    Os&                         operator=       (const Os&) = delete;
+    Os(const Os&) = delete;
+    Os& operator=(const Os&) = delete;
 
-    void                        begin           ();
-    void                        loop            ();
+    void begin();
+    void loop();
 
-    bool                        register_module (Module& module);
+    bool register_module(Module& module);
     // printf-style; prints the message, or before begin() (static constructors, no Serial yet)
     // queues it for begin() to print
-    void                        report_error    (const char* fmt, ...);
-    Module*                     get_module      (std::string_view id) const;
-    const std::vector<Module*>& get_modules     ()                    const;
-    const OsConfig&             get_config      ()                    const;
+    void report_error(const char* fmt, ...);
+    Module* get_module(std::string_view id) const;
+    const std::vector<Module*>& get_modules() const;
+    const OsConfig& get_config() const;
 
-    SerialPort                  serial;
-    Nvs                         nvs;
-    // The ESP32 core defines `cli` as a function-like macro: initialise this member with braces (cli{serial}), never with parentheses.
-    Cli                         cli;
-    System                      system;
+    SerialPort serial;
+    Nvs nvs;
+    // The ESP32 core defines `cli` as a function-like macro: initialise this member with braces
+    // (cli{serial}), never with parentheses.
+    Cli cli;
+    System system;
 
 private:
-    void                        print_banner    ();
+    void print_banner();
 };
 
 } // namespace xewe

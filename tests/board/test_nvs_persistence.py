@@ -8,15 +8,28 @@ def test_button_and_schedule_survive_restart(cli):
     cli.clear_buttons()
     cli.clear_schedules()
     pin = cli.test_pin
-    assert "Buttons: button mapping added" in cli.run(f'$buttons add {pin} "$pins status" pullup on_release 75')
-    assert "Scheduler: schedule saved" in cli.run('$schedule add 600 660 3 0000FF "$time status"')
+    assert "Buttons: button mapping added" in cli.run(
+        f'$buttons add {pin} "$pins status" pullup on_release 75'
+    )
+    assert "Scheduler: schedule saved" in cli.run(
+        '$schedule add 600 660 3 0000FF "$time status"'
+    )
     cli.restart()
     rows = [l.strip() for l in cli.run("$buttons status")]
-    assert any(re.match(rf"^\|\s*0\s*\|\s*{pin}\s*\|\s*\$pins status\s*\|\s*75\s*\|\s*pullup\s*\|\s*on_release\s*\|", l)
-               for l in rows), rows
+    assert any(
+        re.match(
+            rf"^\|\s*0\s*\|\s*{pin}\s*\|\s*\$pins status\s*\|\s*75\s*\|\s*pullup\s*\|\s*on_release\s*\|",
+            l,
+        )
+        for l in rows
+    ), rows
     out = "\n".join(cli.run("$schedule status"))
-    assert '"start_time":600' in out and '"end_time":660' in out and '"day":3' in out, out
-    assert '"displayed_color":"0000FF"' in out and '"commands":["$time status"]' in out, out
+    assert '"start_time":600' in out and '"end_time":660' in out and '"day":3' in out, (
+        out
+    )
+    assert (
+        '"displayed_color":"0000FF"' in out and '"commands":["$time status"]' in out
+    ), out
     cli.clear_buttons()
     cli.clear_schedules()
 

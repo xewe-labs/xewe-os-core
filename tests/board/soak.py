@@ -30,7 +30,13 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
-from xewe.board.serialio import BOOT_READY, BOOT_UNPROVISIONED, Console, ExpectTimeout, wait_for_banner
+from xewe.board.serialio import (
+    BOOT_READY,
+    BOOT_UNPROVISIONED,
+    Console,
+    ExpectTimeout,
+    wait_for_banner,
+)
 from xewe.report import XeWeError
 
 # ---------------------------------------------------------------- command mix
@@ -42,10 +48,14 @@ CORE_COMMANDS: list[tuple[str, str, float]] = [
     ("$system mac", r"^wifi_sta [0-9A-F:]{17}", 5),
     ("$system uid", r"^uid64 [0-9a-fA-F]{16}", 5),
     ("$help system", r"System Commands \[system\]", 5),
-    ("$SYSTEM Uid", r"^uid64 ", 5),                                         # case-insensitive lookup
+    ("$SYSTEM Uid", r"^uid64 ", 5),  # case-insensitive lookup
     ("$nosuch cmd", r"Error: Unknown command group 'nosuch'", 5),
     ("$system nosuch", r"Error: Unknown command 'nosuch' in command group 'system'", 5),
-    ("$system restart now", r"Error: Argument count mismatch for '\$system restart'", 5),
+    (
+        "$system restart now",
+        r"Error: Argument count mismatch for '\$system restart'",
+        5,
+    ),
     ("hello", r"Error: commands must start with '\$'", 5),
     ('$system "unterminated', r"Error: Unterminated quote", 5),
     ("$", r"Error: Missing command group", 5),
@@ -65,18 +75,22 @@ MODULE_COMMANDS: list[tuple[str, str, float]] = [
 ]
 # rare and slow: network round trips
 SLOW_COMMANDS: list[tuple[str, str, float]] = [
-    ("$help", r"Wifi Commands \[wifi\]", 10),                              # every group's table
+    ("$help", r"Wifi Commands \[wifi\]", 10),  # every group's table
     ("$time fetch", r"Current time: |Unable to reach time server", 25),
 ]
 SLOW_EVERY = 60
 """A slow command replaces the normal pick every this many commands."""
 
-BOOT_LINE = re.compile(r"^ESP-ROM:|^rst:0x|System Setup Complete|\|\s+Rebooting\s+\||Name your device")
+BOOT_LINE = re.compile(
+    r"^ESP-ROM:|^rst:0x|System Setup Complete|\|\s+Rebooting\s+\||Name your device"
+)
 UPTIME_RE = re.compile(r"^\s*Uptime:\s+(\d+)d (\d+):(\d+):(\d+)")
 MEMORY_RE = re.compile(r"^\s*Memory usage: [\d.]+% \((\d+) / (\d+) bytes\)")
 WIFI_CONNECTED_RE = re.compile(r"^Connected to ")
-TEST_HEAP_RE = re.compile(r"^free=(\d+) min_free=(\d+) largest=(\d+)")   # Testing.cpp `$test heap`
-TEST_UPTIME_RE = re.compile(r"^uptime_ms=(\d+)")                          # Testing.cpp `$test uptime`
+TEST_HEAP_RE = re.compile(
+    r"^free=(\d+) min_free=(\d+) largest=(\d+)"
+)  # Testing.cpp `$test heap`
+TEST_UPTIME_RE = re.compile(r"^uptime_ms=(\d+)")  # Testing.cpp `$test uptime`
 
 
 @dataclasses.dataclass
@@ -114,8 +128,14 @@ class SoakResult:
         mins = [s.min_free for s in self.samples if s.min_free is not None]
         out: dict[str, Any] = {"n": len(free)}
         if free:
-            out.update(start=free[0], end=free[-1], min=min(free), max=max(free),
-                       drop_from_start=free[0] - min(free), slope_b_per_min=_slope(self.samples))
+            out.update(
+                start=free[0],
+                end=free[-1],
+                min=min(free),
+                max=max(free),
+                drop_from_start=free[0] - min(free),
+                slope_b_per_min=_slope(self.samples),
+            )
         if mins:
             out["min_free_ever"] = min(mins)
         return out
@@ -150,7 +170,9 @@ def _slope(samples: list[Sample]) -> float | None:
 
 
 class Soaker:
-    def __init__(self, console: Console, say: Callable[[str], None] = print, seed: int = 20261008) -> None:
+    def __init__(
+        self, console: Console, say: Callable[[str], None] = print, seed: int = 20261008
+    ) -> None:
         self.c = console
         self.say = say
         self.rng = random.Random(seed)
@@ -175,7 +197,9 @@ class Soaker:
         except XeWeError as exc:  # port vanished: the board rebooted
             self.res.reboots.append(f"port lost: {exc}")
             try:
-                wait_for_banner(self.c, f"{BOOT_READY}|{BOOT_UNPROVISIONED}", 90, reset=False)
+                wait_for_banner(
+                    self.c, f"{BOOT_READY}|{BOOT_UNPROVISIONED}", 90, reset=False
+                )
             except (ExpectTimeout, XeWeError):
                 pass
             return None
@@ -221,22 +245,38 @@ class Soaker:
     # ------------------------------------------------------------ sampling
     def probe_test_group(self) -> None:
         self.c.send("$test heap")
-        m = self._expect(r"Error: Unknown command group 'test'|Error: Unknown command 'heap'|" + TEST_HEAP_RE.pattern, 5)
+        m = self._expect(
+            r"Error: Unknown command group 'test'|Error: Unknown command 'heap'|"
+            + TEST_HEAP_RE.pattern,
+            5,
+        )
         self.has_test_heap = bool(m) and not m.group(0).startswith("Error")
         self.say(f"$test heap available: {self.has_test_heap}")
         self.c.collect(silence=0.3, limit=2)
 
     def sample(self, t_start: float) -> Sample:
-        s = Sample(round(time.monotonic() - t_start, 1), self.res.sent, None, None, None, None, None, None, "")
+        s = Sample(
+            round(time.monotonic() - t_start, 1),
+            self.res.sent,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            "",
+        )
         if self.has_test_heap:
-            if (m := self.one("$test heap", TEST_HEAP_RE.pattern, 5)):
+            if m := self.one("$test heap", TEST_HEAP_RE.pattern, 5):
                 s.free, s.min_free, s.largest = int(m[1]), int(m[2]), int(m[3])
                 s.source = "test"
-            if (m := self.one("$test uptime", TEST_UPTIME_RE.pattern, 5)):
+            if m := self.one("$test uptime", TEST_UPTIME_RE.pattern, 5):
                 s.uptime_ms = int(m[1])
         mu = self.one("$web_interface status", UPTIME_RE.pattern, 5)
         if mu:
-            s.uptime_s = int(mu[1]) * 86400 + int(mu[2]) * 3600 + int(mu[3]) * 60 + int(mu[4])
+            s.uptime_s = (
+                int(mu[1]) * 86400 + int(mu[2]) * 3600 + int(mu[3]) * 60 + int(mu[4])
+            )
             mm = self._expect(MEMORY_RE.pattern, 3)
             if mm:
                 s.total = int(mm[2])
@@ -276,14 +316,28 @@ def run_soak(
         csv_path.parent.mkdir(parents=True, exist_ok=True)
         fh = csv_path.open("w", newline="")
         writer = csv.writer(fh)
-        writer.writerow(["t_s", "commands_sent", "uptime_s", "uptime_ms", "free", "min_free", "largest", "total", "source"])
+        writer.writerow(
+            [
+                "t_s",
+                "commands_sent",
+                "uptime_s",
+                "uptime_ms",
+                "free",
+                "min_free",
+                "largest",
+                "total",
+                "source",
+            ]
+        )
 
     def take_sample() -> None:
         smp = s.sample(t_start)
         if writer:
             writer.writerow(dataclasses.astuple(smp))
             fh.flush()  # type: ignore[union-attr]
-        say(f"[{smp.t_s:7.1f}s] sent {s.res.sent} uptime {smp.uptime_s} free {smp.free} min {smp.min_free}")
+        say(
+            f"[{smp.t_s:7.1f}s] sent {s.res.sent} uptime {smp.uptime_s} free {smp.free} min {smp.min_free}"
+        )
 
     try:
         take_sample()
@@ -320,13 +374,16 @@ def run_soak(
         r.reasons.append(f"{len(r.unanswered)} unanswered: {r.unanswered[:5]}")
     if r.reboots:
         r.reasons.append(f"reboot detected: {r.reboots[:3]}")
-    ups = [x.uptime_ms for x in r.samples if x.uptime_ms is not None] or \
-        [x.uptime_s for x in r.samples if x.uptime_s is not None]
+    ups = [x.uptime_ms for x in r.samples if x.uptime_ms is not None] or [
+        x.uptime_s for x in r.samples if x.uptime_s is not None
+    ]
     if any(b < a for a, b in zip(ups, ups[1:])):
         r.reasons.append(f"uptime not monotonic: {ups}")
     h = r.heap_stats()
     if h.get("n", 0) and h["drop_from_start"] > max_heap_drop:
-        r.reasons.append(f"heap dropped {h['drop_from_start']} B from start (> {max_heap_drop})")
+        r.reasons.append(
+            f"heap dropped {h['drop_from_start']} B from start (> {max_heap_drop})"
+        )
     if not h.get("n"):
         r.reasons.append("no heap sample")
     return r
@@ -336,10 +393,18 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--port", default="/dev/ttyACM0")
     ap.add_argument("--duration", type=float, required=True, help="seconds of traffic")
-    ap.add_argument("--rate", type=float, default=1.0, help="commands per second (steady part)")
-    ap.add_argument("--burst-every", type=int, default=15, help="every Nth slot is a burst of 4")
-    ap.add_argument("--sample-every", type=int, default=20, help="heap/uptime sample every N slots")
-    ap.add_argument("--wifi-every", type=float, default=30.0, help="$wifi status every S seconds")
+    ap.add_argument(
+        "--rate", type=float, default=1.0, help="commands per second (steady part)"
+    )
+    ap.add_argument(
+        "--burst-every", type=int, default=15, help="every Nth slot is a burst of 4"
+    )
+    ap.add_argument(
+        "--sample-every", type=int, default=20, help="heap/uptime sample every N slots"
+    )
+    ap.add_argument(
+        "--wifi-every", type=float, default=30.0, help="$wifi status every S seconds"
+    )
     ap.add_argument("--max-heap-drop", type=int, default=8192)
     ap.add_argument("--csv", type=Path, help="heap/uptime CSV")
     ap.add_argument("--log", type=Path, help="timestamped transcript of every line")
@@ -356,10 +421,20 @@ def main(argv: list[str] | None = None) -> int:
     with console:
         # opening a native-USB S3 resets it: wait for that boot (or force one if it stayed silent)
         try:
-            m = wait_for_banner(console, f"{BOOT_READY}|{BOOT_UNPROVISIONED}", a.boot_timeout, reset=False)
+            m = wait_for_banner(
+                console,
+                f"{BOOT_READY}|{BOOT_UNPROVISIONED}",
+                a.boot_timeout,
+                reset=False,
+            )
         except (ExpectTimeout, XeWeError):
             try:
-                m = wait_for_banner(console, f"{BOOT_READY}|{BOOT_UNPROVISIONED}", a.boot_timeout, reset=True)
+                m = wait_for_banner(
+                    console,
+                    f"{BOOT_READY}|{BOOT_UNPROVISIONED}",
+                    a.boot_timeout,
+                    reset=True,
+                )
             except (ExpectTimeout, XeWeError) as exc:
                 print(f"board did not boot: {exc}", file=sys.stderr)
                 return 2
@@ -367,14 +442,31 @@ def main(argv: list[str] | None = None) -> int:
         while m.group(0) == BOOT_READY:
             tail = console.collect(silence=2.0, limit=30)
             rst = [i for i, line in enumerate(tail) if line.startswith("rst:")]
-            if not rst or any(BOOT_READY in line for line in tail[rst[-1]:]):
+            if not rst or any(BOOT_READY in line for line in tail[rst[-1] :]):
                 break
-            m = wait_for_banner(console, f"{BOOT_READY}|{BOOT_UNPROVISIONED}", a.boot_timeout, reset=False)
+            m = wait_for_banner(
+                console,
+                f"{BOOT_READY}|{BOOT_UNPROVISIONED}",
+                a.boot_timeout,
+                reset=False,
+            )
         if m.group(0) == BOOT_UNPROVISIONED:
-            print("board is unprovisioned (Name your device); provision it first", file=sys.stderr)
+            print(
+                "board is unprovisioned (Name your device); provision it first",
+                file=sys.stderr,
+            )
             return 2
-        res = run_soak(console, a.duration, a.rate, a.burst_every, a.sample_every, a.wifi_every,
-                       a.max_heap_drop, a.csv, seed=a.seed)
+        res = run_soak(
+            console,
+            a.duration,
+            a.rate,
+            a.burst_every,
+            a.sample_every,
+            a.wifi_every,
+            a.max_heap_drop,
+            a.csv,
+            seed=a.seed,
+        )
     print(res.summary())
     return 0 if res.ok else 1
 

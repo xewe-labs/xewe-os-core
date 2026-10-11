@@ -14,7 +14,9 @@ import pytest
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # --import-mode=importlib: hooks.py is a sibling
+sys.path.insert(
+    0, str(Path(__file__).resolve().parent)
+)  # --import-mode=importlib: hooks.py is a sibling
 from hooks import hooks  # noqa: F401,E402
 
 ARG_RX = re.compile(r"^arg(\d+) len=(\d+) hex=([0-9A-F]*) text=")
@@ -30,7 +32,7 @@ CASES = [
     ('$test echo "tab\\there"', True, ["tabthere"]),
     ('$test echo a"b', True, ['a"b']),
     ('$test echo3 "a"b c', True, ["a", "b", "c"]),
-    ('$test echo "héllo \U0001F600"', True, ["héllo \U0001F600"]),
+    ('$test echo "héllo \U0001f600"', True, ["héllo \U0001f600"]),
     ("   $test   echo   spaced   ", True, ["spaced"]),
     ("$TEST ECHO Case", True, ["Case"]),
     ("$test\techo\tx", True, ["x"]),
@@ -58,7 +60,9 @@ def echo(hooks, line: str) -> tuple[int | None, list[bytes], list[str]]:
     return argc, args, reply
 
 
-@pytest.mark.parametrize("line,dispatched,expected", CASES, ids=[c[0].strip()[:28] for c in CASES])
+@pytest.mark.parametrize(
+    "line,dispatched,expected", CASES, ids=[c[0].strip()[:28] for c in CASES]
+)
 def test_tokenizer(hooks, line, dispatched, expected):
     argc, args, reply = echo(hooks, line)
     if not dispatched:
@@ -72,7 +76,9 @@ def test_tokenizer(hooks, line, dispatched, expected):
 def test_error_messages(hooks):
     assert any("Unterminated quote" in line for line in hooks.run('$test echo "abc'))
     assert any("expected 1, got 2" in line for line in hooks.run("$test echo a b"))
-    assert any("commands must start with '$'" in line for line in hooks.run("test echo x"))
+    assert any(
+        "commands must start with '$'" in line for line in hooks.run("test echo x")
+    )
 
 
 def test_embedded_nul_and_control_bytes(hooks):
@@ -108,7 +114,11 @@ def test_queue_while_loop_blocked(hooks):
     hooks.c._ser.flush()
     hooks.c.expect(r"^slept_ms=1500$", 5)
     hooks.c.collect(silence=1.0, limit=10)
-    got = [bytes.fromhex(ARG_RX.match(l)[3]).decode() for l in hooks.c.lines if ARG_RX.match(l)]
+    got = [
+        bytes.fromhex(ARG_RX.match(l)[3]).decode()
+        for l in hooks.c.lines
+        if ARG_RX.match(l)
+    ]
     dropped = sum(1 for l in hooks.c.lines if "Input overflow" in l)
     assert got == ["q0", "q1", "q2", "q3"], hooks.c.lines
     assert dropped == 2
@@ -121,6 +131,10 @@ def test_queue_within_limit_all_run(hooks):
     hooks.c._ser.flush()
     hooks.c.expect(r"^slept_ms=1000$", 5)
     hooks.c.collect(silence=1.0, limit=10)
-    got = [bytes.fromhex(ARG_RX.match(l)[3]).decode() for l in hooks.c.lines if ARG_RX.match(l)]
+    got = [
+        bytes.fromhex(ARG_RX.match(l)[3]).decode()
+        for l in hooks.c.lines
+        if ARG_RX.match(l)
+    ]
     assert got == ["r0", "r1", "r2"]
     assert not any("Input overflow" in l for l in hooks.c.lines)

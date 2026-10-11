@@ -3,31 +3,27 @@
 #include <XeWeCore.h>
 
 struct Alarm : xewe::FlexData<Alarm> {
-    uint16_t    minute_of_day = 0;
+    uint16_t minute_of_day = 0;
     std::string label;
 
     static constexpr auto fields() {
         return std::make_tuple(
-            fld("minute_of_day", &Alarm::minute_of_day),
-            fld("label",         &Alarm::label)
-        );
+            fld("minute_of_day", &Alarm::minute_of_day), fld("label", &Alarm::label));
     }
 };
 
 struct Settings : xewe::FlexData<Settings> {
-    uint8_t            brightness = 128;
+    uint8_t brightness = 128;
     std::vector<Alarm> alarms;
 
     static constexpr auto fields() {
         return std::make_tuple(
-            fld("brightness", &Settings::brightness),
-            fld("alarms",     &Settings::alarms)
-        );
+            fld("brightness", &Settings::brightness), fld("alarms", &Settings::alarms));
     }
 };
 
 xewe::Nvs nvs;
-Settings  settings;
+Settings settings;
 
 void setup() {
     Serial.begin(115200);
@@ -47,7 +43,7 @@ void setup() {
         Serial.println("No saved settings, creating defaults");
         settings.alarms.push_back({});
         settings.alarms.back().minute_of_day = 7 * 60;
-        settings.alarms.back().label         = "wake up";
+        settings.alarms.back().label = "wake up";
         nvs.write_flex("demo", "settings", settings);
     }
 

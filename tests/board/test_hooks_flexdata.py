@@ -11,12 +11,16 @@ import pytest
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # --import-mode=importlib: hooks.py is a sibling
+sys.path.insert(
+    0, str(Path(__file__).resolve().parent)
+)  # --import-mode=importlib: hooks.py is a sibling
 from hooks import hooks, quote  # noqa: F401,E402
 
 DEFAULT = '{"b":false,"i":0,"u":0,"l":0,"f":0,"d":0,"s":"","v":[],"in":{"a":0,"s":""},"vi":[]}'
-FULL = ('{"b":true,"i":-7,"u":4000000000,"l":-9000000000,"f":1.5,"d":0.25,"s":"x y",'
-        '"v":[1,-2,3],"in":{"a":9,"s":"n"},"vi":[{"a":1,"s":"p"},{"a":2,"s":"q"}]}')
+FULL = (
+    '{"b":true,"i":-7,"u":4000000000,"l":-9000000000,"f":1.5,"d":0.25,"s":"x y",'
+    '"v":[1,-2,3],"in":{"a":9,"s":"n"},"vi":[{"a":1,"s":"p"},{"a":2,"s":"q"}]}'
+)
 
 
 def flex(hooks, json: str) -> dict[str, str]:
@@ -41,7 +45,10 @@ def test_full_round_trip(hooks):
     assert r["parse"] == "Ok"
     assert r["json"] == FULL
     assert r["stable"] == "1" and r["blob_ok"] == "1" and r["blob_equal"] == "1"
-    assert r["types"] == "b:bool,i:int,u:int,l:int,f:float,d:float,s:string,v:array,in:object,vi:array"
+    assert (
+        r["types"]
+        == "b:bool,i:int,u:int,l:int,f:float,d:float,s:string,v:array,in:object,vi:array"
+    )
 
 
 def test_partial_input_fills_defaults(hooks):
@@ -49,20 +56,27 @@ def test_partial_input_fills_defaults(hooks):
     assert r["json"] == DEFAULT.replace('"i":0', '"i":5')
 
 
-@pytest.mark.parametrize("case,parse,json", [
-    ("truncated", "IncompleteInput", DEFAULT),
-    ("trailing", "Ok", DEFAULT.replace('"i":0', '"i":1')),
-    ("empty", "EmptyInput", DEFAULT),
-    ("null", "Ok", DEFAULT),
-    ("array", "Ok", DEFAULT),
-    ("deep", "TooDeep", DEFAULT),
-    # type-matched assignment: every mistyped field is rejected and keeps its value
-    ("wrongtypes", "Ok", DEFAULT),
-    ("boolstr", "Ok", DEFAULT.replace('"i":0', '"i":3')),
-])
+@pytest.mark.parametrize(
+    "case,parse,json",
+    [
+        ("truncated", "IncompleteInput", DEFAULT),
+        ("trailing", "Ok", DEFAULT.replace('"i":0', '"i":1')),
+        ("empty", "EmptyInput", DEFAULT),
+        ("null", "Ok", DEFAULT),
+        ("array", "Ok", DEFAULT),
+        ("deep", "TooDeep", DEFAULT),
+        # type-matched assignment: every mistyped field is rejected and keeps its value
+        ("wrongtypes", "Ok", DEFAULT),
+        ("boolstr", "Ok", DEFAULT.replace('"i":0', '"i":3')),
+    ],
+)
 def test_malformed_json(hooks, case, parse, json):
     lines = hooks.run(f"$test flex_bad {case}", until=r"^blob_len=")
-    got = {k: v for k, _, v in (line.partition("=") for line in lines) if k in ("parse", "json", "stable")}
+    got = {
+        k: v
+        for k, _, v in (line.partition("=") for line in lines)
+        if k in ("parse", "json", "stable")
+    }
     assert got["parse"] == parse
     assert got["json"] == json
     assert got["stable"] == "1"
@@ -73,7 +87,11 @@ def test_huge_numbers(hooks):
     """Out-of-range numbers: no crash, blob round trip intact. Values recorded, not asserted
     beyond the integer fields (ArduinoJson converts out-of-range integers to 0)."""
     lines = hooks.run("$test flex_bad hugenum", until=r"^blob_len=")
-    got = {k: v for k, _, v in (line.partition("=") for line in lines) if k in ("parse", "json", "stable")}
+    got = {
+        k: v
+        for k, _, v in (line.partition("=") for line in lines)
+        if k in ("parse", "json", "stable")
+    }
     print("hugenum:", got)
     assert got["parse"] == "Ok"
     assert '"i":0' in got["json"] and '"u":0' in got["json"]
@@ -85,16 +103,20 @@ def test_huge_numbers(hooks):
 
 def test_unicode(hooks):
     lines = hooks.run("$test flex_bad unicode", until=r"^blob_len=")
-    got = {k: v for k, _, v in (line.partition("=") for line in lines) if k in ("parse", "json")}
+    got = {
+        k: v
+        for k, _, v in (line.partition("=") for line in lines)
+        if k in ("parse", "json")
+    }
     print("unicode:", got)
     assert got["parse"] == "Ok"
-    assert got["json"].startswith('{"b":false') and "é\U0001F600" in got["json"]
+    assert got["json"].startswith('{"b":false') and "é\U0001f600" in got["json"]
     assert "blob_equal=1" in "\n".join(lines)
 
 
 def test_unicode_via_cli(hooks):
-    r = flex(hooks, '{"s":"héllo \U0001F600"}')
-    assert '"s":"héllo \U0001F600"' in r["json"] and r["blob_equal"] == "1"
+    r = flex(hooks, '{"s":"héllo \U0001f600"}')
+    assert '"s":"héllo \U0001f600"' in r["json"] and r["blob_equal"] == "1"
 
 
 def test_long_string(hooks):
@@ -104,7 +126,9 @@ def test_long_string(hooks):
     assert "blob_equal=1" in "\n".join(lines)
 
 
-@pytest.mark.parametrize("case", ["blob_version", "blob_short", "blob_empty", "blob_strlen", "blob_veccount"])
+@pytest.mark.parametrize(
+    "case", ["blob_version", "blob_short", "blob_empty", "blob_strlen", "blob_veccount"]
+)
 def test_corrupt_blob_rejected(hooks, case):
     """blob_veccount: a 4 G element count must be rejected without reserve() aborting."""
     assert hooks.call(f"$test flex_bad {case}") == {"blob_ok": "0"}
@@ -115,8 +139,13 @@ def test_string_into_bool_rejected(hooks):
     """A string in a bool field is rejected and reported; b keeps its value."""
     lines = hooks.run("$test flex_bad boolstr", until=r"^blob_len=")
     assert any("! Probe.b: expected bool, got string" in line for line in lines)
-    assert any(line.startswith("json=") and '"b":false' in line and '"i":3' in line for line in lines)
+    assert any(
+        line.startswith("json=") and '"b":false' in line and '"i":3' in line
+        for line in lines
+    )
 
 
 def test_unknown_case(hooks):
-    assert any("error=unknown case" in line for line in hooks.run("$test flex_bad nope"))
+    assert any(
+        "error=unknown case" in line for line in hooks.run("$test flex_bad nope")
+    )

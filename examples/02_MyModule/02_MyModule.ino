@@ -20,22 +20,23 @@
 #include "MyModule.h"
 
 // Declaration order is registration order: the Os first, then the modules.
-XeWeOs   os({.project_name = "my-module", .version = "0.1.0"});
-MyModule my(os, {.heartbeat = true});   // set false to silence the heartbeat
+XeWeOs os({.project_name = "my-module", .version = "0.1.0"});
+MyModule my(os, {.heartbeat = true}); // set false to silence the heartbeat
 
 // A listener: told about every change of the number.
 struct NumberPrinter : NumberListener {
     void on_number(uint16_t value, const void* origin) override {
-        if (origin == this) return;     // a change we made ourselves: no echo
+        if (origin == this)
+            return; // a change we made ourselves: no echo
         os.serial.printf("sketch: number changed to %u", value);
     }
 } printer;
 
 void setup() {
-    os.begin();                 // begins every module: System first, then MyModule
+    os.begin(); // begins every module: System first, then MyModule
     my.listeners.add(&printer);
 }
 
 void loop() {
-    os.loop();                  // console, then MyModule::loop() while it is enabled
+    os.loop(); // console, then MyModule::loop() while it is enabled
 }

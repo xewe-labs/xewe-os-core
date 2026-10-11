@@ -6,13 +6,13 @@
 // without the Arduino shim). Keep it that way so pure effect code can include it.
 //
 // hsv_to_rgb is pinned bit for bit by tests/unit (test_utils.cpp, color_hsv_to_rgb_pinned):
-// effect code depends on its exact output, so the arithmetic and its operation order stay as they are.
+// effect code depends on its exact output, so the arithmetic and its operation order stay as they
+// are.
 #pragma once
 
 #include <array>
 #include <algorithm> // for std::max, std::min
 #include <cstdint>
-
 
 namespace xewe::color {
 
@@ -22,46 +22,46 @@ inline std::array<uint8_t, 3> hsv_to_rgb(const std::array<uint8_t, 3>& hsv) {
     const float s_f = hsv[1] / 255.0f;
     const float v_f = hsv[2] / 255.0f;
 
-    float       r_f = 0.0f, g_f = 0.0f, b_f = 0.0f;
+    float r_f = 0.0f, g_f = 0.0f, b_f = 0.0f;
 
     // six hue sectors; i is the sector, f the position inside it
-    const int   i = static_cast<int>(h_f * 6.0f);
+    const int i = static_cast<int>(h_f * 6.0f);
     const float f = h_f * 6.0f - i;
     const float p = v_f * (1.0f - s_f);
     const float q = v_f * (1.0f - f * s_f);
     const float t = v_f * (1.0f - (1.0f - f) * s_f);
 
     switch (i % 6) {
-        case 0:
-            r_f = v_f;
-            g_f = t;
-            b_f = p;
-            break;
-        case 1:
-            r_f = q;
-            g_f = v_f;
-            b_f = p;
-            break;
-        case 2:
-            r_f = p;
-            g_f = v_f;
-            b_f = t;
-            break;
-        case 3:
-            r_f = p;
-            g_f = q;
-            b_f = v_f;
-            break;
-        case 4:
-            r_f = t;
-            g_f = p;
-            b_f = v_f;
-            break;
-        case 5:
-            r_f = v_f;
-            g_f = p;
-            b_f = q;
-            break;
+    case 0:
+        r_f = v_f;
+        g_f = t;
+        b_f = p;
+        break;
+    case 1:
+        r_f = q;
+        g_f = v_f;
+        b_f = p;
+        break;
+    case 2:
+        r_f = p;
+        g_f = v_f;
+        b_f = t;
+        break;
+    case 3:
+        r_f = p;
+        g_f = q;
+        b_f = v_f;
+        break;
+    case 4:
+        r_f = t;
+        g_f = p;
+        b_f = v_f;
+        break;
+    case 5:
+        r_f = v_f;
+        g_f = p;
+        b_f = q;
+        break;
     }
 
     // Convert back to uint8_t [0-255]
@@ -79,15 +79,15 @@ inline std::array<uint8_t, 3> rgb_to_hsv(const std::array<uint8_t, 3>& rgb) {
     const float g_f = rgb[1] / 255.0f;
     const float b_f = rgb[2] / 255.0f;
 
-    float       h_f = 0.0f, s_f = 0.0f, v_f = 0.0f;
+    float h_f = 0.0f, s_f = 0.0f, v_f = 0.0f;
 
     // value = max channel, saturation = spread / max, hue from the dominant channel
     const float max_val = std::max({r_f, g_f, b_f});
     const float min_val = std::min({r_f, g_f, b_f});
-    v_f                 = max_val;
+    v_f = max_val;
 
-    const float d       = max_val - min_val;
-    s_f                 = (max_val == 0.0f) ? 0.0f : (d / max_val);
+    const float d = max_val - min_val;
+    s_f = (max_val == 0.0f) ? 0.0f : (d / max_val);
 
     if (max_val == min_val) {
         h_f = 0.0f;

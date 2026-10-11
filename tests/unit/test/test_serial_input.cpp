@@ -8,28 +8,30 @@
 
 #include <string>
 
-
 namespace {
 
 struct InputFixture {
     xewe::SerialPort serial;
 
     InputFixture() {
-        Serial.rx.clear();  // tests share the global shim
+        Serial.rx.clear(); // tests share the global shim
         Serial.take();
         xewe::SerialPortConfig cfg;
         cfg.startup_delay_ms = 0;
-        cfg.echo             = false;  // keep Serial.tx to what the input path prints itself
+        cfg.echo = false; // keep Serial.tx to what the input path prints itself
         serial.begin(cfg);
         Serial.take();
     }
 };
 
-bool contains(const std::string& hay, const char* needle) { return hay.find(needle) != std::string::npos; }
+bool contains(const std::string& hay, const char* needle) {
+    return hay.find(needle) != std::string::npos;
+}
 
 std::size_t count(const std::string& hay, const std::string& needle) {
     std::size_t n = 0;
-    for (std::size_t p = hay.find(needle); p != std::string::npos; p = hay.find(needle, p + 1)) ++n;
+    for (std::size_t p = hay.find(needle); p != std::string::npos; p = hay.find(needle, p + 1))
+        ++n;
     return n;
 }
 
@@ -75,14 +77,15 @@ TEST(serial_input_queue_overflow_drops_newest) {
 TEST(serial_input_long_line_dropped_whole) {
     InputFixture f;
     std::string line;
-    for (int i = 0; i < 300; ++i) line.push_back(static_cast<char>('a' + i % 26));
+    for (int i = 0; i < 300; ++i)
+        line.push_back(static_cast<char>('a' + i % 26));
     Serial.inject(line + "\n");
     f.serial.loop();
-    CHECK(!f.serial.has_line());  // nothing of an over-long line is readable
+    CHECK(!f.serial.has_line()); // nothing of an over-long line is readable
     std::string out = Serial.take();
     CHECK_EQ(count(out, "! Input line too long (max 254 chars): dropped"), std::size_t{1});
     CHECK(!contains(out, "overflow"));
-    Serial.inject("after\n");  // the next normal line works
+    Serial.inject("after\n"); // the next normal line works
     f.serial.loop();
     CHECK_EQ(f.serial.read_line(), std::string("after"));
     CHECK(!f.serial.has_line());
@@ -93,7 +96,7 @@ TEST(serial_input_long_line_dropped_across_loops) {
     InputFixture f;
     Serial.inject("ok1\n" + std::string(200, 'x'));
     f.serial.loop();
-    Serial.inject(std::string(200, 'y'));  // crosses the limit in a later pass
+    Serial.inject(std::string(200, 'y')); // crosses the limit in a later pass
     f.serial.loop();
     Serial.inject(std::string(100, 'z') + "\r\nok2\n");
     f.serial.loop();
@@ -106,7 +109,8 @@ TEST(serial_input_long_line_dropped_across_loops) {
 TEST(serial_input_254_char_line_kept) {
     InputFixture f;
     std::string line;
-    for (int i = 0; i < 254; ++i) line.push_back(static_cast<char>('a' + i % 26));
+    for (int i = 0; i < 254; ++i)
+        line.push_back(static_cast<char>('a' + i % 26));
     Serial.inject(line + "\n");
     f.serial.loop();
     CHECK_EQ(f.serial.read_line(), line);
@@ -124,7 +128,7 @@ TEST(serial_input_255_char_line_dropped) {
 
 TEST(serial_input_clear_input_resets_overflow) {
     InputFixture f;
-    Serial.inject(std::string(300, 'q'));  // over-long, no newline yet
+    Serial.inject(std::string(300, 'q')); // over-long, no newline yet
     f.serial.loop();
     f.serial.clear_input();
     Serial.inject("fresh\n");

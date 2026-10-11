@@ -9,11 +9,10 @@ class AlertModule : public xewe::Module {
 public:
     AlertModule(xewe::Os& host, SensorModule& sensor, uint8_t led_pin)
         : Module(host, "alert", "Alert", "Blinks when the sensor is over its limit",
-                 /* requires_init_setup */ false,
-                 /* can_be_disabled     */ true,
-                 /* has_cli_commands    */ true)
-        , sensor(sensor)
-        , led_pin(led_pin) {
+              /* requires_init_setup */ false,
+              /* can_be_disabled     */ true,
+              /* has_cli_commands    */ true),
+          sensor(sensor), led_pin(led_pin) {
         // Records the edge in BOTH directions: sensor becomes our requirement,
         // and we become one of its dependents. That back-edge is what makes
         // `$sensor disable` cascade down to this module.
@@ -30,7 +29,8 @@ public:
     // Only called while this module is enabled — the Os skips loop()
     // for disabled modules. It must not block.
     void loop() override {
-        if (millis() - last_check < 1000) return;
+        if (millis() - last_check < 1000)
+            return;
         last_check = millis();
 
         // Safe even if `sensor` were disabled: its public functions guard
@@ -42,7 +42,8 @@ public:
     // Called from the $alert test command handler, where a short block is fine.
     // Do NOT call this from loop(): every module shares that one loop.
     void blink() {
-        if (is_disabled()) return;   // a disabled module stays registered and callable
+        if (is_disabled())
+            return; // a disabled module stays registered and callable
         digitalWrite(led_pin, HIGH);
         delay(120);
         digitalWrite(led_pin, LOW);
@@ -50,6 +51,6 @@ public:
 
 private:
     SensorModule& sensor;
-    uint8_t       led_pin;
-    uint32_t      last_check = 0;
+    uint8_t led_pin;
+    uint32_t last_check = 0;
 };

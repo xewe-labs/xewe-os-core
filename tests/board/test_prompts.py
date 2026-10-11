@@ -67,7 +67,9 @@ def test_disable_prompt_times_out_after_30s(cli):
     assert 13.5 <= first <= 17.5, first
     assert 28.0 <= elapsed <= 34.0, elapsed
     late = cli.settle(2.0)
-    assert not any("Timeout" in l or "(y/n)" in l for l in late), late  # two attempts only
+    assert not any("Timeout" in l or "(y/n)" in l for l in late), (
+        late
+    )  # two attempts only
     assert "Buttons module enabled" in cli.run("$buttons status")
     out = [l.strip() for l in cli.run("$system status")]
     assert any(re.match(r"\|\s*Buttons\s*\|\s*Yes\s*\|", l) for l in out), out
@@ -104,7 +106,9 @@ def test_disable_yes_then_enable(cli):
         reboot_wait()  # Module::disable restarts the board itself (do_restart = true)
         assert "Buttons module disabled" in cli.run("$buttons status")
         # module commands stay registered while disabled; Buttons' add is silently ignored
-        out = cli.run(f'$buttons add {cli.test_pin} "$system status" pullup on_press 50')
+        out = cli.run(
+            f'$buttons add {cli.test_pin} "$system status" pullup on_press 50'
+        )
         assert not any("button mapping added" in l for l in out), out
         out = [l.strip() for l in cli.run("$system status")]
         assert any(re.match(r"\|\s*Buttons\s*\|\s*No\s*\|", l) for l in out), out
@@ -121,4 +125,6 @@ def test_disable_yes_then_enable(cli):
 
 def test_system_cannot_be_disabled(cli):
     """Module::register_generic_commands: System has no enable/disable commands."""
-    assert "Error: Unknown command 'disable' in command group 'system'" in cli.run("$system disable")
+    assert "Error: Unknown command 'disable' in command group 'system'" in cli.run(
+        "$system disable"
+    )

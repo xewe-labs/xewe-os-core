@@ -9,27 +9,30 @@
 
 #include "test.h"
 
-class String;  // Nvs.tpp names Arduino's String; the host shim has none (never instantiated here)
+class String; // Nvs.tpp names Arduino's String; the host shim has none (never instantiated here)
 
-#include <XeWeCore/Nvs.cpp>   // Nvs.cpp is not in run.sh's LIB_SRCS: compiled into this TU only
+#include <XeWeCore/Nvs.cpp> // Nvs.cpp is not in run.sh's LIB_SRCS: compiled into this TU only
 
 #include <string>
 #include <vector>
 
-
 namespace {
 
 struct Fx {
-    xewe::Nvs                nvs;
+    xewe::Nvs nvs;
     std::vector<std::string> errors;
 
     Fx() {
         host_nvs::reset();
         nvs.set_error_handler([this](std::string_view m) { errors.emplace_back(m); });
     }
-    std::size_t open_handles() const { return host_nvs::state().open.size(); }
-    bool        logged(const char* needle) const {
-        for (const auto& e : errors) if (e.find(needle) != std::string::npos) return true;
+    std::size_t open_handles() const {
+        return host_nvs::state().open.size();
+    }
+    bool logged(const char* needle) const {
+        for (const auto& e : errors)
+            if (e.find(needle) != std::string::npos)
+                return true;
         return false;
     }
 };
@@ -49,7 +52,7 @@ TEST(nvs_round_trip_all_types) {
     CHECK(f.nvs.write<std::string>("ns", "s", "hello"));
     CHECK(f.nvs.write<std::string>("ns", "empty", ""));
     CHECK(f.nvs.write<const char*>("ns", "cstr", "lit"));
-    CHECK(f.nvs.write("ns", "lit", "bare"));                 // T = char[5]: no -Waddress
+    CHECK(f.nvs.write("ns", "lit", "bare")); // T = char[5]: no -Waddress
     CHECK(f.nvs.write<const char*>("ns", "null", nullptr));
     CHECK(f.nvs.write<std::string_view>("ns", "sv", std::string_view("view")));
 
@@ -62,7 +65,7 @@ TEST(nvs_round_trip_all_types) {
     CHECK_EQ(f.nvs.read<float>("ns", "f"), 1.5f);
     CHECK_EQ(f.nvs.read<double>("ns", "d"), -2.25);
     CHECK_EQ(f.nvs.read<std::string>("ns", "s"), std::string("hello"));
-    CHECK_EQ(f.nvs.read<std::string>("ns", "empty", "dflt"), std::string(""));  // empty != missing
+    CHECK_EQ(f.nvs.read<std::string>("ns", "empty", "dflt"), std::string("")); // empty != missing
     CHECK_EQ(f.nvs.read<std::string>("ns", "cstr"), std::string("lit"));
     CHECK_EQ(f.nvs.read<std::string>("ns", "lit"), std::string("bare"));
     CHECK_EQ(f.nvs.read<std::string>("ns", "null", "x"), std::string(""));
@@ -81,7 +84,7 @@ TEST(nvs_key_length_rejects_not_truncates) {
     const std::string a = k15 + "A", b = k15 + "B";
     CHECK(!f.nvs.write<int32_t>("ns", a, 1));
     CHECK(!f.nvs.write<int32_t>("ns", b, 2));
-    CHECK_EQ(f.nvs.read<int32_t>("ns", k15), 15);           // the 15-char key is untouched
+    CHECK_EQ(f.nvs.read<int32_t>("ns", k15), 15); // the 15-char key is untouched
     CHECK_EQ(f.nvs.read<int32_t>("ns", a, -1), -1);
     CHECK_EQ(host_nvs::state().data["ns"].size(), std::size_t(1));
     CHECK(f.logged("too long"));
@@ -100,7 +103,7 @@ TEST(nvs_key_length_rejects_not_truncates) {
 TEST(nvs_type_confusion_reads_default) {
     Fx f;
     CHECK(f.nvs.write<int32_t>("ns", "k", -1));
-    CHECK_EQ(f.nvs.read<uint32_t>("ns", "k", 7u), 7u);      // signedness is part of the type
+    CHECK_EQ(f.nvs.read<uint32_t>("ns", "k", 7u), 7u); // signedness is part of the type
     CHECK_EQ(f.nvs.read<int64_t>("ns", "k", 7), int64_t(7)); // width too
     CHECK_EQ(f.nvs.read<std::string>("ns", "k", "d"), std::string("d"));
 
@@ -126,8 +129,8 @@ TEST(nvs_read_cannot_tell_missing_from_wrong_type_or_error) {
     Fx f;
     CHECK(f.nvs.write<int32_t>("ns", "wrong", 5));
     const int32_t missing = f.nvs.read<int32_t>("ns", "missing", -9);
-    const int32_t wrong   = f.nvs.read<uint8_t>("ns", "wrong", 247);
-    const int32_t no_ns   = f.nvs.read<int32_t>("nons", "k", -9);
+    const int32_t wrong = f.nvs.read<uint8_t>("ns", "wrong", 247);
+    const int32_t no_ns = f.nvs.read<int32_t>("nons", "k", -9);
     CHECK_EQ(missing, -9);
     CHECK_EQ(wrong, 247);
     CHECK_EQ(no_ns, -9);
@@ -135,11 +138,11 @@ TEST(nvs_read_cannot_tell_missing_from_wrong_type_or_error) {
 
 TEST(nvs_string_size_limit) {
     Fx f;
-    const std::string s3999(3999, 'x');   // 3999 + NUL = 4000 bytes: the IDF maximum
+    const std::string s3999(3999, 'x'); // 3999 + NUL = 4000 bytes: the IDF maximum
     CHECK(f.nvs.write<std::string>("ns", "s", s3999));
     CHECK_EQ(f.nvs.read<std::string>("ns", "s"), s3999);
     CHECK(!f.nvs.write<std::string>("ns", "s", std::string(4000, 'y')));
-    CHECK_EQ(f.nvs.read<std::string>("ns", "s"), s3999);    // failed write leaves the old value
+    CHECK_EQ(f.nvs.read<std::string>("ns", "s"), s3999); // failed write leaves the old value
     CHECK(f.logged("ESP_ERR_NVS_VALUE_TOO_LONG"));
     CHECK_EQ(f.open_handles(), std::size_t(0));
 }
@@ -161,8 +164,8 @@ TEST(nvs_blobs) {
 
 TEST(nvs_remove_and_reset_ns) {
     Fx f;
-    f.nvs.remove("ns", "nothing");                       // missing key: silent, no handle leak
-    f.nvs.reset_ns("never");                            // never-written namespace is not created
+    f.nvs.remove("ns", "nothing"); // missing key: silent, no handle leak
+    f.nvs.reset_ns("never"); // never-written namespace is not created
     CHECK(host_nvs::state().data.count("never") == 0);
     CHECK(f.nvs.write<int32_t>("a", "k", 1));
     CHECK(f.nvs.write<int32_t>("b", "k", 2));
@@ -189,7 +192,8 @@ TEST(nvs_init_failure_fails_every_call_and_reports_once) {
     host_nvs::state().init_results = {ESP_ERR_NOT_FOUND, ESP_ERR_NOT_FOUND, ESP_ERR_NOT_FOUND};
     CHECK(!f.nvs.write<int32_t>("ns", "k", 1));
     CHECK_EQ(f.nvs.read<int32_t>("ns", "k", 4), 4);
-    CHECK(!f.nvs.write<bool>("root", "init_setup_flag", true));   // Os::begin must not restart on this
+    CHECK(
+        !f.nvs.write<bool>("root", "init_setup_flag", true)); // Os::begin must not restart on this
     CHECK(f.logged("ESP_ERR_NOT_FOUND"));
     CHECK_EQ(f.errors.size(), std::size_t(1));
     // the partition comes back: the next call initialises normally
@@ -201,12 +205,12 @@ TEST(nvs_full_partition_is_reported) {
     Fx f;
     CHECK(f.nvs.write<int32_t>("ns", "k", 1));
     host_nvs::state().full = true;
-    CHECK(!f.nvs.write<int32_t>("ns", "k2", 2));            // set fails
+    CHECK(!f.nvs.write<int32_t>("ns", "k2", 2)); // set fails
     CHECK(f.logged("ESP_ERR_NVS_NOT_ENOUGH_SPACE"));
     f.errors.clear();
-    CHECK(!f.nvs.write<int32_t>("newns", "k", 2));          // namespace creation fails
+    CHECK(!f.nvs.write<int32_t>("newns", "k", 2)); // namespace creation fails
     CHECK(f.logged("newns"));
-    CHECK_EQ(f.nvs.read<int32_t>("ns", "k"), 1);            // reads still work
+    CHECK_EQ(f.nvs.read<int32_t>("ns", "k"), 1); // reads still work
     CHECK_EQ(f.open_handles(), std::size_t(0));
 }
 

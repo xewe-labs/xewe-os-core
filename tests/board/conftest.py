@@ -29,7 +29,15 @@ HOOKS = "XEWE_TESTING=1" in os.environ.get("XEWE_HWTEST_DEFINES", "").split()
 # with every module and the template's two passes as well as one with only these six.
 # `$system status` row names in registration order, and the matching CLI group ids.
 REQUIRED_MODULES = ["Buttons", "Pins", "Wifi", "Time", "Scheduler", "Web Interface"]
-REQUIRED_GROUPS = ["buttons", "pins", "schedule", "system", "time", "web_interface", "wifi"]
+REQUIRED_GROUPS = [
+    "buttons",
+    "pins",
+    "schedule",
+    "system",
+    "time",
+    "web_interface",
+    "wifi",
+]
 STATUS_ROW_RX = re.compile(r"\|\s*([^|\s][^|]*?)\s*\|\s*(Yes|No)\s*\|\s*(.*?)\s*\|")
 
 
@@ -38,7 +46,10 @@ def status_rows(lines: list[str]) -> dict[str, tuple[str, str]]:
 
     A module's cell spans several lines (setting rows, live lines); only the first line of each
     module carries the name and the Yes/No, so only those lines match."""
-    return {m[1]: (m[2], m[3]) for l in lines if (m := STATUS_ROW_RX.fullmatch(l.strip()))}
+    return {
+        m[1]: (m[2], m[3]) for l in lines if (m := STATUS_ROW_RX.fullmatch(l.strip()))
+    }
+
 
 MEM_RX = re.compile(r"Memory usage:\s+[\d.]+% \((\d+) / (\d+) bytes\)")
 UPTIME_RX = re.compile(r"Uptime:\s+(\d+)d (\d\d):(\d\d):(\d\d)")
@@ -100,14 +111,20 @@ class Cli:
         self.boot_seconds = time.monotonic() - t0
         # a native-USB reopen can reset the chip once more: wait until the output is quiet
         tail = self.c.collect(silence=2.0, limit=30)
-        if any(BOOT_READY in line for line in tail) is False and any("rst:" in l for l in tail):
+        if any(BOOT_READY in line for line in tail) is False and any(
+            "rst:" in l for l in tail
+        ):
             wait_for_banner(self.c, BOOT_READY, BOOT_TIMEOUT, reset=False)
             self.c.collect(silence=2.0, limit=30)
         return tail
 
     # -------------------------------------------------------------- tables
     def button_ids(self) -> list[int]:
-        return [int(m[1]) for line in self.run("$buttons status") if (m := BUTTON_ROW_RX.match(line.strip()))]
+        return [
+            int(m[1])
+            for line in self.run("$buttons status")
+            if (m := BUTTON_ROW_RX.match(line.strip()))
+        ]
 
     def schedule_ids(self) -> list[int]:
         out = "\n".join(self.run("$schedule status"))
@@ -140,7 +157,9 @@ def log_dir() -> Path | None:
     return p
 
 
-def write_csv(log_dir: Path | None, name: str, header: list[str], rows: list[list]) -> None:
+def write_csv(
+    log_dir: Path | None, name: str, header: list[str], rows: list[list]
+) -> None:
     if log_dir is None:
         return
     stamp = time.strftime("%H%M")
@@ -176,5 +195,8 @@ def compiled(xewe):
     except XeWeError as exc:
         pytest.fail(f"build failed for {xewe.chip}: {exc}", pytrace=False)
     if not res.ok or res.binary is None:
-        pytest.fail(f"build failed for {xewe.chip}; see {p.rel(p.out_dir(xewe.chip) / 'compile.log')}", pytrace=False)
+        pytest.fail(
+            f"build failed for {xewe.chip}; see {p.rel(p.out_dir(xewe.chip) / 'compile.log')}",
+            pytrace=False,
+        )
     return res.binary

@@ -4,18 +4,18 @@
 #include <XeWeCore.h>
 
 struct SensorConfig {
-    uint8_t  pin            = 1;
-    uint16_t default_limit  = 500;
+    uint8_t pin = 1;
+    uint16_t default_limit = 500;
 };
 
 class SensorModule : public xewe::Module {
 public:
     SensorModule(xewe::Os& host, SensorConfig config = {})
         : Module(host, "sensor", "Sensor", "Reads a value and compares it to a limit",
-                 /* requires_init_setup */ true,
-                 /* can_be_disabled     */ true,
-                 /* has_cli_commands    */ true)
-        , config(config) {
+              /* requires_init_setup */ true,
+              /* can_be_disabled     */ true,
+              /* has_cli_commands    */ true),
+          config(config) {
         // The Os parameter is named `host` so it never hides the member `os`;
         // the handlers (which run later) capture [this] and use os directly.
         register_command({"limit", "Set the alert limit", "$sensor limit 600", 1,
@@ -35,8 +35,7 @@ public:
 
     // Runs once, until it completes: the first-boot question for this module.
     void begin_routines_init() override {
-        limit = os.serial.get_uint16("Alert limit (0-4095)?",
-                                     0, 4095, 0, 0, config.default_limit);
+        limit = os.serial.get_uint16("Alert limit (0-4095)?", 0, 4095, 0, 0, config.default_limit);
         os.nvs.write<uint16_t>(id, "limit", limit);
     }
 
@@ -46,12 +45,17 @@ public:
         limit = os.nvs.read<uint16_t>(id, "limit", config.default_limit);
     }
 
-    uint16_t read_value() const { return analogRead(config.pin); }
+    uint16_t read_value() const {
+        return analogRead(config.pin);
+    }
 
-    bool over_limit() const { return read_value() > limit; }
+    bool over_limit() const {
+        return read_value() > limit;
+    }
 
     void set_limit(uint16_t value) {
-        if (is_disabled()) return;   // a disabled module stays registered and callable
+        if (is_disabled())
+            return; // a disabled module stays registered and callable
         limit = value;
         os.nvs.write<uint16_t>(id, "limit", limit);
         os.serial.printf("limit %u", limit);
@@ -60,11 +64,12 @@ public:
     // Compose, don't replace: keep the base line and add our own state.
     std::string status(const bool verbose = false) const override {
         std::string s = Module::status(false) + ", limit " + std::to_string(limit);
-        if (verbose) os.serial.print(s);
+        if (verbose)
+            os.serial.print(s);
         return s;
     }
 
 private:
     SensorConfig config;
-    uint16_t     limit = 0;
+    uint16_t limit = 0;
 };

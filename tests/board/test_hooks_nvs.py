@@ -11,7 +11,9 @@ import pytest
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # --import-mode=importlib: hooks.py is a sibling
+sys.path.insert(
+    0, str(Path(__file__).resolve().parent)
+)  # --import-mode=importlib: hooks.py is a sibling
 from hooks import hooks, quote, unquote  # noqa: F401,E402  (fixture import)
 
 NS = "xtnvs"
@@ -37,12 +39,14 @@ ROUND_TRIPS = [
     ("double", "2.718281828459045", "2.7182818284590451"),
     ("str", "hello world", "hello world"),
     ("str", "", ""),
-    ("str", "héllo \U0001F600", "héllo \U0001F600"),
+    ("str", "héllo \U0001f600", "héllo \U0001f600"),
     ("str", 'quote " and \\ back', 'quote " and \\ back'),
 ]
 
 
-@pytest.mark.parametrize("typ,value,expected", ROUND_TRIPS, ids=[f"{t}:{v[:12]}" for t, v, _ in ROUND_TRIPS])
+@pytest.mark.parametrize(
+    "typ,value,expected", ROUND_TRIPS, ids=[f"{t}:{v[:12]}" for t, v, _ in ROUND_TRIPS]
+)
 def test_round_trip(hooks, ns, typ, value, expected):
     assert hooks.call(f"$test nvs {ns} k {typ} {quote(value)}") == {"write": "1"}
     r = hooks.call(f"$test nvs_read {ns} k {typ}")
@@ -80,7 +84,9 @@ def test_overwrite_with_other_type(hooks, ns):
     assert hooks.call(f"$test nvs {ns} k str seven") == {"write": "1"}
     assert unquote(hooks.call(f"$test nvs_read {ns} k str")["value"]) == "seven"
     old = hooks.call(f"$test nvs_read {ns} k i32")
-    print(f"old i32 entry after str overwrite: found={old['found']} value={old['value']}")
+    print(
+        f"old i32 entry after str overwrite: found={old['found']} value={old['value']}"
+    )
 
 
 def test_key_length_limits(hooks, ns):
@@ -107,21 +113,24 @@ def test_namespace_isolation(hooks, ns):
     assert hooks.call(f"$test nvs_read {ns} same i32")["found"] == "1"
 
 
-@pytest.mark.parametrize("cmd,err", [
-    ("$test nvs system k i32 1", "namespace must start with xt"),
-    ("$test nvs_del wifi ssid", "namespace must start with xt"),
-    ("$test nvs_reset root", "namespace must start with xt"),
-    (f"$test nvs {NS} k i32 abc", "bad i32"),
-    (f"$test nvs {NS} k i32 99999999999", "bad i32"),
-    (f"$test nvs {NS} k u32 -1", "bad u32"),
-    (f"$test nvs {NS} k bool maybe", "bad bool"),
-    (f"$test nvs {NS} k float 1e999", "bad float"),
-    (f"$test nvs {NS} k blob x", "unknown type"),
-    ("$test nvs_read xtnvs k blob", "unknown type"),
-    ("$test nvs_stress 0", "n must be 1..200"),
-    ("$test nvs_stress 201", "n must be 1..200"),
-    ("$test nvs_stress abc", "n must be 1..200"),
-])
+@pytest.mark.parametrize(
+    "cmd,err",
+    [
+        ("$test nvs system k i32 1", "namespace must start with xt"),
+        ("$test nvs_del wifi ssid", "namespace must start with xt"),
+        ("$test nvs_reset root", "namespace must start with xt"),
+        (f"$test nvs {NS} k i32 abc", "bad i32"),
+        (f"$test nvs {NS} k i32 99999999999", "bad i32"),
+        (f"$test nvs {NS} k u32 -1", "bad u32"),
+        (f"$test nvs {NS} k bool maybe", "bad bool"),
+        (f"$test nvs {NS} k float 1e999", "bad float"),
+        (f"$test nvs {NS} k blob x", "unknown type"),
+        ("$test nvs_read xtnvs k blob", "unknown type"),
+        ("$test nvs_stress 0", "n must be 1..200"),
+        ("$test nvs_stress 201", "n must be 1..200"),
+        ("$test nvs_stress abc", "n must be 1..200"),
+    ],
+)
 def test_garbage_arguments_report_errors(hooks, cmd, err):
     reply = hooks.run(cmd)
     assert any(f"error={err}" in line for line in reply), reply

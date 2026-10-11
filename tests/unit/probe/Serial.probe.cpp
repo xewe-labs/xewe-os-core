@@ -8,7 +8,6 @@
 
 #include <string>
 
-
 void xewe_host_probe_serial() {
     xewe::SerialPort serial;
     serial.begin();

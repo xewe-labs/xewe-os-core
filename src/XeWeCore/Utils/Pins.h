@@ -18,7 +18,6 @@
 #endif
 #endif
 
-
 namespace xewe::pins {
 
 // table size: GPIO 0-48 (ESP32-S3 has 49 pads; C3 22, C6 31, ESP32 40)
@@ -32,11 +31,12 @@ inline constexpr int kMaxGpio = 49;
 namespace detail {
 constexpr uint64_t mask(std::initializer_list<int> gpios) {
     uint64_t m = 0;
-    for (int g : gpios) m |= uint64_t{1} << g;
+    for (int g : gpios)
+        m |= uint64_t{1} << g;
     return m;
 }
 } // namespace detail
-inline constexpr uint64_t kStrappingEsp32   = detail::mask({0, 2, 5, 12, 15});
+inline constexpr uint64_t kStrappingEsp32 = detail::mask({0, 2, 5, 12, 15});
 inline constexpr uint64_t kStrappingEsp32C3 = detail::mask({2, 8, 9});
 inline constexpr uint64_t kStrappingEsp32C6 = detail::mask({4, 5, 8, 9, 15});
 inline constexpr uint64_t kStrappingEsp32S3 = detail::mask({0, 3, 45, 46});
@@ -50,7 +50,7 @@ inline constexpr uint64_t kStrapping = kStrappingEsp32S3;
 #elif defined(CONFIG_IDF_TARGET_ESP32)
 inline constexpr uint64_t kStrapping = kStrappingEsp32;
 #else
-inline constexpr uint64_t kStrapping = 0;   // host, or a chip not listed above
+inline constexpr uint64_t kStrapping = 0; // host, or a chip not listed above
 #endif
 
 constexpr bool is_strapping(int gpio) {
@@ -64,11 +64,12 @@ inline void (*error_handler)(void* context, const char* message) = nullptr;
 inline void* error_context = nullptr;
 
 namespace detail {
-inline const char* owners[kMaxGpio] = {};   // owner name per GPIO, nullptr = free
-inline uint64_t    strapping        = kStrapping;   // what claim() warns about (host tests set a chip's mask)
+inline const char* owners[kMaxGpio] = {}; // owner name per GPIO, nullptr = free
+inline uint64_t strapping = kStrapping; // what claim() warns about (host tests set a chip's mask)
 
 inline void report(const char* fmt, int gpio, const char* a, const char* b = "") {
-    if (!error_handler) return;
+    if (!error_handler)
+        return;
     char msg[112];
     std::snprintf(msg, sizeof(msg), fmt, gpio, a, b);
     error_handler(error_context, msg);
@@ -85,26 +86,32 @@ inline const char* owner_of(int gpio) {
 // when another owner holds it, and for a pin outside 0-48. A strapping pin is claimed with a
 // warning, never refused.
 inline bool claim(int gpio, const char* owner) {
-    if (!owner) owner = "?";
+    if (!owner)
+        owner = "?";
     if (gpio < 0 || gpio >= kMaxGpio) {
         detail::report("! GPIO %d out of range (0-48): not claimed by %s", gpio, owner);
         return false;
     }
     const char*& slot = detail::owners[gpio];
     if (slot) {
-        if (std::strcmp(slot, owner) == 0) return true;
+        if (std::strcmp(slot, owner) == 0)
+            return true;
         detail::report("! GPIO %d already claimed by %s, refused for %s", gpio, slot, owner);
         return false;
     }
     slot = owner;
-    if ((detail::strapping >> gpio) & 1u) detail::report("! GPIO %d is a strapping pin (%s): its level at reset selects the boot mode", gpio, owner);
+    if ((detail::strapping >> gpio) & 1u)
+        detail::report(
+            "! GPIO %d is a strapping pin (%s): its level at reset selects the boot mode", gpio,
+            owner);
     return true;
 }
 
 // Frees `gpio` if `owner` holds it; false (and nothing changes) otherwise.
 inline bool release(int gpio, const char* owner) {
     const char* held = owner_of(gpio);
-    if (!held || !owner || std::strcmp(held, owner) != 0) return false;
+    if (!held || !owner || std::strcmp(held, owner) != 0)
+        return false;
     detail::owners[gpio] = nullptr;
     return true;
 }

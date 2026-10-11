@@ -16,7 +16,9 @@ import pytest
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # --import-mode=importlib: hooks.py is a sibling
+sys.path.insert(
+    0, str(Path(__file__).resolve().parent)
+)  # --import-mode=importlib: hooks.py is a sibling
 from hooks import hooks  # noqa: F401,E402
 
 YN = r"\(y/n\) > "
@@ -48,7 +50,10 @@ def test_yn_answer_yes(hooks):
     assert result(hooks) == {"result": "1", "success": "1"}
 
 
-@pytest.mark.parametrize("text,value", [("YES", "1"), ("true", "1"), ("1", "1"), ("No", "0"), ("false", "0"), ("0", "0")])
+@pytest.mark.parametrize(
+    "text,value",
+    [("YES", "1"), ("true", "1"), ("1", "1"), ("No", "0"), ("false", "0"), ("0", "0")],
+)
 def test_yn_accepted_spellings(hooks, text, value):
     start(hooks, "$test prompt_yn 5000 1", YN)
     answer(hooks, text)
@@ -111,8 +116,17 @@ def test_yn_type_ahead_dropped(hooks):
     assert r == {"result": "0", "success": "0"}, "type-ahead answered the prompt"
 
 
-@pytest.mark.parametrize("cmd", ["$test prompt_yn 0 1", "$test prompt_yn 60001 1", "$test prompt_yn 100 11",
-                                 "$test prompt_yn x y", "$test prompt_str 5 300 100", "$test prompt_int a 1 100"])
+@pytest.mark.parametrize(
+    "cmd",
+    [
+        "$test prompt_yn 0 1",
+        "$test prompt_yn 60001 1",
+        "$test prompt_yn 100 11",
+        "$test prompt_yn x y",
+        "$test prompt_str 5 300 100",
+        "$test prompt_int a 1 100",
+    ],
+)
 def test_prompt_bad_args(hooks, cmd):
     assert any("error=bad args" in line for line in hooks.run(cmd))
 

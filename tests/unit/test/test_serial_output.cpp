@@ -14,16 +14,16 @@
 #include <string>
 #include <vector>
 
-
 namespace {
 
 std::deque<std::string> script;
-int                     ticks_since_feed = 0;
+int ticks_since_feed = 0;
 
 // queue the lines of `all` (each ending in '\n'); the fake clock hands them out on yield()
 void feed(const std::string& all) {
     std::size_t a = 0;
-    for (std::size_t b; (b = all.find('\n', a)) != std::string::npos; a = b + 1) script.push_back(all.substr(a, b - a + 1));
+    for (std::size_t b; (b = all.find('\n', a)) != std::string::npos; a = b + 1)
+        script.push_back(all.substr(a, b - a + 1));
 }
 
 void tick() {
@@ -37,7 +37,7 @@ void tick() {
 
 struct Case {
     const char* name;
-    void        (*run)(xewe::SerialPort& s);
+    void (*run)(xewe::SerialPort& s);
 };
 
 std::vector<Case>& cases() {
@@ -46,40 +46,120 @@ std::vector<Case>& cases() {
 }
 
 struct AddCase {
-    AddCase(const char* name, void (*run)(xewe::SerialPort&)) { cases().push_back({name, run}); }
+    AddCase(const char* name, void (*run)(xewe::SerialPort&)) {
+        cases().push_back({name, run});
+    }
 };
 
-#define CASE(n)                             \
-    void   n(xewe::SerialPort& s);          \
-    AddCase add_##n(#n, n);                 \
-    void   n(xewe::SerialPort& s)
+#define CASE(n) \
+    void n(xewe::SerialPort& s); \
+    AddCase add_##n(#n, n); \
+    void n(xewe::SerialPort& s)
 
-
-CASE(print_lines) { s.print("a\nb\r\nc"); }
-CASE(print_box_words) { s.print("hello world foo bar", xewe::str::kCRLF, "|", 'c', 'w', 10, 1, 1); }
-CASE(print_box_chars) { s.print("abcdefghijkl", "", "#", 'r', 'c', 5, 0, 2); }
-CASE(print_empty) { s.print(); s.print("", "END"); }
-CASE(printf_basic) { s.printf("x=%d %s", 5, "y"); s.printf(nullptr); s.printf("100%%"); }
-CASE(printf_fmt_box) { s.printf_fmt(xewe::str::kCRLF, "|", 'c', 'w', 20, 1, 1, "n=%u and more words here", 7u); s.printf_fmt("", "", 'l', 'w', 0, 0, 0, nullptr); }
-CASE(separators) { s.print_separator(); s.print_separator(10, "=-", ""); s.print_separator(1, "-", "++"); s.print_separator(3, "-", "++"); s.print_separator(0); s.print_separator(6, "", "|"); }
-CASE(spacers) { s.print_spacer(); s.print_spacer(8, "|"); s.print_spacer(5, ""); s.print_spacer(2, "||"); s.print_spacer(0, "|"); }
-CASE(header) { s.print_header("Title\\sepSub line that is long enough to wrap around the box width\nsecond"); s.print_header("x", 0); s.print_header("narrow", 6, "", "*", "="); }
+CASE(print_lines) {
+    s.print("a\nb\r\nc");
+}
+CASE(print_box_words) {
+    s.print("hello world foo bar", xewe::str::kCRLF, "|", 'c', 'w', 10, 1, 1);
+}
+CASE(print_box_chars) {
+    s.print("abcdefghijkl", "", "#", 'r', 'c', 5, 0, 2);
+}
+CASE(print_empty) {
+    s.print();
+    s.print("", "END");
+}
+CASE(printf_basic) {
+    s.printf("x=%d %s", 5, "y");
+    s.printf(nullptr);
+    s.printf("100%%");
+}
+CASE(printf_fmt_box) {
+    s.printf_fmt(xewe::str::kCRLF, "|", 'c', 'w', 20, 1, 1, "n=%u and more words here", 7u);
+    s.printf_fmt("", "", 'l', 'w', 0, 0, 0, nullptr);
+}
+CASE(separators) {
+    s.print_separator();
+    s.print_separator(10, "=-", "");
+    s.print_separator(1, "-", "++");
+    s.print_separator(3, "-", "++");
+    s.print_separator(0);
+    s.print_separator(6, "", "|");
+}
+CASE(spacers) {
+    s.print_spacer();
+    s.print_spacer(8, "|");
+    s.print_spacer(5, "");
+    s.print_spacer(2, "||");
+    s.print_spacer(0, "|");
+}
+CASE(header) {
+    s.print_header("Title\\sepSub line that is long enough to wrap around the box width\nsecond");
+    s.print_header("x", 0);
+    s.print_header("narrow", 6, "", "*", "=");
+}
 CASE(table) {
-    std::vector<std::vector<std::string_view>> t = {{"Name", "Value", "Notes"}, {"a", "1"}, {"multi\nline", "2", "a long cell that has to wrap because it is wider than the column"}, {"", "", ""}};
+    std::vector<std::vector<std::string_view>> t = {{"Name", "Value", "Notes"}, {"a", "1"},
+        {"multi\nline", "2", "a long cell that has to wrap because it is wider than the column"},
+        {"", "", ""}};
     s.print_table(t, "My Table");
     s.print_table(t);
     s.print_table(t, "Narrow\nheader", 8, "#", "*", "~=");
     s.print_table({}, "none");
 }
-CASE(render_equals_print) { std::vector<std::vector<std::string_view>> t = {{"k", "v"}, {"x", "y"}}; std::string r = s.render_table(t, "H"); Serial.take(); s.print_table(t, "H"); if (Serial.tx != r) Serial.tx = "MISMATCH"; }
-CASE(get_int_range) { feed("999\nabc\n5\n"); int v = s.get_int("Pick", 1, 10, 0, 0, 0); s.printf("v=%d", v); }
-CASE(get_uint8_bad) { feed("300\n-1\n7\n"); unsigned v = s.get_uint8("U8", 0, 9, 3, 0, 4); s.printf("v=%u", v); }
-CASE(get_uint16_32) { feed("70000\n65535\n"); unsigned v = s.get_uint16("U16"); feed("5000000000\n4000000000\n7\n"); unsigned long w = s.get_uint32("U32", 10, 5); s.printf("v=%u w=%lu", v, w); }
-CASE(get_uint32_swap_timeout) { bool ok = true; unsigned long w = s.get_uint32("T", 9, 3, 2, 50, 8, ok); s.printf("w=%lu ok=%d", w, int(ok)); }
-CASE(get_string_len) { feed("ab\nabcdefghijk\nabcd\n"); std::string v = s.get_string("Str", 3, 6); s.printf("v=%s", v.c_str()); }
-CASE(get_float_range) { feed("x\nnan\n12.5\n2.5 \n"); float v = s.get_float("F", 0.0f, 10.0f); s.printf("v=%g", double(v)); }
-CASE(get_yn_flow) { feed("maybe\nYES\n"); bool v = s.get_yn("Q"); s.printf("v=%d", int(v)); }
-CASE(menu) { feed("0\n3\n2\n"); unsigned v = s.get_menu_choice("Menu", {"one", "two"}); s.printf("v=%u", v); feed("4\n"); v = s.get_menu_choice("Bare", {}, 1, 5); s.printf("v=%u", v); }
+CASE(render_equals_print) {
+    std::vector<std::vector<std::string_view>> t = {{"k", "v"}, {"x", "y"}};
+    std::string r = s.render_table(t, "H");
+    Serial.take();
+    s.print_table(t, "H");
+    if (Serial.tx != r)
+        Serial.tx = "MISMATCH";
+}
+CASE(get_int_range) {
+    feed("999\nabc\n5\n");
+    int v = s.get_int("Pick", 1, 10, 0, 0, 0);
+    s.printf("v=%d", v);
+}
+CASE(get_uint8_bad) {
+    feed("300\n-1\n7\n");
+    unsigned v = s.get_uint8("U8", 0, 9, 3, 0, 4);
+    s.printf("v=%u", v);
+}
+CASE(get_uint16_32) {
+    feed("70000\n65535\n");
+    unsigned v = s.get_uint16("U16");
+    feed("5000000000\n4000000000\n7\n");
+    unsigned long w = s.get_uint32("U32", 10, 5);
+    s.printf("v=%u w=%lu", v, w);
+}
+CASE(get_uint32_swap_timeout) {
+    bool ok = true;
+    unsigned long w = s.get_uint32("T", 9, 3, 2, 50, 8, ok);
+    s.printf("w=%lu ok=%d", w, int(ok));
+}
+CASE(get_string_len) {
+    feed("ab\nabcdefghijk\nabcd\n");
+    std::string v = s.get_string("Str", 3, 6);
+    s.printf("v=%s", v.c_str());
+}
+CASE(get_float_range) {
+    feed("x\nnan\n12.5\n2.5 \n");
+    float v = s.get_float("F", 0.0f, 10.0f);
+    s.printf("v=%g", double(v));
+}
+CASE(get_yn_flow) {
+    feed("maybe\nYES\n");
+    bool v = s.get_yn("Q");
+    s.printf("v=%d", int(v));
+}
+CASE(menu) {
+    feed("0\n3\n2\n");
+    unsigned v = s.get_menu_choice("Menu", {"one", "two"});
+    s.printf("v=%u", v);
+    feed("4\n");
+    v = s.get_menu_choice("Bare", {}, 1, 5);
+    s.printf("v=%u", v);
+}
 
 #undef CASE
 
@@ -89,40 +169,49 @@ struct Golden {
 };
 
 const Golden kGolden[] = {
-    {"print_lines", "a\r\n"
+    {"print_lines",
+        "a\r\n"
         "b\r\n"
         "c\r\n"
         ""},
-    {"print_box_words", "|   hello    |\r\n"
+    {"print_box_words",
+        "|   hello    |\r\n"
         "| world foo  |\r\n"
         "|    bar     |\r\n"
         ""},
-    {"print_box_chars", "#abcde  #\r\n"
+    {"print_box_chars",
+        "#abcde  #\r\n"
         "#fghij  #\r\n"
         "#   kl  #"},
-    {"print_empty", "\r\n"
+    {"print_empty",
+        "\r\n"
         "END"},
-    {"printf_basic", "x=5 y\r\n"
+    {"printf_basic",
+        "x=5 y\r\n"
         "\r\n"
         "100%\r\n"
         ""},
-    {"printf_fmt_box", "|  n=7 and more words  |\r\n"
+    {"printf_fmt_box",
+        "|  n=7 and more words  |\r\n"
         "|         here         |\r\n"
         ""},
-    {"separators", "+------------------------------------------------+\r\n"
+    {"separators",
+        "+------------------------------------------------+\r\n"
         "=-=-=-=-=-\r\n"
         "+\r\n"
         "++\r\n"
         "\r\n"
         "|    |\r\n"
         ""},
-    {"spacers", "                                                  \r\n"
+    {"spacers",
+        "                                                  \r\n"
         "|      |\r\n"
         "     \r\n"
         "||\r\n"
         "\r\n"
         ""},
-    {"header", "+------------------------------------------------+\r\n"
+    {"header",
+        "+------------------------------------------------+\r\n"
         "|                     Title                      |\r\n"
         "+------------------------------------------------+\r\n"
         "|  Sub line that is long enough to wrap around   |\r\n"
@@ -136,7 +225,8 @@ const Golden kGolden[] = {
         " narrow \r\n"
         "*====*\r\n"
         ""},
-    {"table", "+----------------------------------------------+\r\n"
+    {"table",
+        "+----------------------------------------------+\r\n"
         "|                   My Table                   |\r\n"
         "+-------+-------+------------------------------+\r\n"
         "| Name  | Value | Notes                        |\r\n"
@@ -184,7 +274,8 @@ const Golden kGolden[] = {
         "#       #       #        #\r\n"
         "*~=~=~=~*~=~=~=~*~=~=~=~=*\r\n"
         ""},
-    {"render_equals_print", "+-------+\r\n"
+    {"render_equals_print",
+        "+-------+\r\n"
         "|   H   |\r\n"
         "+---+---+\r\n"
         "| k | v |\r\n"
@@ -192,7 +283,8 @@ const Golden kGolden[] = {
         "| x | y |\r\n"
         "+---+---+\r\n"
         ""},
-    {"get_int_range", "Pick\r\n"
+    {"get_int_range",
+        "Pick\r\n"
         "> \r\n"
         "! Out of range [1..10].\r\n"
         "> \r\n"
@@ -200,7 +292,8 @@ const Golden kGolden[] = {
         "> \r\n"
         "v=5\r\n"
         ""},
-    {"get_uint8_bad", "U8\r\n"
+    {"get_uint8_bad",
+        "U8\r\n"
         "> \r\n"
         "! Invalid number. Please enter a base-10 integer.\r\n"
         "> \r\n"
@@ -208,7 +301,8 @@ const Golden kGolden[] = {
         "> \r\n"
         "v=7\r\n"
         ""},
-    {"get_uint16_32", "U16\r\n"
+    {"get_uint16_32",
+        "U16\r\n"
         "> \r\n"
         "! Invalid number. Please enter a base-10 integer.\r\n"
         "> \r\n"
@@ -220,14 +314,16 @@ const Golden kGolden[] = {
         "> \r\n"
         "v=65535 w=7\r\n"
         ""},
-    {"get_uint32_swap_timeout", "T\r\n"
+    {"get_uint32_swap_timeout",
+        "T\r\n"
         "> \r\n"
         "! Timeout.\r\n"
         "> \r\n"
         "! Timeout.\r\n"
         "w=8 ok=0\r\n"
         ""},
-    {"get_string_len", "Str\r\n"
+    {"get_string_len",
+        "Str\r\n"
         "> \r\n"
         "! Length must be in [3..6] chars.\r\n"
         "> \r\n"
@@ -235,7 +331,8 @@ const Golden kGolden[] = {
         "> \r\n"
         "v=abcd\r\n"
         ""},
-    {"get_float_range", "F\r\n"
+    {"get_float_range",
+        "F\r\n"
         "> \r\n"
         "! Invalid number. Please enter a decimal value.\r\n"
         "> \r\n"
@@ -245,13 +342,15 @@ const Golden kGolden[] = {
         "> \r\n"
         "v=2.5\r\n"
         ""},
-    {"get_yn_flow", "Q\r\n"
+    {"get_yn_flow",
+        "Q\r\n"
         "(y/n) > \r\n"
         "! Please answer 'y' or 'n'.\r\n"
         "(y/n) > \r\n"
         "v=1\r\n"
         ""},
-    {"menu", "Menu\r\n"
+    {"menu",
+        "Menu\r\n"
         "  1) one\r\n"
         "  2) two\r\n"
         "Choice\r\n"
@@ -273,17 +372,19 @@ TEST(serial_output_golden) {
     CHECK_EQ(cases().size(), sizeof(kGolden) / sizeof(kGolden[0]));
     host::on_yield = tick;
     for (std::size_t i = 0; i < cases().size() && i < sizeof(kGolden) / sizeof(kGolden[0]); ++i) {
-        xewe::SerialPort       s;
+        xewe::SerialPort s;
         xewe::SerialPortConfig cfg;
         cfg.startup_delay_ms = 0;
-        cfg.echo             = false;
+        cfg.echo = false;
         s.begin(cfg);
         Serial.rx.clear();
         Serial.take();
         script.clear();
         cases()[i].run(s);
         const std::string out = Serial.take();
-        if (out != kGolden[i].out) host_test::fail(__FILE__, __LINE__, std::string("output of ") + cases()[i].name + ":\n" + out);
+        if (out != kGolden[i].out)
+            host_test::fail(
+                __FILE__, __LINE__, std::string("output of ") + cases()[i].name + ":\n" + out);
     }
     host::on_yield = nullptr;
     script.clear();

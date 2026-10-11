@@ -60,7 +60,13 @@ class Hooks:
     def __init__(self, console: Console) -> None:
         self.c = console
 
-    def run(self, cmd: str, quiet: float = QUIET, limit: float = 20, until: str | None = None) -> list[str]:
+    def run(
+        self,
+        cmd: str,
+        quiet: float = QUIET,
+        limit: float = 20,
+        until: str | None = None,
+    ) -> list[str]:
         """Send ``cmd``; wait for ``until`` (if given), then for ``quiet`` s of silence.
 
         Returns every line read after the send, the console echo of ``cmd`` removed.
@@ -94,7 +100,9 @@ class Hooks:
         assert "uptime_ms" in self.call("$test uptime"), "board stopped answering"
 
 
-_present: dict[int, bool] = {}  # id(console) -> hooks present (one probe per session console)
+_present: dict[
+    int, bool
+] = {}  # id(console) -> hooks present (one probe per session console)
 
 
 @pytest.fixture
@@ -106,7 +114,9 @@ def hooks(serial: Console, request):
     if any("Unknown command group 'test'" in line for line in reply):
         _present[id(serial)] = False
         pytest.skip(NO_HOOKS)
-    assert any("uptime_ms=" in line for line in reply), f"unexpected reply to $test uptime: {reply}"
+    assert any("uptime_ms=" in line for line in reply), (
+        f"unexpected reply to $test uptime: {reply}"
+    )
     _present[id(serial)] = True
     yield h
     _transcript(request.node.nodeid, serial.lines)

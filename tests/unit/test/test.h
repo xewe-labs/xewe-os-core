@@ -12,12 +12,25 @@
 
 namespace host_test {
 
-struct Case { const char* name; std::function<void()> fn; };
+struct Case {
+    const char* name;
+    std::function<void()> fn;
+};
 
-inline std::vector<Case>& registry() { static std::vector<Case> r; return r; }
-inline int&               failures() { static int f = 0; return f; }
+inline std::vector<Case>& registry() {
+    static std::vector<Case> r;
+    return r;
+}
+inline int& failures() {
+    static int f = 0;
+    return f;
+}
 
-struct Register { Register(const char* n, std::function<void()> f) { registry().push_back({n, std::move(f)}); } };
+struct Register {
+    Register(const char* n, std::function<void()> f) {
+        registry().push_back({n, std::move(f)});
+    }
+};
 
 inline void fail(const char* file, int line, const std::string& what) {
     ++failures();
@@ -27,17 +40,22 @@ inline void fail(const char* file, int line, const std::string& what) {
 } // namespace host_test
 
 #define HT_CAT2(a, b) a##b
-#define HT_CAT(a, b)  HT_CAT2(a, b)
-#define TEST(name)                                                                 \
-    static void HT_CAT(test_, name)();                                             \
-    static host_test::Register HT_CAT(reg_, name)(#name, HT_CAT(test_, name));     \
+#define HT_CAT(a, b) HT_CAT2(a, b)
+#define TEST(name) \
+    static void HT_CAT(test_, name)(); \
+    static host_test::Register HT_CAT(reg_, name)(#name, HT_CAT(test_, name)); \
     static void HT_CAT(test_, name)()
 
 #define CHECK(cond) \
-    do { if (!(cond)) host_test::fail(__FILE__, __LINE__, "CHECK(" #cond ")"); } while (0)
+    do { \
+        if (!(cond)) \
+            host_test::fail(__FILE__, __LINE__, "CHECK(" #cond ")"); \
+    } while (0)
 
-#define CHECK_EQ(a, b)                                                             \
-    do {                                                                           \
-        const auto& _a = (a); const auto& _b = (b);                                \
-        if (!(_a == _b)) host_test::fail(__FILE__, __LINE__, "CHECK_EQ(" #a ", " #b ")"); \
+#define CHECK_EQ(a, b) \
+    do { \
+        const auto& _a = (a); \
+        const auto& _b = (b); \
+        if (!(_a == _b)) \
+            host_test::fail(__FILE__, __LINE__, "CHECK_EQ(" #a ", " #b ")"); \
     } while (0)

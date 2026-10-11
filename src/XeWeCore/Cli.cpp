@@ -8,7 +8,6 @@
 
 #include "Utils.h"
 
-
 namespace xewe {
 
 namespace {
@@ -16,32 +15,36 @@ namespace {
 std::string trim_copy(std::string_view value) {
     std::size_t begin = 0;
     std::size_t end = value.size();
-    while (begin < end && std::isspace(static_cast<unsigned char>(value[begin]))) ++begin;
-    while (end > begin && std::isspace(static_cast<unsigned char>(value[end - 1]))) --end;
+    while (begin < end && std::isspace(static_cast<unsigned char>(value[begin])))
+        ++begin;
+    while (end > begin && std::isspace(static_cast<unsigned char>(value[end - 1])))
+        --end;
     return std::string(value.substr(begin, end - begin));
 }
 
 // trimmed and lower-cased: the key of a group id
 std::string group_key(std::string_view id) {
     std::string key = trim_copy(id);
-    for (char& c : key) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    for (char& c : key)
+        c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
     return key;
 }
 
 // ASCII case-insensitive equality, no allocation
 bool iequals(std::string_view a, std::string_view b) {
-    if (a.size() != b.size()) return false;
+    if (a.size() != b.size())
+        return false;
     for (std::size_t i = 0; i < a.size(); ++i) {
-        if (std::tolower(static_cast<unsigned char>(a[i])) != std::tolower(static_cast<unsigned char>(b[i]))) return false;
+        if (std::tolower(static_cast<unsigned char>(a[i])) !=
+            std::tolower(static_cast<unsigned char>(b[i])))
+            return false;
     }
     return true;
 }
 
 } // namespace
 
-Cli::Cli(SerialPort& serial)
-    : serial(serial)
-{}
+Cli::Cli(SerialPort& serial) : serial(serial) {}
 
 void Cli::loop() {
     serial.loop();
@@ -50,32 +53,36 @@ void Cli::loop() {
     }
 }
 
-CommandGroup& Cli::add_group(std::string_view id,
-                                         std::string_view name) {
+CommandGroup& Cli::add_group(std::string_view id, std::string_view name) {
     const std::string key = group_key(id);
-    CommandGroup&     group = groups[key];
-    group.id                = key;
-    group.name              = std::string(name);
+    CommandGroup& group = groups[key];
+    group.id = key;
+    group.name = std::string(name);
     return group;
 }
 
-bool Cli::add_command(std::string_view group_id,
-                                  Command command) {
+bool Cli::add_command(std::string_view group_id, Command command) {
     auto it = groups.find(group_key(group_id));
-    if (it == groups.end() || name_error(command.name, false) || !command.function) return false;
+    if (it == groups.end() || name_error(command.name, false) || !command.function)
+        return false;
 
     it->second.commands.push_back(std::move(command));
     return true;
 }
 
 const char* Cli::name_error(std::string_view name, bool is_module_id) {
-    if (name.empty()) return "is empty";
+    if (name.empty())
+        return "is empty";
     for (unsigned char c : name) {
-        if (std::isspace(c)) return "contains whitespace";
+        if (std::isspace(c))
+            return "contains whitespace";
     }
-    if (!is_module_id) return nullptr;
-    if (iequals(name, "help")) return "is reserved ($help)";
-    if (name.size() > 15) return "is longer than 15 characters (NVS namespace limit)";
+    if (!is_module_id)
+        return nullptr;
+    if (iequals(name, "help"))
+        return "is reserved ($help)";
+    if (name.size() > 15)
+        return "is longer than 15 characters (NVS namespace limit)";
     return nullptr;
 }
 
@@ -88,18 +95,23 @@ const CommandGroup* Cli::get_group(std::string_view id) const {
     return it == groups.end() ? nullptr : &it->second;
 }
 
-const std::map<std::string, CommandGroup>& Cli::get_groups() const { return groups; }
+const std::map<std::string, CommandGroup>& Cli::get_groups() const {
+    return groups;
+}
 
-bool Cli::execute(std::string_view group_id,
-                              std::string_view command_name,
-                              xewe::span<const std::string> args) const {
+bool Cli::execute(std::string_view group_id, std::string_view command_name,
+    xewe::span<const std::string> args) const {
     const CommandGroup* group = get_group(group_id);
-    if (group == nullptr) return false;
+    if (group == nullptr)
+        return false;
 
     for (const Command& command : group->commands) {
-        if (!command.function)                  continue;
-        if (!iequals(command.name, command_name)) continue;
-        if (args.size() != command.arg_count)   continue;
+        if (!command.function)
+            continue;
+        if (!iequals(command.name, command_name))
+            continue;
+        if (args.size() != command.arg_count)
+            continue;
 
         // call a copy: the command may add/remove commands or groups, which can destroy
         // the stored std::function while it is still running
@@ -113,13 +125,11 @@ bool Cli::execute(std::string_view group_id,
 void Cli::execute(std::string_view input_line) const {
     std::string local = trim_copy(input_line);
 
-    if (local.empty()) return;
+    if (local.empty())
+        return;
 
     if (local[0] != '$') {
-        serial.print(
-            "Error: commands must start with '$'; type $help",
-            xewe::str::kCRLF
-        );
+        serial.print("Error: commands must start with '$'; type $help", xewe::str::kCRLF);
         return;
     }
 
@@ -128,15 +138,14 @@ void Cli::execute(std::string_view input_line) const {
 
     if (local.empty()) {
         serial.print(
-            "Error: Missing command group; usage: $<group> <command> [args...]",
-            xewe::str::kCRLF
-        );
+            "Error: Missing command group; usage: $<group> <command> [args...]", xewe::str::kCRLF);
         return;
     }
 
     std::vector<std::string> tokens;
 
-    if (!tokenize(local, tokens)) return;
+    if (!tokenize(local, tokens))
+        return;
 
     if (iequals(tokens[0], "help")) {
         if (tokens.size() == 1) {
@@ -145,10 +154,8 @@ void Cli::execute(std::string_view input_line) const {
         }
 
         if (tokens.size() != 2) {
-            serial.print(
-                "Error: Argument count mismatch for '$help'; usage: $help <group>",
-                xewe::str::kCRLF
-            );
+            serial.print("Error: Argument count mismatch for '$help'; usage: $help <group>",
+                xewe::str::kCRLF);
             return;
         }
 
@@ -159,20 +166,14 @@ void Cli::execute(std::string_view input_line) const {
     const CommandGroup* group = get_group(tokens[0]);
 
     if (group == nullptr) {
-        serial.printf(
-            "Error: Unknown command group '%s'",
-            tokens[0].c_str()
-        );
+        serial.printf("Error: Unknown command group '%s'", tokens[0].c_str());
         return;
     }
 
     const auto& commands = group->commands;
 
     if (commands.empty()) {
-        serial.printf(
-            "Error: Command group '%s' has no CLI commands",
-            tokens[0].c_str()
-        );
+        serial.printf("Error: Command group '%s' has no CLI commands", tokens[0].c_str());
         return;
     }
 
@@ -184,9 +185,7 @@ void Cli::execute(std::string_view input_line) const {
     if (tokens[1].empty()) {
         serial.printf(
             "Error: Missing command in command group '%s'; usage: $%s <command> [args...]",
-            tokens[0].c_str(),
-            tokens[0].c_str()
-        );
+            tokens[0].c_str(), tokens[0].c_str());
         return;
     }
 
@@ -195,7 +194,7 @@ void Cli::execute(std::string_view input_line) const {
         return;
     }
 
-    const Command*    matched_command = nullptr;
+    const Command* matched_command = nullptr;
 
     const std::size_t provided_arg_count = tokens.size() - 2;
 
@@ -207,7 +206,8 @@ void Cli::execute(std::string_view input_line) const {
         }
 
         if (iequals(command.name, tokens[1])) {
-            if (matched_command == nullptr) matched_command = &command;
+            if (matched_command == nullptr)
+                matched_command = &command;
             if (command.arg_count == provided_arg_count) {
                 matched_command = &command;
                 break;
@@ -216,30 +216,20 @@ void Cli::execute(std::string_view input_line) const {
     }
 
     if (matched_command == nullptr) {
-        serial.printf(
-            "Error: Unknown command '%s' in command group '%s'",
-            tokens[1].c_str(),
-            tokens[0].c_str()
-        );
+        serial.printf("Error: Unknown command '%s' in command group '%s'", tokens[1].c_str(),
+            tokens[0].c_str());
         return;
     }
 
     const std::size_t expected_arg_count = matched_command->arg_count;
 
     if (provided_arg_count != expected_arg_count) {
-        serial.printf(
-            "Error: Argument count mismatch for '$%s %s'; expected %u, got %u",
-            tokens[0].c_str(),
-            tokens[1].c_str(),
-            static_cast<unsigned>(expected_arg_count),
-            static_cast<unsigned>(provided_arg_count)
-        );
+        serial.printf("Error: Argument count mismatch for '$%s %s'; expected %u, got %u",
+            tokens[0].c_str(), tokens[1].c_str(), static_cast<unsigned>(expected_arg_count),
+            static_cast<unsigned>(provided_arg_count));
 
         if (!matched_command->sample_usage.empty()) {
-            serial.printf(
-                "Usage: %s",
-                matched_command->sample_usage.c_str()
-            );
+            serial.printf("Usage: %s", matched_command->sample_usage.c_str());
         }
 
         return;
@@ -261,20 +251,14 @@ void Cli::print_help(std::string_view group_id) const {
     const CommandGroup* group = get_group(id);
 
     if (group == nullptr) {
-        serial.printf(
-            "Error: Unknown command group '%s'",
-            id.c_str()
-        );
+        serial.printf("Error: Unknown command group '%s'", id.c_str());
         return;
     }
 
     const auto& commands = group->commands;
 
     if (commands.empty()) {
-        serial.printf(
-            "Error: Command group '%s' has no CLI commands",
-            id.c_str()
-        );
+        serial.printf("Error: Command group '%s' has no CLI commands", id.c_str());
         return;
     }
 
@@ -291,19 +275,11 @@ void Cli::print_help(std::string_view group_id) const {
 
         arg_counts.push_back(std::to_string(command.arg_count));
 
-        table_data.push_back({
-            command.name,
-            arg_counts.back(),
-            command.description,
-            command.sample_usage
-        });
+        table_data.push_back(
+            {command.name, arg_counts.back(), command.description, command.sample_usage});
     }
 
-    const std::string header =
-        group->name +
-        " Commands [" +
-        group->id +
-        "]";
+    const std::string header = group->name + " Commands [" + group->id + "]";
 
     serial.print_table(table_data, header);
 }
@@ -316,15 +292,13 @@ void Cli::print_all_commands() const {
     }
 }
 
-bool Cli::tokenize(std::string_view input,
-                               std::vector<std::string>& out) const {
+bool Cli::tokenize(std::string_view input, std::vector<std::string>& out) const {
     out.clear();
 
     std::size_t pos = 0;
 
     while (pos < input.size()) {
-        while (pos < input.size() &&
-               std::isspace(static_cast<unsigned char>(input[pos])) != 0) {
+        while (pos < input.size() && std::isspace(static_cast<unsigned char>(input[pos])) != 0) {
             ++pos;
         }
 
@@ -363,15 +337,12 @@ bool Cli::tokenize(std::string_view input,
             }
 
             if (!closed) {
-                serial.print(
-                    "Error: Unterminated quote in command.",
-                    xewe::str::kCRLF
-                );
+                serial.print("Error: Unterminated quote in command.", xewe::str::kCRLF);
                 return false;
             }
         } else {
-            while (pos < input.size() &&
-                   std::isspace(static_cast<unsigned char>(input[pos])) == 0) {
+            while (
+                pos < input.size() && std::isspace(static_cast<unsigned char>(input[pos])) == 0) {
                 token.push_back(input[pos++]);
             }
         }

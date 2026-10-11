@@ -10,11 +10,9 @@
 
 #include "String.h"
 
-
 namespace xewe {
 
-template <typename>
-struct always_false : std::false_type {};
+template <typename> struct always_false : std::false_type {};
 
 // Use LimitT to allow implicit type deduction for literals (e.g. 0, 255)
 template <typename T, typename LimitT>
@@ -33,22 +31,22 @@ std::optional<T> validate(std::string_view value, LimitT min, LimitT max) {
         // when the bounds are wider than the type (e.g. validate<int8_t>("300", 0, 1000))
         if constexpr (std::is_signed_v<U>) {
             U res = 0;
-            if (xewe::str::parse_int(value, res) &&
-                res >= static_cast<long long>(min) && res <= static_cast<long long>(max)) {
+            if (xewe::str::parse_int(value, res) && res >= static_cast<long long>(min) &&
+                res <= static_cast<long long>(max)) {
                 return static_cast<T>(res);
             }
         } else if constexpr (std::is_unsigned_v<U>) {
             U res = 0;
-            if (xewe::str::parse_int(value, res) &&
-                res >= static_cast<unsigned long long>(min) && res <= static_cast<unsigned long long>(max)) {
+            if (xewe::str::parse_int(value, res) && res >= static_cast<unsigned long long>(min) &&
+                res <= static_cast<unsigned long long>(max)) {
                 return static_cast<T>(res);
             }
         }
     } else if constexpr (std::is_floating_point_v<U>) {
         // For floats, min and max denote the numeric range bounds
         double res = 0.0;
-        if (xewe::str::parse_float(value, res) &&
-            res >= static_cast<double>(min) && res <= static_cast<double>(max)) {
+        if (xewe::str::parse_float(value, res) && res >= static_cast<double>(min) &&
+            res <= static_cast<double>(max)) {
             return static_cast<T>(res);
         }
     } else {

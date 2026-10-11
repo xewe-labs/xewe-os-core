@@ -20,34 +20,34 @@
 #include <string>
 #include <vector>
 
-
 template class xewe::AsyncTimer<uint8_t>;
 template class xewe::AsyncTimer<double>;
 
 void xewe_host_probe_utils() {
-    (void)xewe::validate<uint8_t>    ("128",  0,   255);
-    (void)xewe::validate<int32_t>    ("-5",  -10,  10);
-    (void)xewe::validate<double>     ("1.5",  0.0, 2.0);
-    (void)xewe::validate<std::string>("ab",   1,   4);
+    (void)xewe::validate<uint8_t>("128", 0, 255);
+    (void)xewe::validate<int32_t>("-5", -10, 10);
+    (void)xewe::validate<double>("1.5", 0.0, 2.0);
+    (void)xewe::validate<std::string>("ab", 1, 4);
 
-    int         i = 0;
-    double      d = 0.0;
-    (void)xewe::str::parse_int  ("42",  i);
+    int i = 0;
+    double d = 0.0;
+    (void)xewe::str::parse_int("42", i);
     (void)xewe::str::parse_float("4.2", d);
     (void)xewe::str::format("%d", 1);
     (void)xewe::str::to_lower("ABC");
     (void)xewe::str::repeat_pattern("-", 4);
 
     const std::vector<std::string> v{"a"};
-    xewe::span<const std::string>  sp(v);                      // container ctor
-    xewe::span<const std::string>  sp2(v.data(), v.size());    // pointer + size
+    xewe::span<const std::string> sp(v); // container ctor
+    xewe::span<const std::string> sp2(v.data(), v.size()); // pointer + size
     (void)sp.size();
     (void)sp[0];
     (void)sp2.empty();
-    for (const auto& s : sp) (void)s;
+    for (const auto& s : sp)
+        (void)s;
 
     (void)xewe::color::hsv_to_rgb({0, 255, 255});
 
     DBG_PRINTLN(Probe, "x");
-    DBG_PRINTF (Probe, "%d\n", 1);
+    DBG_PRINTF(Probe, "%d\n", 1);
 }

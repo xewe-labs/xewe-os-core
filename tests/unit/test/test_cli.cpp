@@ -9,27 +9,29 @@
 #include <string>
 #include <vector>
 
-
 namespace {
 
 struct Fixture {
-    xewe::SerialPort         serial;
-    xewe::Cli                xewe_cli{serial};
+    xewe::SerialPort serial;
+    xewe::Cli xewe_cli{serial};
     std::vector<std::string> got;
-    int                      calls = 0;
+    int calls = 0;
 
     Fixture() {
         Serial.take();
         xewe_cli.add_group("dev", "Device");
-        xewe_cli.add_command("dev", {"name", "Set the name", "$dev name \"x\"", 1,
-            [this](xewe::span<const std::string> args) {
-                ++calls;
-                got.assign(args.begin(), args.end());
-            }});
+        xewe_cli.add_command("dev",
+            {"name", "Set the name", "$dev name \"x\"", 1,
+                [this](xewe::span<const std::string> args) {
+                    ++calls;
+                    got.assign(args.begin(), args.end());
+                }});
     }
 };
 
-bool contains(const std::string& hay, const char* needle) { return hay.find(needle) != std::string::npos; }
+bool contains(const std::string& hay, const char* needle) {
+    return hay.find(needle) != std::string::npos;
+}
 
 } // namespace
 
