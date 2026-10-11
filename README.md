@@ -42,28 +42,35 @@ every public type, command and stored key. Building and testing the library itse
 
 ## Releasing
 
-Maintainers only. Each release has a folder `releases/<version>/` with `notes.txt` (the GitHub
-Release text) and `testcard.md` (what was tested on which commits, attached to the release). Commit
-that folder first; then, from a clean `main` that is level with `origin/main`, one command does the
-whole release:
+Maintainers only. A release is two steps. First prepare it:
 
 ```sh
-scripts/release.sh 3.0.0 --dry-run   # prints every step and HEAD's CI state, changes nothing
-scripts/release.sh 3.0.0
+scripts/release.sh --prepare 3.0.1   # sets the version, adds the releases/3.0.1/ skeletons
 ```
 
-It runs seven numbered stages: 1 preflight (version, release files, tree, branch, tag, `gh`); 2 waits
-for the `tests` workflow on HEAD to pass; 3 host tests and the format check; 4 commits the version
-bump alone (`release 3.0.0`) and pushes `main`; 5 waits for `tests` on that release commit; 6 tags
-`3.0.0` (no `v`), pushes the tag and creates the GitHub Release; 7 prints where to check the Arduino
-Library Manager, which picks the tag up by itself, usually within a day. A tag is only made once CI
-on the release commit is green.
+This sets the version in `library.properties`, `library.json` and `XEWE_CORE_VERSION*`
+(`src/XeWeCore/XeWeOs.h`) and creates `releases/3.0.1/notes.txt` (the GitHub Release text) and
+`testcard.md` (what was tested on which commits, attached to the release) when they are missing.
+Fill both in, then commit everything as one `prepare 3.0.1` commit and push it to `main`. Then,
+from that clean `main`, level with `origin/main`:
 
-Options: `--ci-timeout <min>` (default 30) bounds each CI wait; `--skip-ci` skips both CI gates,
-for emergencies only, with a loud warning. If a run stops after the release commit (CI red or timed
-out), fix the cause and run the same command again: with HEAD at `release 3.0.0` and no tag it
-resumes at stage 5 (pushing the commit first if that push failed); with the tag present but no
-GitHub Release it resumes at stage 6. The
+```sh
+scripts/release.sh 3.0.1 --dry-run   # prints every step and HEAD's CI state, changes nothing
+scripts/release.sh 3.0.1
+```
+
+It runs five numbered stages: 1 preflight (version, branch, clean tree, level with origin, tag free,
+release files committed, every version location already at 3.0.1, `gh`); 2 waits for the `tests`
+workflow on HEAD to pass; 3 host tests and the format check; 4 tags HEAD `3.0.1` (no `v`), pushes
+the tag and creates the GitHub Release; 5 prints where to check the Arduino Library Manager, which
+picks the tag up by itself, usually within a day. A tag is only made once CI on HEAD is green.
+
+Options: `--dry-run` (no writes; read-only `gh` queries only); `--ci-timeout <min>` (default 30)
+bounds the CI wait; `--skip-ci` skips the CI gate, for emergencies only, with a loud warning;
+`--prepare <version>` as above; `-h` prints the usage. If a run stops before the tag (CI red or
+timed out), fix the cause with a new commit and run it again. If the tag exists but the GitHub
+Release does not, the same command only creates the release, provided the tagged commit's files say
+the version; with tag and release both present it reports the version as already released. The
 [publish-arduino-library](https://github.com/xewe-labs/publish-arduino-library) tool remains
 available for its broader checks, but `scripts/release.sh` is the release path for core.
 

@@ -105,14 +105,17 @@ One change carries all four:
    changed signature; it is what module authors copy.
 
 Then run the host tests, compile the examples and lint. A version bump changes
-`library.properties`, `library.json` and `XEWE_CORE_VERSION*` together; `scripts/release.sh` does
-it in the release commit (X-14). Releasing is the owner's: `releases/<version>/notes.txt` and
-`testcard.md` committed first, then the one command `scripts/release.sh <version>` (try `--dry-run`
-first). It waits for the `tests` workflow on HEAD and again on the release commit, and tags only
-after that second run is green; `--ci-timeout <min>` (default 30) and `--skip-ci` (emergencies).
-Re-running the same command resumes at stage 5 (release commit, no tag) or stage 6 (tag, no GitHub
-Release). The publish-arduino-library tool remains available for its broader checks, but release.sh
-is the release path for core.
+`library.properties`, `library.json` and `XEWE_CORE_VERSION*` together; `scripts/release.sh
+--prepare <version>` does it (X-14). Releasing is the owner's, in two steps: `--prepare <version>`
+sets the version and creates the `releases/<version>/notes.txt` and `testcard.md` skeletons (no git
+change); the owner fills them and pushes it all as one `prepare <version>` commit. Then
+`scripts/release.sh <version>` (try `--dry-run` first) checks that HEAD is that pushed, clean `main`
+with every version location at `<version>`, waits for the `tests` workflow on HEAD, runs the host
+tests and the format check, and only then tags HEAD and creates the GitHub Release.
+`--ci-timeout <min>` (default 30), `--skip-ci` (emergencies). Re-running with a tag but no GitHub
+Release only creates the release (if the tagged commit's files say `<version>`); tag and release
+both present means already released. The publish-arduino-library tool remains available for its
+broader checks, but release.sh is the release path for core.
 
 ### Component notes
 
