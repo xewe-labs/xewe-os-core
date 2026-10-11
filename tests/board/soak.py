@@ -72,8 +72,8 @@ SLOW_EVERY = 60
 """A slow command replaces the normal pick every this many commands."""
 
 BOOT_LINE = re.compile(r"^ESP-ROM:|^rst:0x|System Setup Complete|\|\s+Rebooting\s+\||Name your device")
-UPTIME_RE = re.compile(r"^\s*- Uptime:\s+(\d+)d (\d+):(\d+):(\d+)")
-MEMORY_RE = re.compile(r"^\s*- Memory Usage: [\d.]+% \((\d+) / (\d+) bytes\)")
+UPTIME_RE = re.compile(r"^\s*Uptime:\s+(\d+)d (\d+):(\d+):(\d+)")
+MEMORY_RE = re.compile(r"^\s*Memory usage: [\d.]+% \((\d+) / (\d+) bytes\)")
 WIFI_CONNECTED_RE = re.compile(r"^Connected to ")
 TEST_HEAP_RE = re.compile(r"^free=(\d+) min_free=(\d+) largest=(\d+)")   # Testing.cpp `$test heap`
 TEST_UPTIME_RE = re.compile(r"^uptime_ms=(\d+)")                          # Testing.cpp `$test uptime`

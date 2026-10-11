@@ -18,7 +18,7 @@ import pytest
 from xewe.board.serialio import BOOT_READY, BOOT_UNPROVISIONED, wait_for_banner
 
 BOOT_TIMEOUT = 90.0
-MODULES = ["System", "Buttons", "Pins", "Wifi", "Time", "Scheduler", "Web Interface"]
+MODULES = ["System", "Buttons", "Pins", "Wifi", "Time", "Scheduler", "Web Interface"]  # core set; a project may add more
 
 pytestmark = pytest.mark.skipif(os.environ.get("XEWE_HWTEST_DESTRUCTIVE") != "1",
                                 reason="destructive (erases NVS, re-provisions); set XEWE_HWTEST_DESTRUCTIVE=1")
@@ -99,8 +99,8 @@ def test_factory_reset_then_reprovision(cli, xewe, log_dir, tmp_path):
     rows = {m[1]: (m[2], m[3]) for l in out
             if (m := re.fullmatch(r"\|\s*([^|\s][^|]*?)\s*\|\s*(Yes|No)\s*\|\s*(.*?)\s*\|", l))}
     print(f"status after re-provisioning: {rows}")
-    assert list(rows) == MODULES, rows
-    assert all(v[0] == "Yes" for v in rows.values()), rows
+    assert set(MODULES) <= set(rows), rows
+    assert all(rows[name][0] == "Yes" for name in MODULES), rows
     wifi = "\n".join(cli.run("$wifi status"))
     assert re.search(r"^Connected to ", wifi, re.M), wifi
     (logs / f"{time.strftime('%H%M')}-post-reprovision.log").write_text("\n".join(c.lines[start:]) + "\n")

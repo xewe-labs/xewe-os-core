@@ -42,7 +42,7 @@ def status_rows(lines: list[str]) -> dict[str, tuple[str, str]]:
     module carries the name and the Yes/No, so only those lines match."""
     return {m[1]: (m[2], m[3]) for l in lines if (m := STATUS_ROW_RX.fullmatch(l.strip()))}
 
-MEM_RX = re.compile(r"Memory Usage:\s+[\d.]+% \((\d+) / (\d+) bytes\)")
+MEM_RX = re.compile(r"Memory usage:\s+[\d.]+% \((\d+) / (\d+) bytes\)")
 UPTIME_RX = re.compile(r"Uptime:\s+(\d+)d (\d\d):(\d\d):(\d\d)")
 BUTTON_ROW_RX = re.compile(r"^\|\s*(\d+)\s*\|\s*(\d+)\s*\|")
 SCHEDULE_ID_RX = re.compile(r'"id"\s*:\s*(\d+)')

@@ -78,10 +78,10 @@ def test_quoted_args_with_spaces_and_escapes(cli):
     """Cli::tokenize: quoted arg keeps spaces, \\" becomes ", round-trips through $buttons add/status."""
     cli.clear_buttons()
     out = cli.run(f'$buttons add {cli.test_pin} "$system \\"a b\\" status" pullup on_press 50')
-    assert "Successfully added button mapping." in out
+    assert "Buttons: button mapping added" in out
     rows = [l for l in cli.run("$buttons status") if l.strip().startswith("| 0 ")]
     assert rows and '$system "a b" status' in rows[0], rows
-    assert "Successfully removed button mapping." in cli.run("$buttons remove 0")
+    assert "Buttons: button mapping removed" in cli.run("$buttons remove 0")
 
 
 def test_quoted_pipe_list_in_schedule(cli):

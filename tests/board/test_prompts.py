@@ -105,7 +105,7 @@ def test_disable_yes_then_enable(cli):
         assert "Buttons module disabled" in cli.run("$buttons status")
         # module commands stay registered while disabled; Buttons' add is silently ignored
         out = cli.run(f'$buttons add {cli.test_pin} "$system status" pullup on_press 50')
-        assert not any("Successfully added" in l for l in out), out
+        assert not any("button mapping added" in l for l in out), out
         out = [l.strip() for l in cli.run("$system status")]
         assert any(re.match(r"\|\s*Buttons\s*\|\s*No\s*\|", l) for l in out), out
     finally:

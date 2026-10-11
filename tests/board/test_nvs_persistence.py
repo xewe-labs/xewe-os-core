@@ -8,7 +8,7 @@ def test_button_and_schedule_survive_restart(cli):
     cli.clear_buttons()
     cli.clear_schedules()
     pin = cli.test_pin
-    assert "Successfully added button mapping." in cli.run(f'$buttons add {pin} "$pins status" pullup on_release 75')
+    assert "Buttons: button mapping added" in cli.run(f'$buttons add {pin} "$pins status" pullup on_release 75')
     assert "Scheduler: schedule saved" in cli.run('$schedule add 600 660 3 0000FF "$time status"')
     cli.restart()
     rows = [l.strip() for l in cli.run("$buttons status")]

@@ -1,7 +1,7 @@
 """Black-box tests of the System module (``System::status``, ``System::restart``, generic commands).
 
 ``$system status`` prints a table of modules only; heap and uptime come from
-``$web_interface status`` (``Memory Usage`` / ``Uptime``), the only commands that print them.
+``$web_interface status`` (``Memory usage`` / ``Uptime``), the only commands that print them.
 """
 
 import re

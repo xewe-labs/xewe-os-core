@@ -5,14 +5,14 @@ CYCLE = [   # {pin}: the free test GPIO (cli.test_pin; GPIO 4 is the fan's PWM p
     ("$wifi status", r"^Wifi module enabled"),
     ("$time status", r"^Time module enabled"),
     ("$pins status", r"^Pins module enabled"),
-    ("$buttons add {pin} \"$system status\" pullup on_press 50", r"^Successfully added button mapping\."),
+    ("$buttons add {pin} \"$system status\" pullup on_press 50", r"^Buttons: button mapping added"),
     ("$buttons status", r"^\|\s*0\s*\|\s*{pin}\s*\|"),
-    ("$buttons remove 0", r"^Successfully removed button mapping\."),
+    ("$buttons remove 0", r"^Buttons: button mapping removed"),
     ("$schedule add 1439 1439 6 00FF00 \"$system status\"", r"^Scheduler: schedule saved"),
     ("$schedule status", r'"id":0'),
     ("$schedule remove 0", r"^Scheduler: schedule removed"),
     ("$help pins", r"Pins Commands \[pins\]"),
-    ("$web_interface status", r"Memory Usage"),
+    ("$web_interface status", r"Memory usage"),
     ("$nope", r"^Error: Unknown command group 'nope'"),
 ]
 
