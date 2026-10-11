@@ -14,8 +14,8 @@ def test_status_table(cli):
     assert any(re.fullmatch(r"\|\s+System Status\s+\|", l) for l in out), out
     assert any(re.fullmatch(r"\|\s*Module Name\s*\|\s*Enabled\s*\|\s*Status\s*\|", l) for l in out)
     rows = cli.status_rows(out)
-    # System first, then the modules in registration order; extra modules (fan, led, mlx90614,
-    # the template's two) are allowed, the six the core tests drive must be there, enabled
+    # System first, then the modules in registration order; extra modules (the template's two,
+    # a product's own) are allowed, the six the core tests drive must be there, enabled
     assert list(rows)[0] == "System" and rows["System"] == ("Yes", "System OK"), rows
     required = [n for n in rows if n in cli.required_modules]
     assert required == cli.required_modules, rows

@@ -1,6 +1,6 @@
 """Short soak: 200 mixed commands with heap sampled every 20 (Cli, SerialPort, Nvs, modules)."""
 
-CYCLE = [   # {pin}: the free test GPIO (cli.test_pin; GPIO 4 is the fan's PWM pin on the 9-module S3 image)
+CYCLE = [   # {pin}: the free test GPIO (cli.test_pin)
     ("$system status", r"\|\s*Web Interface\s*\|"),
     ("$wifi status", r"^Wifi module enabled"),
     ("$time status", r"^Time module enabled"),

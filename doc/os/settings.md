@@ -173,8 +173,8 @@ version (raised only on an incompatible change); `core` is `XEWE_CORE_VERSION`.
 
 ### Extra rows: `schema_extra`
 
-Settings that are not plain table rows can still appear in the schema, for example led mode
-parameters, keyed per mode and set through their own command. Override `schema_extra` and write one row per
+Settings that are not plain table rows can still appear in the schema, for example the mode
+parameters of an LED strip module, keyed per mode and set through their own command. Override `schema_extra` and write one row per
 parameter; `SchemaOut::row` adds the braces and, under `$system schema`, the module field:
 
 ```cpp

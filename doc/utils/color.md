@@ -39,6 +39,6 @@ inline std::array<uint8_t, 3> rgb_to_hsv(const std::array<uint8_t, 3>& rgb);
 * No clamping is needed or performed: `uint8_t` inputs are already in range.
 * Both are `inline` and header-only; there is nothing to link.
 * **`hsv_to_rgb` is pinned bit for bit** by `tests/unit` (`color_hsv_to_rgb_pinned`: spot values
-  and a checksum over a 256 × 256 × 16 grid). Effect code, such as the led module's colour modes,
+  and a checksum over a 256 × 256 × 16 grid). Effect code, such as an LED strip's colour modes,
   calls it and depends on its exact output, so the arithmetic does not change (operation order
   included: an FMA-contracted build already gives different bytes).

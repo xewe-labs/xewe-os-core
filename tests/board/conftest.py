@@ -20,9 +20,7 @@ from xewe.board.serialio import BOOT_READY, Console, wait_for_banner
 
 BOOT_TIMEOUT = 90.0
 QUIET = 0.6
-# A GPIO no module claims. Not 4: on the S3 the fan module claims PWM 4/6 and tach 5/7 at boot
-# (a claim of 4 prints `! GPIO 4 already claimed by fan, refused for buttons`); mlx90614 holds 8/9,
-# led 48.
+# A GPIO no module claims.
 TEST_PIN = int(os.environ.get("XEWE_TEST_BUTTONS_PIN", "14"))
 # The image carries the `$test` hooks (an extra `test` CLI group).
 HOOKS = "XEWE_TESTING=1" in os.environ.get("XEWE_HWTEST_DEFINES", "").split()

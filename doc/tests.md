@@ -11,10 +11,11 @@ not compiled by the Arduino builder.
   shims in `tests/unit/shim/` (Arduino, FreeRTOS, ESP log, an in-memory NVS).
 - It builds and runs everything twice: at `-std=c++17`, which exercises the `xewe::span` fallback,
   and at `-std=gnu++2b`, which is what the ESP32 core uses. Both use `-fno-exceptions`.
-- The FlexData tests need ArduinoJson. Set `ARDUINOJSON_SRC` to its `src/` directory. Unset, the
-  script uses a copy in a sibling project's `build/`. Without ArduinoJson it prints a notice and skips them.
+- The FlexData tests need ArduinoJson. Set `ARDUINOJSON_SRC` to its `src/` directory, for example
+  after `git clone --depth 1 --branch v7.4.3 https://github.com/bblanchon/ArduinoJson` (the tag CI
+  uses). Unset, the script stops with that hint.
 - The Nvs and Settings tests need C++20 and ArduinoJson, so they run in the `gnu++2b` pass only.
-  That pass runs 118 tests, the `c++17` pass 94.
+  That pass runs 121 tests, the `c++17` pass 96.
 
 The last line is `== all unit checks passed`; any failure stops the script with a non-zero exit.
 
@@ -63,8 +64,7 @@ Preconditions:
 - The board is provisioned, and Wi-Fi is connected.
 - The modules buttons, pins, wifi, time, scheduler and web-interface are enabled. Other modules
   may be present: the status and help tests check order and the required set, not an exact list.
-- GPIO `XEWE_TEST_BUTTONS_PIN` (default 14) is free. Do not use 4 on an S3 image with the fan
-  module: the fan claims GPIO 4-7 at boot.
+- GPIO `XEWE_TEST_BUTTONS_PIN` (default 14) is free.
 
 The tests restart the board several times (`$system restart`, `$buttons disable`/`enable`) and
 remove **all** button mappings and schedules they find. They never run `$system reset` or touch
