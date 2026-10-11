@@ -19,7 +19,9 @@ UID = r"^uid64 [0-9a-fA-F]{16}"
 
 def _dump(cli, log_dir, name):
     if log_dir is not None:
-        (log_dir / f"{time.strftime('%H%M')}-{name}.log").write_text("\n".join(cli.c.lines) + "\n")
+        (log_dir / f"{time.strftime('%H%M')}-{name}.log").write_text(
+            "\n".join(cli.c.lines) + "\n"
+        )
 
 
 def test_flood_20_lines_one_write(cli, log_dir):
@@ -30,7 +32,9 @@ def test_flood_20_lines_one_write(cli, log_dir):
     time.sleep(3)
     out = cli.c.lines[start:] + cli.settle(1.0)
     text = "\n".join(out)
-    ran = [int(n) for n in re.findall(r"Error: Unknown command group 'flood(\d\d)'", text)]
+    ran = [
+        int(n) for n in re.findall(r"Error: Unknown command group 'flood(\d\d)'", text)
+    ]
     dropped = text.count(OVERFLOW)
     print(f"flood: ran {ran}, overflow notices {dropped}")
     _dump(cli, log_dir, "flood20")
@@ -65,7 +69,7 @@ def test_1k_printable_garbage_then_newline_then_command(cli, log_dir):
     command: the over-long line is dropped whole (one ``! Input line too long``
     message, nothing of it executes, no split lines) and the valid command runs."""
     rng = random.Random(1008)
-    alphabet = "".join(ch for ch in string.printable if ch not in "$\"\\\r\n\t\x0b\x0c")
+    alphabet = "".join(ch for ch in string.printable if ch not in '$"\\\r\n\t\x0b\x0c')
     junk = "".join(rng.choice(alphabet) for _ in range(1024))
     start = len(cli.c.lines)
     cli.write(junk.encode())
@@ -75,21 +79,33 @@ def test_1k_printable_garbage_then_newline_then_command(cli, log_dir):
     cli.c.send("$system uid")
     m = cli.c.expect(UID, 10)
     text = "\n".join(cli.c.lines[start:] + cli.settle(0.8))
-    too_long, rejected, dropped = text.count(TOO_LONG), text.count(NOT_CMD), text.count(OVERFLOW)
-    print(f"1k garbage: too long {too_long}, rejected {rejected}, overflow {dropped}; command: {m[0]}")
+    too_long, rejected, dropped = (
+        text.count(TOO_LONG),
+        text.count(NOT_CMD),
+        text.count(OVERFLOW),
+    )
+    print(
+        f"1k garbage: too long {too_long}, rejected {rejected}, overflow {dropped}; command: {m[0]}"
+    )
     _dump(cli, log_dir, "garbage1k")
     assert (too_long, rejected, dropped) == (1, 0, 0)
     # garbage, newline and command in a single write: same result, the command still runs.
     # The write must fit the 1024-byte RX buffer (SerialPortConfig::rx_buffer_size): the ESP32
     # HWCDC driver has no flow control and drops whatever does not fit its RX queue
     # (HWCDC.cpp: the ISR stops at a full xQueueSendFromISR). 1024 junk + 13 bytes lost the
-    # trailing "\n$system uid\n" on hardware (2026-10-09 hw-verify); 1000 junk + 13 = 1013 fits.
+    # trailing "\n$system uid\n" on hardware; 1000 junk + 13 = 1013 fits.
     start = len(cli.c.lines)
     cli.write(junk[:1000].encode() + b"\n$system uid\n")
     cli.c.expect(UID, 10)
     text = "\n".join(cli.c.lines[start:] + cli.settle(0.8))
-    too_long, rejected, dropped = text.count(TOO_LONG), text.count(NOT_CMD), text.count(OVERFLOW)
-    print(f"1k garbage + command in one write: too long {too_long}, rejected {rejected}, overflow {dropped}")
+    too_long, rejected, dropped = (
+        text.count(TOO_LONG),
+        text.count(NOT_CMD),
+        text.count(OVERFLOW),
+    )
+    print(
+        f"1k garbage + command in one write: too long {too_long}, rejected {rejected}, overflow {dropped}"
+    )
     _dump(cli, log_dir, "garbage1k-onewrite")
     assert (too_long, rejected, dropped) == (1, 0, 0)
 
@@ -97,7 +113,7 @@ def test_1k_printable_garbage_then_newline_then_command(cli, log_dir):
 def test_254_chars_is_a_line_255_is_dropped(cli):
     """Boundary: a 254-char line still executes; 255 chars is dropped whole."""
     cmd = "$system uid"
-    ok = cmd + " " * (254 - len(cmd))           # trailing spaces are trimmed by the CLI
+    ok = cmd + " " * (254 - len(cmd))  # trailing spaces are trimmed by the CLI
     cli.write(ok.encode() + b"\n")
     cli.c.expect(UID, 10)
     start = len(cli.c.lines)

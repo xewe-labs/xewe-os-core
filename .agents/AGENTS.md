@@ -70,14 +70,17 @@ this file is silent.
 ### Check your work
 
 ```bash
-tests/unit/run.sh        # host tests: c++17 (94 tests) and gnu++2b (118 tests), -fno-exceptions; expect "0 failed checks"
+tests/unit/run.sh        # host tests: c++17 (96 tests) and gnu++2b (121 tests), -fno-exceptions; expect "0 failed checks"
 ```
 
 - **Host tests** build the probes and `tests/unit/test/*.cpp` against the shims in
   `tests/unit/shim/` (Arduino, FreeRTOS, NVS in memory, ESP log). FlexData and Settings tests need
-  ArduinoJson: `ARDUINOJSON_SRC=<path to ArduinoJson/src>`, else the shared toolchain copy.
-- **Examples** compile for esp32c3, esp32c6 and esp32s3. With plain arduino-cli:
-  `arduino-cli compile --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc examples/01_Hello`.
+  ArduinoJson: `ARDUINOJSON_SRC=<path to ArduinoJson/src>` (a clone of bblanchon/ArduinoJson at v7.4.3, the tag
+  CI uses); `run.sh` stops when it is unset.
+- **Examples** compile for esp32c3, esp32c6 and esp32s3 (CI: the `examples` job). With plain
+  arduino-cli: `arduino-cli compile --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc --library . examples/01_Hello`.
+- **Format:** `xewe --project . format --check` (clang-format with the tools' style, ruff for the
+  Python). CI blocks on it.
 - **Lint:** `arduino-lint --compliance strict --library-manager update .` Run it from a clone
   whose folder name is a valid library name; in a working copy only LS003 (folder name) may fail.
 - **Board tests** (`tests/board`) run only through the `xewe-os-tools` pytest plugin from an xewe
@@ -102,8 +105,11 @@ One change carries all four:
    changed signature; it is what module authors copy.
 
 Then run the host tests, compile the examples and lint. A version bump changes
-`library.properties`, `library.json` and `XEWE_CORE_VERSION*` together; releases go through the
-publish tool (X-14).
+`library.properties`, `library.json` and `XEWE_CORE_VERSION*` together; `scripts/release.sh` does
+it in the release commit (X-14). Releasing is the owner's: `releases/<version>/notes.txt` and
+`testcard.md` committed first, then `scripts/release.sh <version>` (try `--dry-run` first). The
+publish-arduino-library tool remains available for its broader checks, but release.sh is the release
+path for core.
 
 ### Component notes
 

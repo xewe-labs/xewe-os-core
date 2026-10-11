@@ -119,10 +119,11 @@ as `X-NN`. They are not part of the WAX reference.
 - **X-13 Docs are part of the change.** A public function, lifecycle step, command, prompt, NVS key
   or build define that is added or changed updates its page in `doc/` in the same change. `doc/`
   describes current behaviour only: no history, no changelog, no version tags.
-- **X-14 Release through the publish tool.** Versions and releases go through
-  `publish-arduino-library` (`publish.py check`, `publish.py bump <version>`,
-  `publish.py release`), only when the human asks. Version strings in `library.properties`, `library.json` and `XEWE_CORE_VERSION*` move
-  together.
+- **X-14 Release through scripts/release.sh.** Versions and releases go through
+  `scripts/release.sh <version>` (after `releases/<version>/notes.txt` and `testcard.md` are
+  committed), only when the human asks. Version strings in `library.properties`, `library.json` and
+  `XEWE_CORE_VERSION*` move together; the script bumps all three. `publish-arduino-library` stays
+  available for its broader checks.
 - **X-15 Examples teach.** `examples/02_MyModule` shows every module hook and the current
   signatures; `01_Hello` and `02_MyModule` must never include `<XeWeBuildInfo.h>` (a plain IDE
   build has none).

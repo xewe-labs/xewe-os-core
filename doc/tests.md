@@ -19,6 +19,26 @@ not compiled by the Arduino builder.
 
 The last line is `== all unit checks passed`; any failure stops the script with a non-zero exit.
 
+## Example builds
+
+Every `examples/*/*.ino` compiles against this checkout for ESP32-C3, C6 and S3, with the
+arduino-cli and esp32 core versions the tools pin (`src/xewe/env/pins.py`) and the tools' FQBNs
+(`src/xewe/build/chips.py`), ArduinoJson from the Library Manager:
+
+```sh
+FQBN=esp32:esp32:esp32c3:CDCOnBoot=cdc,CPUFreq=160,DebugLevel=none,EraseFlash=all,FlashMode=qio,FlashSize=4M,PartitionScheme=no_ota,UploadSpeed=921600
+for ino in examples/*/*.ino; do arduino-cli compile --fqbn "$FQBN" --warnings default --library . "$ino"; done
+```
+
+Repeat with `esp32c6` and `esp32s3`. CI does the same, one job per chip.
+
+## CI
+
+`.github/workflows/tests.yml` calls the tools' `xewe-core-tests.yml` on every push and pull request.
+Every job blocks: the host unit tests, arduino-lint, the example builds (c3, c6, s3),
+`xewe format --check` (clang-format with the tools' style, ruff for the Python) and
+`xewe brand-lint`.
+
 ## Board tests
 
 The pytest files in `tests/board/` run on a real board through the xewe-os-tools pytest plugin

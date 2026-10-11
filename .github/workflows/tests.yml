@@ -1,5 +1,5 @@
-# tests.yml: host unit tests and arduino-lint for every push and PR.
-# Releases stay with publish-arduino-library (un-prefixed X.Y.Z tags); nothing here publishes.
+# tests.yml: host unit tests, arduino-lint, example builds, format and brand-lint for every push and PR.
+# Nothing here publishes: releases are made with scripts/release.sh (un-prefixed X.Y.Z tags).
 name: tests
 on:
   push:

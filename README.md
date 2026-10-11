@@ -40,6 +40,23 @@ each; see [doc/examples.md](doc/examples.md).
 every public type, command and stored key. Building and testing the library itself:
 [doc/tests.md](doc/tests.md).
 
+## Releasing
+
+Maintainers only. Each release has a folder `releases/<version>/` with `notes.txt` (the GitHub
+Release text) and `testcard.md` (what was tested on which commits, attached to the release). Commit
+that folder first; then, from a clean `main` that is level with `origin/main`:
+
+```sh
+scripts/release.sh 3.0.0 --dry-run   # prints every step, changes nothing
+scripts/release.sh 3.0.0
+```
+
+It checks the version, the tree, the tag and `gh`, runs the host tests and the format check, commits
+the version bump alone (`release 3.0.0`), tags `3.0.0` (no `v`), pushes, and creates the GitHub
+Release. The Arduino Library Manager picks the tag up by itself, usually within a day. The
+[publish-arduino-library](https://github.com/xewe-labs/publish-arduino-library) tool remains
+available for its broader checks, but `scripts/release.sh` is the release path for core.
+
 ## License
 
 GPL-3.0-only. See [LICENSE.txt](LICENSE.txt).

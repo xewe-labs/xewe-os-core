@@ -35,7 +35,9 @@
     "exclude": [
       ".github",
       "tests",
-      ".agents"
+      ".agents",
+      "releases",
+      "scripts"
     ]
   }
 }
