@@ -119,11 +119,14 @@ as `X-NN`. They are not part of the WAX reference.
 - **X-13 Docs are part of the change.** A public function, lifecycle step, command, prompt, NVS key
   or build define that is added or changed updates its page in `doc/` in the same change. `doc/`
   describes current behaviour only: no history, no changelog, no version tags.
-- **X-14 Release through scripts/release.sh.** Versions and releases go through
+- **X-14 Release through scripts/release.sh.** Versions and releases go through the one command
   `scripts/release.sh <version>` (after `releases/<version>/notes.txt` and `testcard.md` are
-  committed), only when the human asks. Version strings in `library.properties`, `library.json` and
-  `XEWE_CORE_VERSION*` move together; the script bumps all three. `publish-arduino-library` stays
-  available for its broader checks.
+  committed), only when the human asks; there is no separate "wait for CI" step. The script gates on
+  the `tests` workflow for HEAD and for the release commit (`--ci-timeout <min>`, default 30;
+  `--skip-ci` for emergencies only) and never tags a commit whose CI is not green. Re-running it
+  resumes at stage 5 (release commit, no tag) or 6 (tag, no GitHub Release). Version strings in
+  `library.properties`, `library.json` and `XEWE_CORE_VERSION*` move together; the script bumps all
+  three. `publish-arduino-library` stays available for its broader checks.
 - **X-15 Examples teach.** `examples/02_MyModule` shows every module hook and the current
   signatures; `01_Hello` and `02_MyModule` must never include `<XeWeBuildInfo.h>` (a plain IDE
   build has none).

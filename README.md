@@ -44,16 +44,26 @@ every public type, command and stored key. Building and testing the library itse
 
 Maintainers only. Each release has a folder `releases/<version>/` with `notes.txt` (the GitHub
 Release text) and `testcard.md` (what was tested on which commits, attached to the release). Commit
-that folder first; then, from a clean `main` that is level with `origin/main`:
+that folder first; then, from a clean `main` that is level with `origin/main`, one command does the
+whole release:
 
 ```sh
-scripts/release.sh 3.0.0 --dry-run   # prints every step, changes nothing
+scripts/release.sh 3.0.0 --dry-run   # prints every step and HEAD's CI state, changes nothing
 scripts/release.sh 3.0.0
 ```
 
-It checks the version, the tree, the tag and `gh`, runs the host tests and the format check, commits
-the version bump alone (`release 3.0.0`), tags `3.0.0` (no `v`), pushes, and creates the GitHub
-Release. The Arduino Library Manager picks the tag up by itself, usually within a day. The
+It runs seven numbered stages: 1 preflight (version, release files, tree, branch, tag, `gh`); 2 waits
+for the `tests` workflow on HEAD to pass; 3 host tests and the format check; 4 commits the version
+bump alone (`release 3.0.0`) and pushes `main`; 5 waits for `tests` on that release commit; 6 tags
+`3.0.0` (no `v`), pushes the tag and creates the GitHub Release; 7 prints where to check the Arduino
+Library Manager, which picks the tag up by itself, usually within a day. A tag is only made once CI
+on the release commit is green.
+
+Options: `--ci-timeout <min>` (default 30) bounds each CI wait; `--skip-ci` skips both CI gates,
+for emergencies only, with a loud warning. If a run stops after the release commit (CI red or timed
+out), fix the cause and run the same command again: with HEAD at `release 3.0.0` and no tag it
+resumes at stage 5 (pushing the commit first if that push failed); with the tag present but no
+GitHub Release it resumes at stage 6. The
 [publish-arduino-library](https://github.com/xewe-labs/publish-arduino-library) tool remains
 available for its broader checks, but `scripts/release.sh` is the release path for core.
 

@@ -107,9 +107,12 @@ One change carries all four:
 Then run the host tests, compile the examples and lint. A version bump changes
 `library.properties`, `library.json` and `XEWE_CORE_VERSION*` together; `scripts/release.sh` does
 it in the release commit (X-14). Releasing is the owner's: `releases/<version>/notes.txt` and
-`testcard.md` committed first, then `scripts/release.sh <version>` (try `--dry-run` first). The
-publish-arduino-library tool remains available for its broader checks, but release.sh is the release
-path for core.
+`testcard.md` committed first, then the one command `scripts/release.sh <version>` (try `--dry-run`
+first). It waits for the `tests` workflow on HEAD and again on the release commit, and tags only
+after that second run is green; `--ci-timeout <min>` (default 30) and `--skip-ci` (emergencies).
+Re-running the same command resumes at stage 5 (release commit, no tag) or stage 6 (tag, no GitHub
+Release). The publish-arduino-library tool remains available for its broader checks, but release.sh
+is the release path for core.
 
 ### Component notes
 
