@@ -3,4 +3,3 @@
 .vscode/
 build/
 __pycache__/
-/run.sh

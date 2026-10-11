@@ -77,8 +77,7 @@ tests/unit/run.sh        # host tests: c++17 (94 tests) and gnu++2b (118 tests),
   `tests/unit/shim/` (Arduino, FreeRTOS, NVS in memory, ESP log). FlexData and Settings tests need
   ArduinoJson: `ARDUINOJSON_SRC=<path to ArduinoJson/src>`, else the shared toolchain copy.
 - **Examples** compile for esp32c3, esp32c6 and esp32s3. With plain arduino-cli:
-  `arduino-cli compile --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc examples/01_Hello`. With the tools:
-  `./setup.sh` once, then `./run.sh --examples --chip <c3|c6|s3>` or `--all-chips`.
+  `arduino-cli compile --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc examples/01_Hello`.
 - **Lint:** `arduino-lint --compliance strict --library-manager update .` Run it from a clone
   whose folder name is a valid library name; in a working copy only LS003 (folder name) may fail.
 - **Board tests** (`tests/board`) run only through the `xewe-os-tools` pytest plugin from an xewe

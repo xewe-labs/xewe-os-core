@@ -3,36 +3,16 @@
 XeWeCore has three kinds of checks: host unit tests, example builds and board tests. `tests/` is
 not compiled by the Arduino builder.
 
-## Setup and run
-
-```sh
-./setup.sh                  # once, and after a tools update
-./run.sh --chip c3          # host unit tests, then every example for one chip
-./run.sh --all-chips        # the same for ESP32-C3, C6 and S3
-```
-
-`setup.sh` installs xewe-os-tools into `build/tools/.venv` and runs `xewe setup`. That installs
-arduino-cli and the esp32 core once per machine, puts the libraries the examples need (ArduinoJson)
-in `build/`, and writes `run.sh`. `run.sh` is generated and not committed.
-
-The tools come from `XEWE_TOOLS_SOURCE` (a local xewe-os-tools directory) if it is set, else from
-GitHub at `XEWE_TOOLS_REF`: a tag, a branch, a commit SHA or `latest` (the default branch; the
-default).
-
-`run.sh` calls `xewe check`, which takes `--unit`, `--examples`, and `--chip C` or `--all-chips`.
-Run `build/tools/.venv/bin/python -m xewe check --help` for the full list.
-
 ## Host unit tests
 
-`tests/unit/run.sh` needs only a host `g++` and bash. It runs on its own as well as from `run.sh`.
+`tests/unit/run.sh` needs only a host `g++` and bash.
 
 - It compiles the probes in `tests/unit/probe/` and the tests in `tests/unit/test/` against the
   shims in `tests/unit/shim/` (Arduino, FreeRTOS, ESP log, an in-memory NVS).
 - It builds and runs everything twice: at `-std=c++17`, which exercises the `xewe::span` fallback,
   and at `-std=gnu++2b`, which is what the ESP32 core uses. Both use `-fno-exceptions`.
 - The FlexData tests need ArduinoJson. Set `ARDUINOJSON_SRC` to its `src/` directory. Unset, the
-  script uses `build/libraries/ArduinoJson/src` from `setup.sh`, then a copy in a sibling
-  project's `build/`. Without ArduinoJson it prints a notice and skips them.
+  script uses a copy in a sibling project's `build/`. Without ArduinoJson it prints a notice and skips them.
 - The Nvs and Settings tests need C++20 and ArduinoJson, so they run in the `gnu++2b` pass only.
   That pass runs 118 tests, the `c++17` pass 94.
 
@@ -41,7 +21,7 @@ The last line is `== all unit checks passed`; any failure stops the script with 
 ## Board tests
 
 The pytest files in `tests/board/` run on a real board through the xewe-os-tools pytest plugin
-(fixtures `compiled`, `firmware`, `serial`). They are not part of `run.sh`.
+(fixtures `compiled`, `firmware`, `serial`).
 
 | File | Covers |
 |---|---|

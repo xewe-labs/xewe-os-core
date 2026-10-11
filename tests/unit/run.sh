@@ -19,12 +19,11 @@ trap 'rm -rf "$OUT"' EXIT
 FLAGS=(-Wall -Wextra -fno-exceptions -I "$HERE/shim" -I "$SRC")
 LIB_SRCS=("$SRC/XeWeCore/Serial.cpp" "$SRC/XeWeCore/Cli.cpp")
 
-# FlexData tests need ArduinoJson (header-only): ARDUINOJSON_SRC, else the copy ./setup.sh put in
-# build/libraries, else one a sibling project downloaded (../<project>/build/libraries), else the
-# shared toolchain copy.
+# FlexData tests need ArduinoJson (header-only): ARDUINOJSON_SRC, else one a sibling project
+# downloaded (../<project>/build/libraries), else the shared toolchain copy.
 if [ -z "${ARDUINOJSON_SRC:-}" ]; then
     ARDUINOJSON_SRC="$HERE/../../../../.toolchain/user/libraries/ArduinoJson/src"
-    for candidate in "$HERE"/../../build/libraries/ArduinoJson/src "$HERE"/../../../*/build/libraries/ArduinoJson/src; do
+    for candidate in "$HERE"/../../../*/build/libraries/ArduinoJson/src; do
         if [ -f "$candidate/ArduinoJson.h" ]; then
             ARDUINOJSON_SRC="$candidate"
             break
