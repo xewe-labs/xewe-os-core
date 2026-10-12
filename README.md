@@ -70,9 +70,9 @@ bounds the CI wait; `--skip-ci` skips the CI gate, for emergencies only, with a 
 `--prepare <version>` as above; `-h` prints the usage. If a run stops before the tag (CI red or
 timed out), fix the cause with a new commit and run it again. If the tag exists but the GitHub
 Release does not, the same command only creates the release, provided the tagged commit's files say
-the version; with tag and release both present it reports the version as already released. The
-[publish-arduino-library](https://github.com/xewe-labs/publish-arduino-library) tool remains
-available for its broader checks, but `scripts/release.sh` is the release path for core.
+the version; with tag and release both present it reports the version as already released. What
+keeps the library valid for the Library Manager (layout, `library.properties`, names) is in
+[doc/library-rules.md](doc/library-rules.md).
 
 ## License
 

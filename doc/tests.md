@@ -35,7 +35,8 @@ Repeat with `esp32c6` and `esp32s3`. CI does the same, one job per chip.
 ## CI
 
 `.github/workflows/tests.yml` calls the tools' `xewe-core-tests.yml` on every push and pull request.
-Every job blocks: the host unit tests, arduino-lint, the example builds (c3, c6, s3),
+Every job blocks: the host unit tests, arduino-lint (`--compliance strict --library-manager update`,
+[library-rules.md](library-rules.md)), the example builds (c3, c6, s3),
 `xewe format --check` (clang-format with the tools' style, ruff for the Python) and
 `xewe brand-lint`.
 

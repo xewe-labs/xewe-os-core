@@ -81,5 +81,7 @@ always *your own* module.
 
 * [Examples](examples.md): what each sketch in `examples/` shows.
 * [Tests](tests.md): the host unit tests and the board tests.
+* [Library rules](library-rules.md): what keeps XeWeCore a valid Arduino library (layout,
+  `library.properties`, `library.json`, names).
 * Rules for changing the core (layout, include direction, what a change must carry):
   [`.agents/AGENTS.md`](../.agents/AGENTS.md).

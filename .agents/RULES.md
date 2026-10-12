@@ -127,8 +127,8 @@ as `X-NN`. They are not part of the WAX reference.
   gates on the `tests` workflow for HEAD (`--ci-timeout <min>`, default 30; `--skip-ci` for
   emergencies only), runs the local checks, and never tags a commit whose CI is not green; there is
   no separate "wait for CI" step. Re-running it with a tag but no GitHub Release only creates the
-  release; tag and release both present means already released. `publish-arduino-library` stays
-  available for its broader checks.
+  release; tag and release both present means already released. The Library Manager rules are
+  `doc/library-rules.md`.
 - **X-15 Examples teach.** `examples/02_MyModule` shows every module hook and the current
   signatures; `01_Hello` and `02_MyModule` must never include `<XeWeBuildInfo.h>` (a plain IDE
   build has none).

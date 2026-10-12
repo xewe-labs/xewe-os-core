@@ -114,8 +114,8 @@ with every version location at `<version>`, waits for the `tests` workflow on HE
 tests and the format check, and only then tags HEAD and creates the GitHub Release.
 `--ci-timeout <min>` (default 30), `--skip-ci` (emergencies). Re-running with a tag but no GitHub
 Release only creates the release (if the tagged commit's files say `<version>`); tag and release
-both present means already released. The publish-arduino-library tool remains available for its
-broader checks, but release.sh is the release path for core.
+both present means already released. The Library Manager rules (layout, `library.properties`,
+`library.json`, names) are `doc/library-rules.md`.
 
 ### Component notes
 
