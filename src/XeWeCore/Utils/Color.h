@@ -5,6 +5,8 @@
 // Host-includable: the standard library only, no <Arduino.h> (tests/unit/run.sh compiles it
 // without the Arduino shim). Keep it that way so pure effect code can include it.
 //
+// parse_hex_color / to_hex_color are also reachable as xewe::str:: through String.h.
+//
 // hsv_to_rgb is pinned bit for bit by tests/unit (test_utils.cpp, color_hsv_to_rgb_pinned):
 // effect code depends on its exact output, so the arithmetic and its operation order stay as they
 // are.
@@ -13,6 +15,8 @@
 #include <array>
 #include <algorithm> // for std::max, std::min
 #include <cstdint>
+#include <cstdio>
+#include <string>
 
 namespace xewe::color {
 
@@ -108,5 +112,42 @@ inline std::array<uint8_t, 3> rgb_to_hsv(const std::array<uint8_t, 3>& rgb) {
     uint8_t v = static_cast<uint8_t>(v_f * 255.0f);
 
     return {h, s, v};
+}
+
+// --------------------------------------------------------------------------------------
+// Hex colour strings: "rrggbb" or "#rrggbb", exactly six hex digits (either case)
+// --------------------------------------------------------------------------------------
+
+// true and r/g/b set on success; false and r/g/b untouched on anything else
+// ("#ff", "ff00zz", 7 digits, "", "0xff0000", spaces, a sign)
+inline bool parse_hex_color(const std::string& s, uint8_t& r, uint8_t& g, uint8_t& b) {
+    const size_t start = (!s.empty() && s[0] == '#') ? 1 : 0;
+    if (s.size() - start != 6)
+        return false;
+    uint8_t v[3] = {};
+    for (size_t i = 0; i < 6; ++i) {
+        const char c = s[start + i];
+        uint8_t d;
+        if (c >= '0' && c <= '9')
+            d = static_cast<uint8_t>(c - '0');
+        else if (c >= 'a' && c <= 'f')
+            d = static_cast<uint8_t>(c - 'a' + 10);
+        else if (c >= 'A' && c <= 'F')
+            d = static_cast<uint8_t>(c - 'A' + 10);
+        else
+            return false;
+        v[i / 2] = static_cast<uint8_t>((v[i / 2] << 4) | d);
+    }
+    r = v[0];
+    g = v[1];
+    b = v[2];
+    return true;
+}
+
+// "#RRGGBB", upper case like str::to_hex (parse_hex_color accepts either case)
+inline std::string to_hex_color(uint8_t r, uint8_t g, uint8_t b) {
+    char buf[8];
+    snprintf(buf, sizeof(buf), "#%02X%02X%02X", r, g, b);
+    return buf;
 }
 } // namespace xewe::color

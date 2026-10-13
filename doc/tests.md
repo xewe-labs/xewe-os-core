@@ -15,7 +15,7 @@ not compiled by the Arduino builder.
   after `git clone --depth 1 --branch v7.4.3 https://github.com/bblanchon/ArduinoJson` (the tag CI
   uses). Unset, the script stops with that hint.
 - The Nvs and Settings tests need C++20 and ArduinoJson, so they run in the `gnu++2b` pass only.
-  That pass runs 121 tests, the `c++17` pass 96.
+  That pass runs 123 tests, the `c++17` pass 98.
 
 The last line is `== all unit checks passed`; any failure stops the script with a non-zero exit.
 

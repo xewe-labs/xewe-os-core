@@ -195,6 +195,32 @@ TEST(hex_color_format_round_trip) {
     CHECK(r == 0x0A && g == 0xB0 && b == 0xC3);
 }
 
+// the hex helpers live in Color.h (xewe::color); String.h keeps the xewe::str names as
+// using-declarations, so both names are the same function
+TEST(hex_color_str_names_alias_color) {
+    CHECK(&xewe::str::parse_hex_color == &xewe::color::parse_hex_color);
+    CHECK(&xewe::str::to_hex_color == &xewe::color::to_hex_color);
+}
+
+TEST(hex_color_both_names_same_results) {
+    const char* inputs[] = {"ff8000", "#12abEF", "#000000", "FFFFFF", "#0a0B0c", "", "#", "#ff",
+        "ff", "ff00zz", "#ff00001", "fff", "##00ffff", "0xff00", "-12345", " 12345", "#12345G",
+        "red", "ff 000"};
+    for (const char* in : inputs) {
+        uint8_t r1 = 7, g1 = 8, b1 = 9, r2 = 7, g2 = 8, b2 = 9;
+        const bool ok1 = xewe::str::parse_hex_color(in, r1, g1, b1);
+        const bool ok2 = xewe::color::parse_hex_color(in, r2, g2, b2);
+        if (ok1 != ok2 || r1 != r2 || g1 != g2 || b1 != b2)
+            host_test::fail(__FILE__, __LINE__, std::string("names differ on \"") + in + "\"");
+    }
+    for (int v = 0; v < 256; v += 15) {
+        const auto c = static_cast<uint8_t>(v);
+        const auto d = static_cast<uint8_t>(255 - v);
+        CHECK_EQ(xewe::str::to_hex_color(c, d, c), xewe::color::to_hex_color(c, d, c));
+    }
+    CHECK_EQ(xewe::color::to_hex_color(0x0A, 0xB0, 0xC3), std::string("#0AB0C3"));
+}
+
 TEST(async_timer) {
     host::set_millis(1000);
     xewe::AsyncTimer<double> t(100, 0.0, 10.0);
