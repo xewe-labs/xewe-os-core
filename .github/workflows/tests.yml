@@ -1,4 +1,6 @@
-# tests.yml: host unit tests, arduino-lint, example builds, format and brand-lint for every push and PR.
+# tests.yml: host unit tests, arduino-lint, example builds, format and brand-lint for every push and PR,
+# and on a prepare commit the release-card check (the card job compares releases/<v>/release_card.md
+# with this run's host tests). The workflow and tools_ref name the same tools tag as the card.
 # Nothing here publishes: releases are made with scripts/release.sh (un-prefixed X.Y.Z tags).
 name: tests
 on:
@@ -13,4 +15,6 @@ concurrency:
   cancel-in-progress: true
 jobs:
   core:
-    uses: xewe-labs/xewe-os-tools/.github/workflows/xewe-core-tests.yml@main
+    uses: xewe-labs/xewe-os-tools/.github/workflows/xewe-core-tests.yml@3.1.0
+    with:
+      tools_ref: "3.1.0"

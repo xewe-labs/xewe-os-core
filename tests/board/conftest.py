@@ -180,17 +180,26 @@ DEFINES_ENV = "XEWE_HWTEST_DEFINES"
 
 @pytest.fixture(scope="session")
 def compiled(xewe):
-    """The plugin's ``compiled``, plus ``--define`` values from ``$XEWE_HWTEST_DEFINES``.
+    """The plugin's ``compiled``, with the defines from ``$XEWE_HWTEST_DEFINES`` when it is set.
 
     Space-separated ``KEY=VALUE`` items, e.g. ``XEWE_HWTEST_DEFINES=XEWE_TESTING=1`` builds the
-    ``$test`` hooks in (test_hooks_*.py). Unset: identical to the plugin's fixture.
+    ``$test`` hooks in (test_hooks_*.py). Unset: the plugin's defines (``xewe test --define`` or
+    ``XEWE_TEST_DEFINES``). As in the plugin, an image that is up to date for those defines is
+    reused (so a prior ``xewe flash`` with the same defines and this session test the same image),
+    and ``xewe.binary`` is set, which gives the JUnit rows their firmware sha256 (release card).
     """
     from xewe.build import compile as build
+    from xewe.build import flash
     from xewe.report import XeWeError
 
     p = xewe.project()
     try:
-        defines = build.parse_defines(os.environ.get(DEFINES_ENV, "").split())
+        items = os.environ.get(DEFINES_ENV, "").split()
+        defines = build.parse_defines(items) if items else xewe.defines
+        binary, fresh = flash.built_image(p, xewe.lock, xewe.chip, defines)
+        if fresh:
+            xewe.binary = binary
+            return binary
         res = build.build_chip(p, xewe.lock, xewe.chip, defines)
     except XeWeError as exc:
         pytest.fail(f"build failed for {xewe.chip}: {exc}", pytrace=False)
@@ -199,4 +208,5 @@ def compiled(xewe):
             f"build failed for {xewe.chip}; see {p.rel(p.out_dir(xewe.chip) / 'compile.log')}",
             pytrace=False,
         )
+    xewe.binary = res.binary
     return res.binary

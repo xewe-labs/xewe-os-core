@@ -38,7 +38,16 @@ Repeat with `esp32c6` and `esp32s3`. CI does the same, one job per chip.
 Every job blocks: the host unit tests, arduino-lint (`--compliance strict --library-manager update`,
 [library-rules.md](library-rules.md)), the example builds (c3, c6, s3),
 `xewe format --check` (clang-format with the tools' style, ruff for the Python) and
-`xewe brand-lint`.
+`xewe brand-lint`. On a prepare commit (one that holds `releases/<version>/release_card.md` for its
+own tree) the `release card check` job compares the card's host test rows with this run's
+`tests/unit/run.sh` output (`xewe release-card verify --ci --unit-only`). `tests.yml` pins the
+reusable workflow and its `tools_ref` to the same tools tag.
+
+## Release card
+
+`scripts/release.sh --prepare <version>` runs all of the above locally, plus the board tests for
+c3, c6 and s3, and writes the results into `releases/<version>/release_card.md` (README
+"Releasing"). Without `--hardware` the board tests are built but not run ("compiled, not run").
 
 ## Board tests
 
@@ -78,6 +87,9 @@ flock $H/.board.lock build/tools/.venv/bin/python -m xewe test --chip s3 --requi
   --deselect=build/modules -v -s --junitxml=/path/to/logs/junit.xml
 ```
 
+The release script runs all 19 files the same way, from a copy of an xewe project with this
+tree's `tests/board` as its `tests/` (`--deselect=build/modules`, `XEWE_HWTEST_DEFINES=XEWE_TESTING=1`).
+
 `XEWE_HWTEST_LOG_DIR` is optional. It receives the heap and uptime CSVs (`<HHMM>-heap-*.csv`).
 
 Preconditions:
@@ -94,5 +106,8 @@ Wi-Fi settings. A run takes about 4 min 10 s on an ESP32-S3.
 ### Test hooks
 
 `XEWE_TESTING` compiles in the `$test` command group (`src/XeWeCore/Testing.{h,cpp}`) that the
-`test_hooks_*` files drive. Set `XEWE_HWTEST_DEFINES=XEWE_TESTING=1` for the pytest run. Without
-the define the hooks add 0 bytes to the firmware.
+`test_hooks_*` files drive. Set `XEWE_HWTEST_DEFINES=XEWE_TESTING=1` for the pytest run (unset,
+the session builds with `xewe test --define` or `XEWE_TEST_DEFINES`). An image that is already built
+and up to date for the same defines, for example by `xewe flash --define XEWE_TESTING=1`, is reused,
+so the session tests the image that was flashed. Without the define the hooks add 0 bytes to the
+firmware.

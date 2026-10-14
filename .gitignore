@@ -3,3 +3,5 @@
 .vscode/
 build/
 __pycache__/
+# the release run folder (scripts/release.sh --prepare): local logs, never committed
+releases/*/logs/

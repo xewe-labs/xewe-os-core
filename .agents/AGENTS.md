@@ -70,7 +70,7 @@ this file is silent.
 ### Check your work
 
 ```bash
-tests/unit/run.sh        # host tests: c++17 (96 tests) and gnu++2b (121 tests), -fno-exceptions; expect "0 failed checks"
+tests/unit/run.sh        # host tests: c++17 (98 tests) and gnu++2b (123 tests), -fno-exceptions; expect "0 failed checks"
 ```
 
 - **Host tests** build the probes and `tests/unit/test/*.cpp` against the shims in
@@ -106,27 +106,33 @@ One change carries all four:
 
 Then run the host tests, compile the examples and lint. A version bump changes
 `library.properties`, `library.json` and `XEWE_CORE_VERSION*` together; `scripts/release.sh
---prepare <version>` does it (X-14). Releasing is the owner's, in two steps: `--prepare <version>`
-sets the version and creates the `releases/<version>/notes.txt` and `testcard.md` skeletons (no git
-change); the owner fills them and pushes it all as one `prepare <version>` commit. Then
-`scripts/release.sh <version>` (try `--dry-run` first) checks that HEAD is that pushed, clean `main`
-with every version location at `<version>`, waits for the `tests` workflow on HEAD, runs the host
-tests and the format check, and only then tags HEAD and creates the GitHub Release.
-`--ci-timeout <min>` (default 30), `--skip-ci` (emergencies). Re-running with a tag but no GitHub
-Release only creates the release (if the tagged commit's files say `<version>`); tag and release
-both present means already released. The Library Manager rules (layout, `library.properties`,
-`library.json`, names) are `doc/library-rules.md`.
+--prepare <version>` does it (X-14). Releasing is the owner's, in two runs (README "Releasing"):
+`--prepare <version> [--hardware c3,c6,s3]` (no git change) sets the version, stops with exit 2
+until `releases/<version>/notes.txt` is filled, then runs the host tests, arduino-lint, format,
+brand-lint, the example builds and the `tests/board` files per chip (in a harness project; without
+`--hardware` they are compiled, not run) through `xewe release-card record`, and renders the
+generated `releases/<version>/release_card.md` (no hand-written test card; the run logs stay in
+`releases/<version>/logs/`, gitignored); the owner commits it all as one `prepare <version>` commit.
+Then `scripts/release.sh <version>` (try `--dry-run` first) checks that HEAD is that pushed, clean
+`main` with every version location at `<version>`, runs `xewe release-card verify`, waits for the
+`tests` workflow on HEAD with its card check green, and only then tags HEAD and creates the GitHub
+Release with the card as its only asset. Agents run `--dry-run` only, and `--prepare` only on a
+scratch copy unless asked. `--ci-timeout <min>` (default 30), `--skip-ci` (emergencies).
+Re-running with a tag but no GitHub Release only creates the release (if the tagged commit's files
+say `<version>`); tag and release both present means already released. The Library Manager
+rules (layout, `library.properties`, `library.json`, names) are `doc/library-rules.md`.
 
 ### Component notes
 
 - **Utils.** Header-only. `Color.h`, `String.h`, `Pins.h`, `Listeners.h` are host-includable
   (standard library only; `Pins.h` may include `<sdkconfig.h>` behind `__has_include`): code in
   other repositories includes them in host tests, and `run.sh` compiles each without the shim.
-  `color::hsv_to_rgb` is pinned bit for bit (`color_hsv_to_rgb_pinned`). `str::parse_hex_color`
-  accepts exactly `rrggbb` / `#rrggbb` and leaves outputs untouched on failure; `to_hex_color`
-  writes uppercase `#RRGGBB`. `xewe::pins` is a fixed table; `claim` refuses a pin held by another
-  owner or out of range and only warns on a strapping pin; strapping lists cite datasheets in
-  `doc/utils/pins.md`. `lower` and `to_lower` are both public with callers; keep both.
+  `color::hsv_to_rgb` is pinned bit for bit (`color_hsv_to_rgb_pinned`). `color::parse_hex_color`
+  (also reachable as `str::` through `String.h`) accepts exactly `rrggbb` / `#rrggbb` and leaves
+  outputs untouched on failure; `to_hex_color` writes uppercase `#RRGGBB`. `xewe::pins` is a fixed
+  table; `claim` refuses a pin held by another owner or out of range and only warns on a strapping
+  pin; strapping lists cite datasheets in `doc/utils/pins.md`. `lower` and `to_lower` are both
+  public with callers; keep both.
   `xewe::validate` delegates to `str::parse_int` / `parse_float`.
 - **Serial.** The type is `xewe::SerialPort` because `Serial` is a core macro. Prompts:
   `retry_count == 0` means infinite, `timeout_ms == 0` means no timeout; modules rely on those
