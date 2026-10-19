@@ -105,7 +105,7 @@ Wi-Fi settings. A run takes about 4 min 10 s on an ESP32-S3.
 
 ### Test hooks
 
-`XEWE_TESTING` compiles in the `$test` command group (`src/XeWeCore/Testing.{h,cpp}`) that the
+`XEWE_TESTING` compiles in the `$test` command group (`src/XeWeCore/Testing/Testing.{h,cpp}`) that the
 `test_hooks_*` files drive. Set `XEWE_HWTEST_DEFINES=XEWE_TESTING=1` for the pytest run (unset,
 the session builds with `xewe test --define` or `XEWE_TEST_DEFINES`). An image that is already built
 and up to date for the same defines, for example by `xewe flash --define XEWE_TESTING=1`, is reused,

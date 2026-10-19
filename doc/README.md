@@ -9,7 +9,7 @@ typed NVS storage, helpers and a module framework, in one Arduino library. Sketc
 1. **[Concepts](concepts.md)**: what the core is for, modules, the console, storage, the
    settings schema, listeners, and the principles behind them.
 2. **Pick your level** (below) and run its example.
-3. **[Os](os/os.md) → [Module](os/module.md) → [Settings table](os/settings.md)**: the three
+3. **[Os](../src/XeWeCore/Os/README.md#os) → [Module](../src/XeWeCore/Module/README.md) → [Settings table](../src/XeWeCore/Settings/README.md)**: the three
    pages a module author needs.
 4. **The reference pages** below, when you need the exact behaviour of a function, command or
    stored key.
@@ -27,55 +27,55 @@ always *your own* module.
 
 ## Reference
 
-### Os: `src/XeWeCore/XeWeOs.h`, `Module.h`, `Settings.h`
+### Os: `src/XeWeCore/Os/XeWeOs.h`, `Module/Module.h`, `Settings/Settings.h`
 
-| Page | Covers |
+| Section | Covers |
 |---|---|
-| [os/os.md](os/os.md) | `xewe::Os` / `XeWeOs`, `OsConfig`, `begin`, `loop`, module lookup, the core services, `XEWE_DEVICE_NAME` |
-| [os/module.md](os/module.md) | `xewe::Module`: constructor, lifecycle, enable/disable/reset, requirements, commands, listeners, NVS keys |
-| [os/settings.md](os/settings.md) | the settings table: `setting<>`, flags, `$<id> set\|get\|schema`, schema lines, `schema_extra` |
-| [os/system.md](os/system.md) | `xewe::System`, the built-in module, and the `$system` commands including `$system schema` |
+| [Os](../src/XeWeCore/Os/README.md#os) | `xewe::Os` / `XeWeOs`, `OsConfig`, `begin`, `loop`, module lookup, the core services, `XEWE_DEVICE_NAME` |
+| [Module](../src/XeWeCore/Module/README.md) | `xewe::Module`: constructor, lifecycle, enable/disable/reset, requirements, commands, listeners, NVS keys |
+| [Settings table](../src/XeWeCore/Settings/README.md) | the settings table: `setting<>`, flags, `$<id> set\|get\|schema`, schema lines, `schema_extra` |
+| [System](../src/XeWeCore/Os/README.md#system) | `xewe::System`, the built-in module, and the `$system` commands including `$system schema` |
 
-### Serial: `src/XeWeCore/Serial.h`
+### Serial: `src/XeWeCore/Serial/Serial.h`
 
-| Page | Covers |
+| Section | Covers |
 |---|---|
-| [serial/config.md](serial/config.md) | `xewe::SerialPortConfig` and `begin` |
-| [serial/output.md](serial/output.md) | `print`, `printf`, boxes, separators, headers, tables |
-| [serial/input.md](serial/input.md) | non-blocking line input: `loop`, `has_line`, `read_line` |
-| [serial/prompts.md](serial/prompts.md) | blocking typed prompts: `get_string`, `get_int`, `get_yn`, ... |
+| [SerialPortConfig and begin](../src/XeWeCore/Serial/README.md#serialportconfig-and-begin) | `xewe::SerialPortConfig` and `begin` |
+| [Printing](../src/XeWeCore/Serial/README.md#printing) | `print`, `printf`, boxes, separators, headers, tables |
+| [Reading lines](../src/XeWeCore/Serial/README.md#reading-lines) | non-blocking line input: `loop`, `has_line`, `read_line` |
+| [Prompts](../src/XeWeCore/Serial/README.md#prompts) | blocking typed prompts: `get_string`, `get_int`, `get_yn`, ... |
 
-### Cli: `src/XeWeCore/Cli.h`
+### Cli: `src/XeWeCore/Cli/Cli.h`
 
-| Page | Covers |
+| Section | Covers |
 |---|---|
-| [cli/commands.md](cli/commands.md) | `Command`, groups, registration |
-| [cli/execution.md](cli/execution.md) | the two `execute` overloads, tokenizer and error strings |
-| [cli/help.md](cli/help.md) | `$help` output |
+| [Commands and groups](../src/XeWeCore/Cli/README.md#commands-and-groups) | `Command`, groups, registration |
+| [Executing commands](../src/XeWeCore/Cli/README.md#executing-commands) | the two `execute` overloads, tokenizer and error strings |
+| [Help output](../src/XeWeCore/Cli/README.md#help-output) | `$help` output |
 
-### Nvs: `src/XeWeCore/Nvs.h`, `FlexData.h`
+### Nvs: `src/XeWeCore/Nvs/Nvs.h`, `Nvs/FlexData.h`
 
-| Page | Covers |
+| Section | Covers |
 |---|---|
-| [nvs/nvs.md](nvs/nvs.md) | `xewe::Nvs`: typed read/write, namespaces, errors |
-| [nvs/flexdata.md](nvs/flexdata.md) | `xewe::FlexData<T>`: declare fields once, get blob and JSON forms; type rules, field presence |
-| [nvs/blob-format.md](nvs/blob-format.md) | the stored byte layout and how to version a struct |
+| [xewe::Nvs](../src/XeWeCore/Nvs/README.md#xewenvs) | `xewe::Nvs`: typed read/write, namespaces, errors |
+| [xewe::FlexData\<T\>](../src/XeWeCore/Nvs/README.md#xeweflexdatat) | `xewe::FlexData<T>`: declare fields once, get blob and JSON forms; type rules, field presence |
+| [Blob format and versioning](../src/XeWeCore/Nvs/README.md#blob-format-and-versioning) | the stored byte layout and how to version a struct |
 
-### Utils: `src/XeWeCore/Utils.h`
+### Utils: `src/XeWeCore/Utils/Utils.h`
 
-| Page | Covers |
+| Section | Covers |
 |---|---|
-| [utils/string.md](utils/string.md) | `xewe::str`: case, hex colours (aliases of `xewe::color`), trimming, parsing, wrapping, formatting, box lines |
-| [utils/validator.md](utils/validator.md) | `xewe::validate<T>` |
-| [utils/async-timer.md](utils/async-timer.md) | `xewe::AsyncTimer<T>` |
-| [utils/color.md](utils/color.md) | `xewe::color`: HSV/RGB, hex colour strings |
-| [utils/pins.md](utils/pins.md) | `xewe::pins`: GPIO ownership registry, strapping pins |
-| [utils/span.md](utils/span.md) | `xewe::span` |
-| [utils/lock-guard.md](utils/lock-guard.md) | `xewe::LockGuard` |
-| [utils/debug.md](utils/debug.md) | `DBG_*` macros and `DEBUG_<Class>` flags |
+| [xewe::str](../src/XeWeCore/Utils/README.md#xewestr) | `xewe::str`: case, hex colours (aliases of `xewe::color`), trimming, parsing, wrapping, formatting, box lines |
+| [xewe::validate](../src/XeWeCore/Utils/README.md#xewevalidate) | `xewe::validate<T>` |
+| [xewe::AsyncTimer\<T\>](../src/XeWeCore/Utils/README.md#xeweasynctimert) | `xewe::AsyncTimer<T>` |
+| [xewe::color](../src/XeWeCore/Utils/README.md#xewecolor) | `xewe::color`: HSV/RGB, hex colour strings |
+| [xewe::pins](../src/XeWeCore/Utils/README.md#xewepins) | `xewe::pins`: GPIO ownership registry, strapping pins |
+| [xewe::span](../src/XeWeCore/Utils/README.md#xewespan) | `xewe::span` |
+| [xewe::LockGuard](../src/XeWeCore/Utils/README.md#xewelockguard) | `xewe::LockGuard` |
+| [Debug macros](../src/XeWeCore/Utils/README.md#debug-macros) | `DBG_*` macros and `DEBUG_<Class>` flags |
 
 `xewe::ListenerSet` (`Utils/Listeners.h`) is documented with modules:
-[os/module.md#listeners](os/module.md#listeners).
+[Module: Listeners](../src/XeWeCore/Module/README.md#listeners).
 
 ## Also
 

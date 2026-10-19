@@ -41,7 +41,7 @@ kept by hand and by `scripts/release.sh`.
   `portDISABLE_INTERRUPTS()`); the class `xewe::Cli`, `os.cli.loop()` and brace initialization
   `cli{serial}` are fine. A sketch-level object is named `xewe_cli`.
 * Debug flags default to 0 with `#ifndef DEBUG_<Class>` and are enabled from build flags
-  ([utils/debug.md](utils/debug.md)).
+  ([Debug macros](../src/XeWeCore/Utils/README.md#debug-macros)).
 
 ## Library Manager
 

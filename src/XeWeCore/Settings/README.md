@@ -1,6 +1,14 @@
 # Settings table
 
-`src/XeWeCore/Settings.h`. A module declares its plain persistent settings as one
+- [Declaring a table](#declaring-a-table)
+- [Lifecycle](#lifecycle)
+- [Module API](#module-api)
+- [The `xewe::Settings` value](#the-xewesettings-value)
+- [Commands](#commands)
+- [Schema lines](#schema-lines)
+- [Versioning (`requires_core`)](#versioning-requires_core)
+
+`src/XeWeCore/Settings/Settings.h`. A module declares its plain persistent settings as one
 `constexpr` table; the core then provides, from that table alone:
 
 * the load at `begin()`: table default, then the value stored in NVS;

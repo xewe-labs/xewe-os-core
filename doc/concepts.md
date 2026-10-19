@@ -35,7 +35,7 @@ it needs. The core itself knows no concrete module except `System`, the built-in
 the device name, restart, info and factory reset. Features live in their own modules, in the
 firmware or in the modules repository.
 
-See [os/os.md](os/os.md) and [os/module.md](os/module.md).
+See [Os](../src/XeWeCore/Os/README.md#os) and [Module](../src/XeWeCore/Module/README.md).
 
 ## The console: `$group verb args`
 
@@ -49,7 +49,7 @@ silenced, every reply ends in CRLF, error strings are stable enough to grep for,
 blocks the loop, and a confirmation question gives up after two short attempts instead of
 freezing an unattended device.
 
-See [cli/commands.md](cli/commands.md) and [serial/prompts.md](serial/prompts.md).
+See [Commands and groups](../src/XeWeCore/Cli/README.md#commands-and-groups) and [Prompts](../src/XeWeCore/Serial/README.md#prompts).
 
 ## Storage: NVS and FlexData
 
@@ -66,7 +66,7 @@ silently coerced.
 The stored format is a promise to devices already in the field: key names, types and struct
 layouts do not change casually, because the data is still there after a reflash.
 
-See [nvs/nvs.md](nvs/nvs.md) and [nvs/flexdata.md](nvs/flexdata.md).
+See [xewe::Nvs](../src/XeWeCore/Nvs/README.md#xewenvs) and [xewe::FlexData](../src/XeWeCore/Nvs/README.md#xeweflexdatat).
 
 ## Settings and the schema
 
@@ -80,7 +80,7 @@ current value, help text. It is the device's **machine-readable surface**. A web
 app or a test can discover what a device offers and how to change it without knowing the firmware.
 Secrets appear as set or unset, never as values.
 
-See [os/settings.md](os/settings.md).
+See [Settings table](../src/XeWeCore/Settings/README.md).
 
 ## Listeners
 
@@ -88,7 +88,7 @@ Modules talk to each other through listener sets: a module that has something to
 `xewe::ListenerSet`, and others add themselves. Every event carries its **origin**, so a module
 that both sets and listens (a web UI, a bridge) can skip the echo of its own change.
 
-See [os/module.md#listeners](os/module.md#listeners).
+See [Module: Listeners](../src/XeWeCore/Module/README.md#listeners).
 
 ## Principles
 

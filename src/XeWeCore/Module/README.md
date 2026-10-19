@@ -1,11 +1,25 @@
 # Module
 
-`src/XeWeCore/Module.h`. The base class for everything that plugs into XeWe OS.
+- [Constructor](#constructor)
+- [Copy and move](#copy-and-move)
+- [Lifecycle](#lifecycle)
+- [loop](#loop)
+- [add_requirement](#add_requirement)
+- [enable, disable, reset](#enable-disable-reset)
+- [Status and getters](#status-and-getters)
+- [Protected helpers](#protected-helpers)
+- [Generic CLI commands](#generic-cli-commands)
+- [Settings](#settings)
+- [Listeners](#listeners)
+- [NVS keys](#nvs-keys)
+- [Rules of thumb](#rules-of-thumb)
+
+`src/XeWeCore/Module/Module.h`. The base class for everything that plugs into XeWe OS.
 
 A module registers itself with the Os on construction, stores its own settings and overrides
-only the hooks it needs. Start from [`examples/02_MyModule`](../../examples/02_MyModule) (a
+only the hooks it needs. Start from [`examples/02_MyModule`](../../../examples/02_MyModule) (a
 settings table, a command, a listener) or
-[`examples/15_Os/SensorModule.h`](../../examples/15_Os/SensorModule.h) (a module another one
+[`examples/15_Os/SensorModule.h`](../../../examples/15_Os/SensorModule.h) (a module another one
 requires).
 
 ## Constructor
@@ -47,7 +61,7 @@ public:
 };
 ```
 
-**The `id` is checked at registration** ([`Os::register_module`](os.md#register_module) lists the
+**The `id` is checked at registration** ([`Os::register_module`](../Os/README.md#register_module) lists the
 rules). A rejected module never begins or loops, gets no CLI group, and its `register_command`
 returns `false`. `Os::begin()` prints the error, because modules are constructed before Serial is
 up:
@@ -79,7 +93,7 @@ virtual void begin_routines_common  ();
 
 `begin()` is not virtual and runs this sequence:
 
-0. When the module declares a [settings table](settings.md): loads it (table defaults,
+0. When the module declares a [settings table](../Settings/README.md): loads it (table defaults,
    then NVS) and registers `$<id> set`, `get` and `schema`. This runs for a disabled module too.
    Without a table this step does nothing.
 1. Reads `not_first_boot` and `is_enabled` from NVS. On the very first boot the module starts
@@ -157,7 +171,7 @@ when `can_be_disabled` is `false`. Then:
   re-prompts once; the worst stall is 30 s. A "no" prints `Aborted` and returns. A second timeout
   or invalid answer prints `! No answer: disable cancelled`, then `Aborted`, and returns. A
   `disable` from the scheduler, a button or the web UI therefore cannot freeze an unattended
-  device. See [prompts](../serial/prompts.md).
+  device. See [prompts](../Serial/README.md#prompts).
   **When `verbose` is `false` there is no confirmation.**
 * It cascades `disable(false, false)` to **every dependent module**, without prompting them.
 * It ends by calling `reset(verbose, do_restart, /*keep_enabled=*/false)`.
@@ -166,7 +180,7 @@ when `can_be_disabled` is `false`. Then:
 `verbose`.** This is the sharpest edge in the library.
 
 **`reset`** erases the module's NVS namespace and re-writes `not_first_boot = true`. It reloads
-the [settings table](settings.md), so every row is back to its default. It sets `enabled` to
+the [settings table](../Settings/README.md), so every row is back to its default. It sets `enabled` to
 `(!can_be_disabled || keep_enabled) && requirements_enabled()`, persists `is_enabled` when that is
 true, and restarts when asked.
 
@@ -188,7 +202,7 @@ std::string_view    get_name           ()                           const;
 
 | | |
 |---|---|
-| `status` | returns `"<name> module enabled\|disabled"`, read **from NVS**, not the in-RAM flag, plus one `\n<key>: <value>` line per [settings](settings.md) row (a set secret shows `********`); prints it when `verbose`. Override to add your own state |
+| `status` | returns `"<name> module enabled\|disabled"`, read **from NVS**, not the in-RAM flag, plus one `\n<key>: <value>` line per [settings](../Settings/README.md) row (a set secret shows `********`); prints it when `verbose`. Override to add your own state |
 | `is_enabled` | prints `<name> module enabled` **only when the answer is true** |
 | `is_disabled` | prints only when true. Missing requirements print `<name> module disabled` and the list; a user-disabled module prints `<name> module disabled; to enable:` and `$<id> enable` |
 | `init_setup_complete` | `!requires_init_setup \|\| nvs.read<bool>(id, "init_complete")`. **Its `verbose` parameter is accepted but never used** |
@@ -211,8 +225,8 @@ void run_with_dots       (const std::function<void()>& work,
 message when the module has `has_cli_commands == false`. A name that is empty or contains
 whitespace, or a command without a function, is refused with
 `! $<id> command '<name>' <reason>: not registered`, through
-[`Os::report_error`](os.md#report_error). The `Command` aggregate is
-[the Cli's](../cli/commands.md): `{name, description, sample_usage, arg_count, function}`.
+[`Os::report_error`](../Os/README.md#report_error). The `Command` aggregate is
+[the Cli's](../Cli/README.md#commands-and-groups): `{name, description, sample_usage, arg_count, function}`.
 
 **`requirements_enabled`** reports whether every required module is enabled. With `verbose` it
 walks all of them and prints the missing ones; without, it short-circuits on the first.
@@ -233,12 +247,12 @@ With `has_cli_commands`, every module gets these for free:
 | `$<id> enable` | 0 | Enable this module | `enable(true, true)`; only when `can_be_disabled` |
 | `$<id> disable` | 0 | Disable this module | `disable(true, true)`; only when `can_be_disabled` |
 
-With a [settings table](settings.md) it also gets `$<id> set <key> <value>`, `$<id> get <key>` and
+With a [settings table](../Settings/README.md) it also gets `$<id> set <key> <value>`, `$<id> get <key>` and
 `$<id> schema`, registered at `begin()`. A name the module registered itself (any case) is kept.
 
-`$<id>`, `$<id> help` and `$help <id>` print the group's command table ([help](../cli/help.md)).
+`$<id>`, `$<id> help` and `$help <id>` print the group's command table ([help](../Cli/README.md#help-output)).
 
-`$<id> reset` asks nothing. `$system reset` [overrides `reset`](system.md#reset) to add a
+`$<id> reset` asks nothing. `$system reset` [overrides `reset`](../Os/README.md#reset) to add a
 confirmation.
 
 ## Settings
@@ -254,7 +268,7 @@ virtual void           on_setting_changed(const xewe::SettingDef& def);
 
 Plain persistent settings declared as one `constexpr` table. The core loads them and provides
 `set`/`get`/`schema`, the status lines and the rows of `$system schema`. See
-[settings.md](settings.md).
+[Settings/README.md](../Settings/README.md).
 
 ## Listeners
 
@@ -301,7 +315,7 @@ void on_speed(uint8_t pct, const void* origin) override {
 ```
 
 Callbacks run synchronously inside the setter; keep them short (set a flag, push later).
-[`examples/02_MyModule`](../../examples/02_MyModule/MyModule.h) shows a set and a listener.
+[`examples/02_MyModule`](../../../examples/02_MyModule/MyModule.h) shows a set and a listener.
 
 ## NVS keys
 
@@ -313,7 +327,7 @@ Each module stores its state in the NVS namespace named after its `id`:
 | `not_first_boot` | `bool` | set once the first-boot questions have been asked |
 | `init_complete` | `bool` | set after `begin_routines_init()` completes, when `requires_init_setup` |
 
-[Settings table](settings.md) keys and your own keys go in the same namespace, so `$<id> reset`
+[Settings table](../Settings/README.md) keys and your own keys go in the same namespace, so `$<id> reset`
 wipes exactly this module's data. `System` also stores `device_name`. The Os uses the separate
 `root` namespace for `init_setup_flag`.
 
