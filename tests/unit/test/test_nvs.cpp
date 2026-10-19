@@ -11,7 +11,7 @@
 
 class String; // Nvs.tpp names Arduino's String; the host shim has none (never instantiated here)
 
-#include <XeWeCore/Nvs.cpp> // Nvs.cpp is not in run.sh's LIB_SRCS: compiled into this TU only
+#include <XeWeCore/Nvs/Nvs.cpp> // Nvs.cpp is not in run.sh's LIB_SRCS: compiled into this TU only
 
 #include <string>
 #include <vector>

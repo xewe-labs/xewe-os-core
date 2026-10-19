@@ -18,7 +18,7 @@
 //
 // notify() runs in the caller's task. remove() during notify() is safe (a removed listener that has
 // not been called yet is skipped); add() during notify() may or may not see the current event.
-// Full documentation: doc/os/module.md#listeners.
+// Full documentation: src/XeWeCore/Module/README.md#listeners.
 #pragma once
 
 #include <cstddef>

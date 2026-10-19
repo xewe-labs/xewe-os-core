@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
-// xewe-os-core/src/XeWeCore/Testing.cpp
+// xewe-os-core/src/XeWeCore/Testing/Testing.cpp
 //
 // The `$test` CLI group (see Testing.h). Everything below is compiled only with XEWE_TESTING.
 // Output is one `key=value` record per line so tests/board can parse it; every command
@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "XeWeOs.h"
+#include "../Os/XeWeOs.h"
 
 namespace xewe::testing {
 namespace {

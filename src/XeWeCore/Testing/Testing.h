@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
-// xewe-os-core/src/XeWeCore/Testing.h
+// xewe-os-core/src/XeWeCore/Testing/Testing.h
 //
 // Compile-time test hooks: the `$test` CLI group used by tests/board. Compiled in only when
 // XEWE_TESTING is defined; a production build gets zero bytes from this file and Testing.cpp.

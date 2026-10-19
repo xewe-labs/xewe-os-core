@@ -17,7 +17,7 @@ OUT="$(mktemp -d)"
 trap 'rm -rf "$OUT"' EXIT
 
 FLAGS=(-Wall -Wextra -fno-exceptions -I "$HERE/shim" -I "$SRC")
-LIB_SRCS=("$SRC/XeWeCore/Serial.cpp" "$SRC/XeWeCore/Cli.cpp")
+LIB_SRCS=("$SRC/XeWeCore/Serial/Serial.cpp" "$SRC/XeWeCore/Cli/Cli.cpp")
 
 # FlexData, Nvs and Settings tests need ArduinoJson (header-only): ARDUINOJSON_SRC is its src/ directory.
 if [ ! -f "${ARDUINOJSON_SRC:-}/ArduinoJson.h" ]; then

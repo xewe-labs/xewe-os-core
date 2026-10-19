@@ -8,7 +8,7 @@
 
 #include "test.h"
 
-#include <XeWeCore/Cli.h>
+#include <XeWeCore/Cli/Cli.h>
 
 #include <memory>
 #include <string>

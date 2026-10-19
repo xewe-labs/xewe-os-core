@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
-// xewe-os-core/src/XeWeCore/Settings.h
+// xewe-os-core/src/XeWeCore/Settings/Settings.h
 //
 // Settings table: a module declares its plain persistent settings as a constexpr table of
 // SettingDef rows, and the core provides `$<id> set|get|schema`, the status lines, `$system schema`
 // and the load at begin (table default, then the NVS value). Full documentation:
-// doc/os/settings.md.
+// src/XeWeCore/Settings/README.md.
 //
 //   xewe::Settings settings() const override {
 //       static constexpr xewe::SettingDef table[] = {
@@ -27,8 +27,8 @@
 #include <string_view>
 #include <type_traits>
 
-#include "Utils/Span.h"
-#include "Serial.h"
+#include "../Utils/Span.h"
+#include "../Serial/Serial.h"
 
 namespace xewe {
 

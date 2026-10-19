@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
-// xewe-os-core/src/XeWeCore/FlexData.h
+// xewe-os-core/src/XeWeCore/Nvs/FlexData.h
 #pragma once
 
 #include <algorithm>

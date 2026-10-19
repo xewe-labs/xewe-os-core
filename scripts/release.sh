@@ -90,10 +90,10 @@ REGISTRY_URL="https://github.com/arduino/library-registry"
 VERSION_LOCATIONS=(
   'library.properties|^version=.*$|version={V}'
   'library.json|^(  "version": )"[^"]*"|\1"{V}"'
-  'src/XeWeCore/XeWeOs.h|^(#define XEWE_CORE_VERSION[[:space:]]+)"[^"]*"|\1"{V}"'
-  'src/XeWeCore/XeWeOs.h|^(#define XEWE_CORE_VERSION_MAJOR[[:space:]]+)[0-9]+|\1{MAJOR}'
-  'src/XeWeCore/XeWeOs.h|^(#define XEWE_CORE_VERSION_MINOR[[:space:]]+)[0-9]+|\1{MINOR}'
-  'src/XeWeCore/XeWeOs.h|^(#define XEWE_CORE_VERSION_PATCH[[:space:]]+)[0-9]+|\1{PATCH}'
+  'src/XeWeCore/Os/XeWeOs.h|^(#define XEWE_CORE_VERSION[[:space:]]+)"[^"]*"|\1"{V}"'
+  'src/XeWeCore/Os/XeWeOs.h|^(#define XEWE_CORE_VERSION_MAJOR[[:space:]]+)[0-9]+|\1{MAJOR}'
+  'src/XeWeCore/Os/XeWeOs.h|^(#define XEWE_CORE_VERSION_MINOR[[:space:]]+)[0-9]+|\1{MINOR}'
+  'src/XeWeCore/Os/XeWeOs.h|^(#define XEWE_CORE_VERSION_PATCH[[:space:]]+)[0-9]+|\1{PATCH}'
 )
 
 die() { echo "error: $*" >&2; exit 1; }

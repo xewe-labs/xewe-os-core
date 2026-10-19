@@ -55,9 +55,11 @@ this file is silent.
 
 ### Layout
 
-- `src/XeWeCore.h` is the only top-level header; everything else is in `src/XeWeCore/`:
-  `Utils.h` + `Utils/*.h` (header-only), `Serial`, `Cli`, `FlexData.h`, `Nvs` (+ `Nvs.tpp`),
-  `Settings`, `Module`, `XeWeOs`, `Testing`. Files include each other with relative quotes.
+- `src/XeWeCore.h` is the only top-level header; everything else is in `src/XeWeCore/`, one
+  directory per component: `Utils/` (`Utils.h` + `*.h`, header-only), `Serial/`, `Cli/`, `Nvs/`
+  (`Nvs` + `Nvs.tpp` + `FlexData.h`), `Settings/`, `Module/`, `Os/` (`XeWeOs`), `Testing/`.
+  Files include each other with relative quotes. Each component directory except `Testing/`
+  has a `README.md` with its reference documentation.
 - Include direction: Utils ← Serial ← Cli; FlexData ← Nvs; Serial ← Settings (Nvs only
   forward-declared); all ← Module ← XeWeOs. `Module.h` forward-declares `class Os;`; only `.cpp`
   files include `XeWeOs.h`.
@@ -65,7 +67,8 @@ this file is silent.
   `xewe::testing`). Global symbols: `XeWeOs`, the `DBG_*`/`DEBUG_*`/`STRINGIFY_XEWE`/`TO_STRING`
   macros and `XEWE_CORE_VERSION` (+ `_MAJOR/_MINOR/_PATCH`, equal to `library.properties`).
 - `examples/01_Hello`, `02_MyModule` teach levels 1 and 2; `11_Utils` … `15_Os` are reference
-  demos. `tests/unit` runs on the host, `tests/board` on a board. `doc/` is the human reference.
+  demos. `tests/unit` runs on the host, `tests/board` on a board. `doc/` is the human guide and
+  index; the reference is the component `README.md` files under `src/XeWeCore/`.
 
 ### Check your work
 
@@ -86,7 +89,7 @@ tests/unit/run.sh        # host tests: c++17 (98 tests) and gnu++2b (123 tests),
 - **Board tests** (`tests/board`) run only through the `xewe-os-tools` pytest plugin from an xewe
   project with a board attached, never on their own: `doc/tests.md` has the command.
   Take the board lock (`flock <project>/.board.lock`). Never flash a board unasked.
-- **Test hooks:** `XEWE_TESTING` compiles in the `$test` group (`src/XeWeCore/Testing.{h,cpp}`)
+- **Test hooks:** `XEWE_TESTING` compiles in the `$test` group (`src/XeWeCore/Testing/Testing.{h,cpp}`)
   that the `test_hooks_*` files drive. Build it with `xewe build --chip s3 --define XEWE_TESTING=1`
   then `xewe flash --no-build`, or `XEWE_HWTEST_DEFINES=XEWE_TESTING=1` for the pytest run, or
   arduino-cli `--build-property compiler.cpp.extra_flags=-DXEWE_TESTING=1`. Without the define a
@@ -99,8 +102,9 @@ One change carries all four:
 1. **Code** in `src/XeWeCore/`, inside the layout and include direction above.
 2. **A host test** in `tests/unit/test/` (and the board table too when the case also runs through
    `$test`, see X-10).
-3. **The doc page** in `doc/` for every public function, lifecycle step, command, prompt, NVS key
-   or build define it adds or changes (X-13).
+3. **The component README** (`src/XeWeCore/<Component>/README.md`, or the page in `doc/`) for
+   every public function, lifecycle step, command, prompt, NVS key or build define it adds or
+   changes (X-13).
 4. **An example**, when users see it: keep `examples/02_MyModule` in step with every new hook or
    changed signature; it is what module authors copy.
 
@@ -131,7 +135,7 @@ rules (layout, `library.properties`, `library.json`, names) are `doc/library-rul
   (also reachable as `str::` through `String.h`) accepts exactly `rrggbb` / `#rrggbb` and leaves
   outputs untouched on failure; `to_hex_color` writes uppercase `#RRGGBB`. `xewe::pins` is a fixed
   table; `claim` refuses a pin held by another owner or out of range and only warns on a strapping
-  pin; strapping lists cite datasheets in `doc/utils/pins.md`. `lower` and `to_lower` are both
+  pin; strapping lists cite datasheets in `src/XeWeCore/Utils/README.md`. `lower` and `to_lower` are both
   public with callers; keep both.
   `xewe::validate` delegates to `str::parse_int` / `parse_float`.
 - **Serial.** The type is `xewe::SerialPort` because `Serial` is a core macro. Prompts:
@@ -150,7 +154,7 @@ rules (layout, `library.properties`, `library.json`, names) are `doc/library-rul
 - **Nvs and FlexData.** Everything here persists across reflashes. Version a struct with a
   `schema` field, not `kBlobVersion` (one shared constant). `from_blob` overwrites in place.
   Read misses are silent; name errors, init failures (once), the automatic partition erase and
-  open/set/commit failures are reported verbatim as in `doc/nvs/nvs.md`. FlexData JSON assignment
+  open/set/commit failures are reported verbatim as in `src/XeWeCore/Nvs/README.md`. FlexData JSON assignment
   is type-matched (`is<M>()` before `as<M>()`); field presence is a `uint32_t` set only by the
   JSON load, never stored, at most 32 fields. `FlexData.h` stays platform-neutral; Nvs reports
   through `set_error_handler` and does not include `Utils.h` or `Serial.h`.
@@ -158,11 +162,11 @@ rules (layout, `library.properties`, `library.json`, names) are `doc/library-rul
   namespace) and cascades to dependents; with `verbose == false` there is no confirmation.
   `System::reset()` erases the whole partition. `XEWE_DEVICE_NAME` must be a build flag (or come
   from `<XeWeBuildInfo.h>`); a sketch `#define` never reaches `XeWeOs.cpp`. The lifecycle order in
-  `Module::begin()` is contractual (`doc/os/module.md`). The private `modules` vector is declared
+  `Module::begin()` is contractual (`src/XeWeCore/Module/README.md`). The private `modules` vector is declared
   before the service members in `Os`; do not reorder them. `Module` is neither copyable nor
   movable. `System::begin_routines_required()` silences the ESP log on purpose. Settings tables:
   the engine is reached only through `settings_engine`, so a firmware without a table does not
   link it; never call `detail::settings_*` or `register_settings_commands` from code that always
   links. Secrets are never printed. A schema line format change raises `"schema":1` in
-  `Settings::header` and updates `doc/os/settings.md`. `ListenerSet::notify` re-reads each slot,
+  `Settings::header` and updates `src/XeWeCore/Settings/README.md`. `ListenerSet::notify` re-reads each slot,
   so `remove` during `notify` is safe.

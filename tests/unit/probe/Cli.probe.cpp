@@ -4,7 +4,7 @@
 
 // Compiles Cli against the shim and instantiates a command handler, which is where
 // xewe::span appears in the public signature.
-#include <XeWeCore/Cli.h>
+#include <XeWeCore/Cli/Cli.h>
 
 #include <string>
 

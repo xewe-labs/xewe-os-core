@@ -1,6 +1,7 @@
 """Shared helpers for the ``$test`` hook tests (test_hooks_*.py).
 
-The hooks exist only in firmware built with ``XEWE_TESTING`` (src/XeWeCore/Testing.cpp):
+The hooks exist only in firmware built with ``XEWE_TESTING``
+(src/XeWeCore/Testing/Testing.cpp):
 
     XEWE_HWTEST_DEFINES=XEWE_TESTING=1 python -m pytest tests/board/test_hooks_*.py ...
 

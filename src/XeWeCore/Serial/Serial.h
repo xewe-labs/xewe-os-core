@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
-// xewe-os-core/src/XeWeCore/Serial.h
+// xewe-os-core/src/XeWeCore/Serial/Serial.h
 #pragma once
 
 #include <Arduino.h>
@@ -12,7 +12,7 @@
 #include <string_view>
 #include <vector>
 
-#include "Utils.h"
+#include "../Utils/Utils.h"
 
 namespace xewe {
 

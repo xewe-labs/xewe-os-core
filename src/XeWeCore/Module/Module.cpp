@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
-// xewe-os-core/src/XeWeCore/Module.cpp
+// xewe-os-core/src/XeWeCore/Module/Module.cpp
 
 #include "Module.h"
-#include "XeWeOs.h"
+#include "../Os/XeWeOs.h"
 
 namespace xewe {
 
@@ -308,7 +308,7 @@ void Module::register_generic_commands() {
     }
 }
 
-// ---- settings table (doc/os/settings.md) ------------------------------------
+// ---- settings table (src/XeWeCore/Settings/README.md) -----------------------
 
 // Module::begin step 0, reached through settings_engine only (see Settings.h)
 void settings_attach(Module& module) {

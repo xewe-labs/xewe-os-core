@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
-// xewe-os-core/src/XeWeCore/Nvs.h
+// xewe-os-core/src/XeWeCore/Nvs/Nvs.h
 #pragma once
 
 #include <cstddef>

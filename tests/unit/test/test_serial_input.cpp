@@ -4,7 +4,7 @@
 
 #include "test.h"
 
-#include <XeWeCore/Serial.h>
+#include <XeWeCore/Serial/Serial.h>
 
 #include <string>
 

@@ -4,7 +4,7 @@
 
 #include "test.h"
 
-#include <XeWeCore/Utils.h>
+#include <XeWeCore/Utils/Utils.h>
 
 #include <array>
 #include <cstdarg>

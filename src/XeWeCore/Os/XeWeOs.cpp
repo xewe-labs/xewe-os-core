@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
-// xewe-os-core/src/XeWeCore/XeWeOs.cpp
+// xewe-os-core/src/XeWeCore/Os/XeWeOs.cpp
 
 #include "XeWeOs.h"
 
 #include <cstdarg>
 #include <cstdio>
-#include "Testing.h"
+#include "../Testing/Testing.h"
 
 // XEWE_DEVICE_NAME may come from the tools' generated header, like XEWE_TESTING
 #if !defined(XEWE_DEVICE_NAME) && defined(__has_include)
@@ -238,8 +238,8 @@ void System::begin_routines_required() {
 
 void System::begin_routines_init() {
 #ifdef XEWE_DEVICE_NAME
-    // build-time name: no prompt; a name already in NVS is kept (doc/os/os.md, "Build-time device
-    // name")
+    // build-time name: no prompt; a name already in NVS is kept (src/XeWeCore/Os/README.md,
+    // "Build-time device name")
     if (os.nvs.read<std::string>(id, "device_name").empty()) {
         os.nvs.write<std::string>(id, "device_name", XEWE_DEVICE_NAME);
     }

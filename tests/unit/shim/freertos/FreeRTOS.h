@@ -3,7 +3,7 @@
 // xewe-os-core/tests/unit/shim/freertos/FreeRTOS.h
 #pragma once
 
-// Host stand-in for the few FreeRTOS names LockGuard uses. XeWeCore/Utils.h
+// Host stand-in for the few FreeRTOS names LockGuard uses. XeWeCore/Utils/Utils.h
 // includes LockGuard unconditionally (ESP32 always has FreeRTOS), so every host
 // build that reaches Utils.h through Serial.h or Cli.h needs these to exist.
 // Single-threaded: a "mutex" is a counter, enough to check take/give pairing.

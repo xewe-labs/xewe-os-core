@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
-// xewe-os-core/src/XeWeCore/XeWeOs.h
+// xewe-os-core/src/XeWeCore/Os/XeWeOs.h
 #pragma once
 
 #include <string>
@@ -13,7 +13,7 @@
 #include <mbedtls/sha256.h>
 
 #include "esp_log.h"
-#include "Module.h"
+#include "../Module/Module.h"
 
 // library version (library.properties); `$system schema` reports it in its header line
 #define XEWE_CORE_VERSION "3.1.0"

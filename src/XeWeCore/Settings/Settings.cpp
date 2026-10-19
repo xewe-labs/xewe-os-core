@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
-// xewe-os-core/src/XeWeCore/Settings.cpp
+// xewe-os-core/src/XeWeCore/Settings/Settings.cpp
 
 #include "Settings.h"
 
 #include <cstdio>
 
-#include "Nvs.h"
-#include "Utils/String.h"
+#include "../Nvs/Nvs.h"
+#include "../Utils/String.h"
 
 namespace xewe {
 

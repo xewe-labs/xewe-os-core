@@ -14,7 +14,7 @@
 #include <XeWeCore/Utils/Span.h>
 #include <XeWeCore/Utils/Color.h>
 #include <XeWeCore/Utils/LockGuard.h>
-#include <XeWeCore/Utils.h>
+#include <XeWeCore/Utils/Utils.h>
 
 #include <cstdint>
 #include <string>

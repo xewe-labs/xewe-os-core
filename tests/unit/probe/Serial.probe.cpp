@@ -4,7 +4,7 @@
 
 // Compiles SerialPort against the shim. The shim has no setTxBufferSize /
 // setRxBufferSize, so this fails unless the ESP32-only guard in begin() is correct.
-#include <XeWeCore/Serial.h>
+#include <XeWeCore/Serial/Serial.h>
 
 #include <string>
 

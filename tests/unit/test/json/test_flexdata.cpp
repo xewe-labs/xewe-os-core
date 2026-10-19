@@ -8,7 +8,7 @@
 
 #include "../test.h"
 
-#include <XeWeCore/FlexData.h>
+#include <XeWeCore/Nvs/FlexData.h>
 
 #include <string>
 #include <vector>
@@ -23,7 +23,7 @@ struct Inner : xewe::FlexData<Inner> {
     }
 };
 
-// same layout as the firmware's Probe in src/XeWeCore/Testing.cpp
+// same layout as the firmware's Probe in src/XeWeCore/Testing/Testing.cpp
 struct Probe : xewe::FlexData<Probe> {
     bool b = false;
     int32_t i = 0;

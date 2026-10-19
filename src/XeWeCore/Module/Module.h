@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
-// xewe-os-core/src/XeWeCore/Module.h
+// xewe-os-core/src/XeWeCore/Module/Module.h
 #pragma once
 
 #include <Arduino.h>
@@ -12,11 +12,11 @@
 #include <utility>
 #include <vector>
 
-#include "Utils.h"
-#include "Serial.h"
-#include "Nvs.h"
-#include "Cli.h"
-#include "Settings.h"
+#include "../Utils/Utils.h"
+#include "../Serial/Serial.h"
+#include "../Nvs/Nvs.h"
+#include "../Cli/Cli.h"
+#include "../Settings/Settings.h"
 
 namespace xewe {
 
@@ -67,8 +67,9 @@ public:
     std::string_view get_id() const;
     std::string_view get_name() const;
 
-    // settings table (doc/os/settings.md). Empty by default: no commands, no NVS reads,
-    // no schema rows. Override to return {table, this}; read at begin() before every routine.
+    // settings table (src/XeWeCore/Settings/README.md). Empty by default: no commands, no NVS
+    // reads, no schema rows. Override to return {table, this}; read at begin() before every
+    // routine.
     virtual Settings settings() const;
     // extra schema rows after the table's (e.g. mode parameters with "group":"mode:<name>")
     virtual void schema_extra(SchemaOut& out) const;

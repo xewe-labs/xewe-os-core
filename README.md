@@ -54,7 +54,7 @@ scripts/release.sh --prepare X.Y.Z --hardware c3,c6,s3  # with the boards attach
 It refuses a detached HEAD, a merge or rebase in progress, any change outside the version lines and
 `releases/X.Y.Z/`, a `testcard.md` there, and a `.gitignore` that does not ignore `releases/*/logs/`.
 It sets the version in `library.properties`, `library.json` and `XEWE_CORE_VERSION*`
-(`src/XeWeCore/XeWeOs.h`). When `releases/X.Y.Z/notes.txt` (the GitHub Release text) is missing it
+(`src/XeWeCore/Os/XeWeOs.h`). When `releases/X.Y.Z/notes.txt` (the GitHub Release text) is missing it
 writes a skeleton and stops with exit 2; fill it, delete its marker line and run again. Then it runs
 every check through `xewe release-card record` (redacted logs in `releases/X.Y.Z/logs/`, never
 committed) and renders `releases/X.Y.Z/release_card.md`:
