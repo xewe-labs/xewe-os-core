@@ -16,9 +16,9 @@
 #include "Module.h"
 
 // library version (library.properties); `$system schema` reports it in its header line
-#define XEWE_CORE_VERSION "3.0.0"
+#define XEWE_CORE_VERSION "3.1.0"
 #define XEWE_CORE_VERSION_MAJOR 3
-#define XEWE_CORE_VERSION_MINOR 0
+#define XEWE_CORE_VERSION_MINOR 1
 #define XEWE_CORE_VERSION_PATCH 0
 
 namespace xewe {
