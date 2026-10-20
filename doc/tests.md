@@ -8,14 +8,18 @@ not compiled by the Arduino builder.
 `tests/unit/run.sh` needs only a host `g++` and bash.
 
 - It compiles the probes in `tests/unit/probe/` and the tests in `tests/unit/test/` against the
-  shims in `tests/unit/shim/` (Arduino, FreeRTOS, ESP log, an in-memory NVS).
+  shims in `tests/unit/shim/` (Arduino, FreeRTOS, ESP log, an in-memory NVS). `Config.probe.cpp`
+  is built twice, once with `-DXEWE_CORE_DEVICE_NAME="x"`, to check that a pre-answered device name
+  turns the first-boot prompt off.
+- It compiles `Config.h`, `Utils/Color.h`, `String.h`, `Pins.h` and `Listeners.h` on their own
+  with the standard library only, without the shim.
 - It builds and runs everything twice: at `-std=c++17`, which exercises the `xewe::span` fallback,
   and at `-std=gnu++2b`, which is what the ESP32 core uses. Both use `-fno-exceptions`.
 - The FlexData tests need ArduinoJson. Set `ARDUINOJSON_SRC` to its `src/` directory, for example
   after `git clone --depth 1 --branch v7.4.3 https://github.com/bblanchon/ArduinoJson` (the tag CI
   uses). Unset, the script stops with that hint.
 - The Nvs and Settings tests need C++20 and ArduinoJson, so they run in the `gnu++2b` pass only.
-  That pass runs 123 tests, the `c++17` pass 98.
+  That pass runs 125 tests, the `c++17` pass 100.
 
 The last line is `== all unit checks passed`; any failure stops the script with a non-zero exit.
 

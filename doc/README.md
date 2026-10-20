@@ -11,7 +11,9 @@ typed NVS storage, helpers and a module framework, in one Arduino library. Sketc
 2. **Pick your level** (below) and run its example.
 3. **[Os](../src/XeWeCore/Os/README.md#os) → [Module](../src/XeWeCore/Module/README.md) → [Settings table](../src/XeWeCore/Settings/README.md)**: the three
    pages a module author needs.
-4. **The reference pages** below, when you need the exact behaviour of a function, command or
+4. **[Configuration](config.md)**: the build-time values, their names and how a build overrides
+   them; the same scheme for the core, the modules and xewe projects.
+5. **The reference pages** below, when you need the exact behaviour of a function, command or
    stored key.
 
 ## Three levels
@@ -27,11 +29,23 @@ always *your own* module.
 
 ## Reference
 
+### Configuration: `src/XeWeCore/Config.h`
+
+| Section | Covers |
+|---|---|
+| [The module Config.h](config.md#the-module-configh) | the file, its three sections, the entry form, first-boot values and `_PROMPT` |
+| [Names](config.md#names) | `XEWE_<SLUG>_<PARAM>`, the settings-key rule, no prefix nesting |
+| [The project's Config.h](config.md#the-projects-configh) | the core and module blocks, pre-answering, the `INJECTED_FROM_DOTENV` sentinel |
+| [Override ladder](config.md#override-ladder) | `--define`, dotenv, project, module fallback; the three generated or project headers |
+| [The dotenv file](config.md#the-dotenv-file), [Releases](config.md#releases) | injection, errors, provisioning keys; what a release refuses |
+| [Build info](config.md#build-info) | `XeWeBuildInfo.h`: `BUILD_VERSION`, `BUILD_TIMESTAMP`, `BUILD_CHIP`, `XEWE_CHIP_<X>` |
+| [What a validator checks](config.md#what-a-validator-checks) | the rules a module's `Config.h` passes |
+
 ### Os: `src/XeWeCore/Os/XeWeOs.h`, `Module/Module.h`, `Settings/Settings.h`
 
 | Section | Covers |
 |---|---|
-| [Os](../src/XeWeCore/Os/README.md#os) | `xewe::Os` / `XeWeOs`, `OsConfig`, `begin`, `loop`, module lookup, the core services, `XEWE_DEVICE_NAME` |
+| [Os](../src/XeWeCore/Os/README.md#os) | `xewe::Os` / `XeWeOs`, `OsConfig`, `begin`, `loop`, module lookup, the core services, the first-boot device name (`XEWE_CORE_DEVICE_NAME`) |
 | [Module](../src/XeWeCore/Module/README.md) | `xewe::Module`: constructor, lifecycle, enable/disable/reset, requirements, commands, listeners, NVS keys |
 | [Settings table](../src/XeWeCore/Settings/README.md) | the settings table: `setting<>`, flags, `$<id> set\|get\|schema`, schema lines, `schema_extra` |
 | [System](../src/XeWeCore/Os/README.md#system) | `xewe::System`, the built-in module, and the `$system` commands including `$system schema` |
@@ -79,6 +93,7 @@ always *your own* module.
 
 ## Also
 
+* [Configuration](config.md): build-time values for the core, the modules and xewe projects.
 * [Examples](examples.md): what each sketch in `examples/` shows.
 * [Tests](tests.md): the host unit tests and the board tests.
 * [Library rules](library-rules.md): what keeps XeWeCore a valid Arduino library (layout,

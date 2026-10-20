@@ -90,6 +90,17 @@ that both sets and listens (a web UI, a bridge) can skip the echo of its own cha
 
 See [Module: Listeners](../src/XeWeCore/Module/README.md#listeners).
 
+## Configuration
+
+Every build-time value of the core has one name and one place: `src/XeWeCore/Config.h`, with the
+serial defaults, the device name the first boot suggests, and the line and timer sizes. Each is a
+fallback that a compiler flag replaces, and in an xewe project the project's own `Config.h`, the
+dotenv file and `xewe build --define` replace it in a fixed order. A first-boot value that the build
+already answers is not asked for. Modules declare their values the same way, so one page describes
+them all.
+
+See [Configuration](config.md).
+
 ## Principles
 
 * **Pay only for what you use.** A firmware without a settings table does not link the settings
