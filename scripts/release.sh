@@ -635,7 +635,7 @@ prepare() {
       # recompiles (a new timestamp, a new sha), so --resume keeps an existing image: the flash
       # step is green for it and the board step reuses an up-to-date image.
       bin="${HARNESS}/build/builds/${chip}/out/<image>.bin"
-      built="$(find "${HARNESS}/build/builds/${chip}/out" -maxdepth 1 -name "*-${chip}-*.bin" ! -name '*bootloader*' ! -name '*partitions*' 2>/dev/null | head -n 1)"
+      built="$(find "${HARNESS}/build/builds/${chip}/out" -maxdepth 1 -name "*-${chip}-*.bin" ! -name '*bootloader*' ! -name '*partitions*' 2>/dev/null | head -n 1 || true)"
       if [[ "${#RESUME_ARGS[@]}" -eq 0 || -z "${built}" ]]; then
         run env -u XEWE_NO_BOARD "${out}" -m xewe --project "${HARNESS}" build --chip "${chip}" --define "${BOARD_DEFINES}" || true
       else
