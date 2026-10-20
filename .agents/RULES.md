@@ -117,13 +117,15 @@ as `X-NN`. They are not part of the WAX reference.
   `guidelines/license-header.txt`; the third line is the path, `// xewe-os-core/<path>`. Markdown
   files have none.
 - **X-13 Docs are part of the change.** A public function, lifecycle step, command, prompt, NVS key
-  or build define that is added or changed updates its page in `doc/` in the same change. `doc/`
-  describes current behaviour only: no history, no changelog, no version tags.
+  or build define that is added or changed updates its page (the component `README.md` under
+  `src/XeWeCore/`, or `doc/`) in the same change. `doc/` describes current behaviour only: no
+  history, no changelog, no version tags.
 - **X-14 Release through scripts/release.sh.** Versions and releases go through
-  `scripts/release.sh`, only when the human asks. First `--prepare <version>` (no git change) moves
-  the version strings in `library.properties`, `library.json` and `XEWE_CORE_VERSION*` together and
-  creates the `releases/<version>/notes.txt` and `testcard.md` skeletons; the owner fills them and
-  pushes one `prepare <version>` commit. Then `scripts/release.sh <version>` (`--dry-run` first)
+  `scripts/release.sh`, only when the human asks. First `--prepare <version> [--hardware c3,c6,s3]
+  [--harness DIR]` (no git change) moves the version strings in `library.properties`,
+  `library.json` and `XEWE_CORE_VERSION*` together, creates the `releases/<version>/notes.txt`
+  skeleton and renders `releases/<version>/release_card.md`; the owner fills the notes and pushes
+  one `prepare <version>` commit. Then `scripts/release.sh <version>` (`--dry-run` first)
   gates on the `tests` workflow for HEAD (`--ci-timeout <min>`, default 30; `--skip-ci` for
   emergencies only), runs the local checks, and never tags a commit whose CI is not green; there is
   no separate "wait for CI" step. Re-running it with a tag but no GitHub Release only creates the
