@@ -9,6 +9,16 @@
 
 // ---- runtime defaults ----
 
+// ---- first-boot values ----
+
+// Device name (system/device_name), string literal, up to 254 characters; suggested at first boot
+#ifndef XEWE_CORE_DEVICE_NAME
+#define XEWE_CORE_DEVICE_NAME "xewe-device"
+#define XEWE_CORE_DEVICE_NAME_PROMPT 1
+#endif
+
+// ---- compile-time constants ----
+
 // Serial baud rate (SerialPortConfig::baud_rate), bits per second
 #ifndef XEWE_CORE_SERIAL_BAUD
 #define XEWE_CORE_SERIAL_BAUD 115200
@@ -38,16 +48,6 @@
 #ifndef XEWE_CORE_PRINT_BANNER
 #define XEWE_CORE_PRINT_BANNER 1
 #endif
-
-// ---- first-boot values ----
-
-// Device name (system/device_name), string literal, up to 254 characters; suggested at first boot
-#ifndef XEWE_CORE_DEVICE_NAME
-#define XEWE_CORE_DEVICE_NAME "xewe-device"
-#define XEWE_CORE_DEVICE_NAME_PROMPT 1
-#endif
-
-// ---- compile-time constants ----
 
 // Serial line buffer (SerialPort::INPUT_BUFFER_SIZE), bytes including the terminator, 2 to 256
 #ifndef XEWE_CORE_INPUT_BUF_SIZE

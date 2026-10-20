@@ -29,7 +29,7 @@ struct SerialPortConfig {
 | `startup_delay_ms` | `1000` | `XEWE_CORE_SERIAL_DELAY_MS` | a plain `delay()` after opening the port |
 | `echo` | `true` | `XEWE_CORE_SERIAL_ECHO` (`1`) | echo each received character back, so a terminal shows what is typed |
 
-The defaults are the runtime defaults of the core's [`Config.h`](../Config.h)
+The defaults are the compile-time constants of the core's [`Config.h`](../Config.h)
 ([configuration](../../../doc/config.md)); a build flag or the project's `Config.h` changes them for
 the whole build, a field set in code changes them for that port.
 
