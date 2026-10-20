@@ -23,7 +23,6 @@ static_assert(XEWE_CORE_SERIAL_TX_BUF == 2048, "serial tx buffer");
 static_assert(XEWE_CORE_SERIAL_RX_BUF == 1024, "serial rx buffer");
 static_assert(XEWE_CORE_SERIAL_DELAY_MS == 1000, "serial startup delay");
 static_assert(XEWE_CORE_SERIAL_ECHO == 1, "serial echo");
-static_assert(XEWE_CORE_PRINT_BANNER == 1, "banner");
 static_assert(XEWE_CORE_INPUT_BUF_SIZE == 255, "line buffer");
 static_assert(XEWE_CORE_INPUT_QUEUE == 4, "line queue");
 static_assert(XEWE_CORE_TIMER_TICK_MS == 5, "timer tick");

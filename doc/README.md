@@ -33,7 +33,7 @@ always *your own* module.
 
 | Section | Covers |
 |---|---|
-| [The module Config.h](config.md#the-module-configh) | the file, its three sections, the entry form, first-boot values and `_PROMPT` |
+| [The module Config.h](config.md#the-module-configh) | the file, its two sections, the entry form, the values the first boot asks for and `_PROMPT` |
 | [Names](config.md#names) | `XEWE_<SLUG>_<PARAM>`, the settings-key rule, no prefix nesting |
 | [The project's Config.h](config.md#the-projects-configh) | the core and module blocks, pre-answering, the `INJECTED_FROM_DOTENV` sentinel |
 | [Override ladder](config.md#override-ladder) | `--define`, dotenv, project, module fallback; the three generated or project headers |

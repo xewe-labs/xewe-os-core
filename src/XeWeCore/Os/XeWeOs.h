@@ -31,7 +31,7 @@ struct OsConfig {
     std::string build_timestamp = {};
     std::string url = "https://github.com/xewe-labs/xewe-os-core";
     SerialPortConfig serial = {};
-    bool print_banner = XEWE_CORE_PRINT_BANNER != 0;
+    bool print_banner = true;
 };
 
 class System : public Module {

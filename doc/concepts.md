@@ -93,10 +93,10 @@ See [Module: Listeners](../src/XeWeCore/Module/README.md#listeners).
 ## Configuration
 
 Every build-time value of the core has one name and one place: `src/XeWeCore/Config.h`, with the
-serial defaults, the device name the first boot suggests, and the line and timer sizes. Each is a
+serial defaults, the device name the first boot asks for, and the line and timer sizes. Each is a
 fallback that a compiler flag replaces, and in an xewe project the project's own `Config.h`, the
-dotenv file and `xewe build --define` replace it in a fixed order. A first-boot value that the build
-already answers is not asked for. Modules declare their values the same way, so one page describes
+dotenv file and `xewe build --define` replace it in a fixed order. A value the first boot asks for is not asked
+for when the build already answers it. Modules declare their values the same way, so one page describes
 them all.
 
 See [Configuration](config.md).

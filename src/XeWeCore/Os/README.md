@@ -27,7 +27,7 @@ struct OsConfig {
     std::string            build_timestamp = {};
     std::string            url             = "https://github.com/xewe-labs/xewe-os-core";
     SerialPortConfig       serial          = {};
-    bool                   print_banner    = XEWE_CORE_PRINT_BANNER != 0;
+    bool                   print_banner    = true;
 };
 ```
 
@@ -37,7 +37,7 @@ struct OsConfig {
 | `build_timestamp` | `BUILD_TIMESTAMP`, else empty | printed only when set; `__DATE__ " " __TIME__` is the usual value |
 | `url` | this library's repo | printed under a separator; **set it to your own project or clear it** |
 | `serial` | see [SerialPortConfig](../Serial/README.md#serialportconfig-and-begin) | `115200` baud, 2048/1024 buffers, 1000 ms startup delay, echo on, from the `XEWE_CORE_SERIAL_*` defines |
-| `print_banner` | `XEWE_CORE_PRINT_BANNER` (`1`) | the ASCII XeWe banner at the top of the boot log |
+| `print_banner` | `true` | the ASCII XeWe banner at the top of the boot log |
 
 `version` and `build_timestamp` left empty are filled by the constructor from `BUILD_VERSION` and
 `BUILD_TIMESTAMP` of the tools' generated `<XeWeBuildInfo.h>`, which `XeWeOs.cpp` includes when the
@@ -110,11 +110,11 @@ module's `<name> Setup` header → `System Setup Complete`.
 
 #### First-boot device name
 
-The device name (`system/device_name`) is a first-boot value of the core's
+The device name (`system/device_name`) is a default runtime value of the core's
 [`Config.h`](../Config.h) ([configuration](../../../doc/config.md)):
 
 ```c
-// Device name (system/device_name), string literal, up to 254 characters; suggested at first boot
+/* Device name (system/device_name), string literal, up to 254 characters; asked at first boot */
 #ifndef XEWE_CORE_DEVICE_NAME
 #define XEWE_CORE_DEVICE_NAME "xewe-device"
 #define XEWE_CORE_DEVICE_NAME_PROMPT 1
