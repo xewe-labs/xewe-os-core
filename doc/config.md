@@ -36,12 +36,16 @@ headers do this, so `Config.h` sits above everything else in the include directi
 ### Sections
 
 After the header (the SPDX lines, the path, one paragraph, `#pragma once`) come two sections, in
-this order, each opened by its marker line exactly as written here:
+this order, each opened by its start marker line and closed by its end marker line, exactly as
+written here:
 
-| Marker | Holds |
+| Markers | Holds |
 |---|---|
-| `/* ---- default runtime values ---- */` | the default of a value the user changes at runtime (a settings row), including a value the first boot asks for |
-| `/* ---- compile time defined constants ---- */` | pins, sizes, task parameters, debug switches |
+| `/* ---- start default runtime values ---- */` ... `/* ---- end default runtime values ---- */` | the default of a value the user changes at runtime (a settings row), including a value the first boot asks for |
+| `/* ---- start compile time defined constants ---- */` ... `/* ---- end compile time defined constants ---- */` | pins, sizes, task parameters, debug switches |
+
+A section is the start line, a blank line, the entries separated by blank lines, a blank line and
+the end line; one blank line separates the two sections.
 
 A default runtime value is only a value a settings row stores; a struct field read once at begin is
 a compile time defined constant.
@@ -50,7 +54,7 @@ Text is written in `/* */` and commented-out code in `//`, so the two are told a
 In the module's file every text line is a single-line block comment, and the header paragraph is
 one multi-line block comment; `//` appears only in the three SPDX lines.
 
-A section may be empty, but its marker stays. The tools find the sections by these lines, so they
+A section may be empty, but its markers stay. The tools find the sections by these lines, so they
 are never reworded.
 
 ### Entry form
@@ -123,26 +127,47 @@ template owns the file; the tools append to it and never create or rewrite it. I
 active until the user uncomments a line.
 
 ```c
-/* ---- core (xewe modules generate) ---- */
-/* Values of the core. Uncomment a line to override; keep both markers. */
-/* ---- default runtime values ---- */
+// SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
+// SPDX-License-Identifier: GPL-3.0-only
+// xewe-os/Config.h
+/*
+ * Uncomment #define line and change the value to override the default.
+ */
+#pragma once
+
+/************************/
+/* ---- start core ---- */
+/************************/
+/* ---- start default runtime values ---- */
 
 /* Device name (system/device_name), string literal, up to 254 characters; asked at first boot */
 // #define XEWE_CORE_DEVICE_NAME "xewe-device"
 
-/* ---- compile time defined constants ---- */
+/* ---- end default runtime values ---- */
+
+/* ---- start compile time defined constants ---- */
 
 /* Serial baud rate (SerialPortConfig::baud_rate), bits per second */
 // #define XEWE_CORE_SERIAL_BAUD 115200
 ...
-/* ---- end core ---- */
+/* ---- end compile time defined constants ---- */
 
-/* ---- wifi (xewe modules generate) ---- */
-/* Values of the wifi module. Uncomment a line to override; keep both markers. */
+/**********************/
+/* ---- end core ---- */
+/**********************/
+
+/************************/
+/* ---- start wifi ---- */
+/************************/
 ...
+/**********************/
 /* ---- end wifi ---- */
+/**********************/
 ```
 
+* **A module's block is framed by bars**: a `/****/` line above and below its `start` and `end`
+  marker lines, each as long as the marker line. The module's sections sit between them, laid out
+  as in the module's file.
 * **Every entry is a block comment line followed by its definition commented out**: the comment
   line of the module's file, then `// #define NAME value`. The `#ifndef` guard and `<NAME>_PROMPT` are
   left out. A chip-conditional entry keeps its `#if`, `#elif`, `#else` and `#endif` lines, each
@@ -261,8 +286,8 @@ A module's `Config.h`, and the sources that read it, pass these checks. The modu
 validator applies them to every module that has adopted this scheme; the core is held to them by
 its host tests (`tests/unit/probe/Config.probe.cpp`) and by review.
 
-* The two section markers are present, exactly as written, in their order, as single-line block
-  comments.
+* The two sections' start and end marker pairs are present, exactly as written, in their order,
+  each once, as single-line block comments.
 * Every text line is a block comment; `//` appears only in the SPDX lines of a module's file and in
   front of commented-out code in a project's `Config.h`.
 * Every define is inside an `#ifndef` group of its own name, with one block comment line above

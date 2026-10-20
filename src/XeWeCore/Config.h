@@ -8,7 +8,7 @@
  */
 #pragma once
 
-/* ---- default runtime values ---- */
+/* ---- start default runtime values ---- */
 
 /* Device name (system/device_name), string literal, up to 254 characters; asked at first boot */
 #ifndef XEWE_CORE_DEVICE_NAME
@@ -16,7 +16,9 @@
 #define XEWE_CORE_DEVICE_NAME_PROMPT 1
 #endif
 
-/* ---- compile time defined constants ---- */
+/* ---- end default runtime values ---- */
+
+/* ---- start compile time defined constants ---- */
 
 /* Serial baud rate (SerialPortConfig::baud_rate), bits per second */
 #ifndef XEWE_CORE_SERIAL_BAUD
@@ -57,3 +59,5 @@
 #ifndef XEWE_CORE_TIMER_TICK_MS
 #define XEWE_CORE_TIMER_TICK_MS 5
 #endif
+
+/* ---- end compile time defined constants ---- */
