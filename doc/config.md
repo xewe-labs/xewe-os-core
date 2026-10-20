@@ -38,11 +38,14 @@ headers do this, so `Config.h` sits above everything else in the include directi
 After the header (the SPDX lines, the path, one paragraph, `#pragma once`) come three sections, in
 this order, each opened by its marker line exactly as written here:
 
-| Marker | Holds | Always defined |
-|---|---|---|
-| `// ---- runtime defaults ----` | the default of a value the user changes at runtime (a settings row) | yes |
-| `// ---- first-boot values ----` | a value the first boot asks for; a project may pre-answer it | yes |
-| `// ---- compile-time constants ----` | pins, sizes, task parameters, debug switches | yes |
+| Marker | Holds |
+|---|---|
+| `// ---- runtime defaults ----` | the default of a value the user changes at runtime (a settings row) |
+| `// ---- first-boot values ----` | a value the first boot asks for; a project may pre-answer it |
+| `// ---- compile-time constants ----` | pins, sizes, task parameters, debug switches |
+
+A runtime default is only a value a settings row stores; a struct field read once at begin is a
+compile-time constant.
 
 A section may be empty, but its marker stays. The tools find the sections by these lines, so they
 are never reworded.
@@ -99,8 +102,7 @@ Every define of a module's `Config.h` is named `XEWE_<SLUG>_<PARAM>`.
 * **`<PARAM>`** of a runtime default or a first-boot value is the value's settings key in upper
   case: the key `device_name` gives `XEWE_CORE_DEVICE_NAME`. Settings keys and NVS keys are 1 to 15
   characters and are never renamed once stored, so `<PARAM>` is at most 15 characters and keeps
-  its name. A value that has no settings row yet is named as its row would be (the core's
-  `XEWE_CORE_SERIAL_BAUD` → `serial_baud`). The module id is the namespace of the key and is not
+  its name. The module id is the namespace of the key and is not
   part of the name: `XEWE_CORE_DEVICE_NAME` is `device_name` in the namespace `system`.
 * **`<PARAM>`** of a compile-time constant is any upper-case name.
 * **`_PROMPT` is reserved.** No `<PARAM>` ends in `_PROMPT`; the suffix exists only as the marker of
@@ -113,19 +115,14 @@ A module defines names with its prefix only in its `Config.h`.
 ## The project's Config.h
 
 A project (the template and every product made from it) has one `Config.h` in its root. The
-template owns the file; the tools append to it and never create or rewrite it. It holds a header,
-then the core block, then one block per selected module:
+template owns the file; the tools append to it and never create or rewrite it. It is a catalogue:
+`xewe modules generate` appends one block per module, the core first, and nothing in the file is
+active until the user uncomments a line.
 
 ```c
 // ---- core (xewe modules generate) ----
-// Values of the core. Edit the numbers; keep this marker and the end marker.
+// Values of the core. Uncomment a line to set it; keep this marker and the end marker.
 // ---- runtime defaults ----
-
-// Serial baud rate (SerialPortConfig::baud_rate), bits per second
-#ifndef XEWE_CORE_SERIAL_BAUD
-#define XEWE_CORE_SERIAL_BAUD 115200
-#endif
-...
 
 // ---- first-boot values ----
 
@@ -133,33 +130,41 @@ then the core block, then one block per selected module:
 // #define XEWE_CORE_DEVICE_NAME "xewe-device"
 
 // ---- compile-time constants ----
+
+// Serial baud rate (SerialPortConfig::baud_rate), bits per second
+// #define XEWE_CORE_SERIAL_BAUD 115200
 ...
 // ---- end core ----
 
 // ---- wifi (xewe modules generate) ----
-// Values of the wifi module. Edit the numbers; keep this marker and the end marker.
+// Values of the wifi module. Uncomment a line to set it; keep this marker and the end marker.
 ...
 // ---- end wifi ----
 ```
 
-* `xewe modules generate` appends a block once, when the file has no block of that slug, copying
-  the module's `Config.h` from its first section marker on. Runtime defaults and compile-time
-  constants are copied as their `#ifndef` groups. A first-boot value becomes its comment line plus
-  `// #define <NAME> <value>`, without the guard and without `<NAME>_PROMPT`, so a fresh project
-  still asks at first boot.
-* A block is never rewritten: the user's edits survive every generate. A block whose module is no
-  longer selected stays.
+* **Every entry is a comment line followed by its definition commented out**: the comment line of
+  the module's file, then `// #define NAME value`. The `#ifndef` guard and `<NAME>_PROMPT` are
+  left out. A chip-conditional entry keeps its `#if`, `#elif`, `#else` and `#endif` lines, each
+  commented.
+* **Nothing is active until the user uncomments a line.** A fresh project defines no value of its
+  own, so every module fallback applies and every first-boot question is asked.
+* **An uncommented line is a bare `#define`**, with no `#ifndef`. The generated `XeWeOverrides.h`
+  is read after the project's `Config.h` and carries the `--define` and dotenv values, so a bare
+  line here still yields to them ([Override ladder](#override-ladder)).
+* **A first-boot line that is uncommented pre-answers its question**, or carries
+  `INJECTED_FROM_DOTENV` to take the answer from the dotenv file.
+* **A block is appended once and never rewritten.** `xewe modules generate` adds a block when the
+  file has no block of that slug; the user's edits survive every generate, and a block whose
+  module is no longer selected stays.
 * No `#include` and no build macros (`BUILD_VERSION` and the like). The one exception is
   `XEWE_CHIP_C3`, `XEWE_CHIP_C6` or `XEWE_CHIP_S3`, which the build defines before this file is
   read, for chip-dependent values (`#ifdef XEWE_CHIP_C3`).
-* Bare `#define` lines are allowed and win over the module fallback, because this file is read
-  before any module header.
 
 What the user does in it:
 
 | To | Write |
 |---|---|
-| change a default or a constant | edit the number or string in its `#define` |
+| change a default or a constant | uncomment its line and set the number or string: `#define XEWE_CORE_SERIAL_BAUD 921600` |
 | pre-answer a first-boot question | uncomment its line: `#define XEWE_CORE_DEVICE_NAME "Desk Lamp"` |
 | take a value from the dotenv file at build time | `#define XEWE_WIFI_PSW INJECTED_FROM_DOTENV` |
 
