@@ -45,7 +45,7 @@ INSTALL
 
 - Arduino IDE: Library Manager, XeWeCore 3.1.0. Depends on ArduinoJson >=7.0.0 (tested 7.4.3).
 - xewe-os projects: [core] ref = "3.1.0" in xewe.toml, then ./setup.sh. Built and tested with
-  xewe-os-tools 3.1.1, arduino-cli 1.5.1 and esp32 core 3.3.12.
+  xewe-os-tools 3.1.2, arduino-cli 1.5.1 and esp32 core 3.3.12.
 
 TESTING
 
