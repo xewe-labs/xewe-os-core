@@ -631,9 +631,16 @@ prepare() {
     hw=0
     [[ ",${HARDWARE}," == *",${chip},"* ]] && hw=1
     if [[ "${hw}" == 1 ]]; then
-      # the image the flash step writes is the one the board step tests (up to date: reused)
-      run env -u XEWE_NO_BOARD "${out}" -m xewe --project "${HARNESS}" build --chip "${chip}" --define "${BOARD_DEFINES}" || true
+      # the image the flash step writes is the one the board step tests. `xewe build` always
+      # recompiles (a new timestamp, a new sha), so --resume keeps an existing image: the flash
+      # step is green for it and the board step reuses an up-to-date image.
       bin="${HARNESS}/build/builds/${chip}/out/<image>.bin"
+      built="$(find "${HARNESS}/build/builds/${chip}/out" -maxdepth 1 -name "*-${chip}-*.bin" ! -name '*bootloader*' ! -name '*partitions*' 2>/dev/null | head -n 1)"
+      if [[ "${#RESUME_ARGS[@]}" -eq 0 || -z "${built}" ]]; then
+        run env -u XEWE_NO_BOARD "${out}" -m xewe --project "${HARNESS}" build --chip "${chip}" --define "${BOARD_DEFINES}" || true
+      else
+        echo "   resume: keeping the built image for ${chip} (${built})"
+      fi
       if [[ "${DRY_RUN}" != 1 ]]; then
         bin="$(find "${HARNESS}/build/builds/${chip}/out" -maxdepth 1 -name "*-${chip}-*.bin" ! -name '*bootloader*' ! -name '*partitions*' 2>/dev/null | head -n 1)"
         [[ -n "${bin}" ]] || bin="${HARNESS}/build/builds/${chip}/out/missing.bin"

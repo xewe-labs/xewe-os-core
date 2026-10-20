@@ -67,11 +67,11 @@ MODULE_COMMANDS: list[tuple[str, str, float]] = [
     ("$pins status", r"^Pins module enabled", 5),
     ("$buttons status", r"^Buttons module enabled", 5),
     ("$web_interface status", r"^Web Interface module enabled", 5),
-    ("$time set_zone bogus", r"^Invalid format\. Use GMT", 5),
-    ("$schedule remove 999", r"^Scheduler: invalid ID or out of bounds", 5),
-    ("$schedule remove 250", r"^Scheduler: schedule not found", 5),
-    ("$buttons remove abc", r"^Error: invalid button ID", 5),
-    ("$buttons remove 4242", r"^Error: button ID not found", 5),
+    ("$time set_zone bogus", r"^! Time: invalid timezone, use GMT", 5),
+    ("$schedule remove 999", r"^! Scheduler: invalid id or out of bounds", 5),
+    ("$schedule remove 250", r"^! Scheduler: schedule not found", 5),
+    ("$buttons remove abc", r"^! Buttons: invalid button id", 5),
+    ("$buttons remove 4242", r"^! Buttons: button id not found", 5),
 ]
 # rare and slow: network round trips
 SLOW_COMMANDS: list[tuple[str, str, float]] = [
