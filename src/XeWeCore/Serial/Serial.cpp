@@ -4,6 +4,8 @@
 
 #include "Serial.h"
 
+#include <cstdio>
+
 namespace xewe {
 
 void SerialPort::begin(const SerialPortConfig& cfg) {
@@ -33,7 +35,10 @@ void SerialPort::loop() {
                 // the whole over-long line is dropped: nothing of it executes
                 input_overflowed = false;
                 input_buffer_pos = 0;
-                this->println_raw("! Input line too long (max 254 chars): dropped");
+                char notice[64];
+                snprintf(notice, sizeof(notice), "! Input line too long (max %u chars): dropped",
+                    static_cast<unsigned>(INPUT_BUFFER_SIZE - 1));
+                this->println_raw(notice);
                 continue;
             }
             push_line();
@@ -42,7 +47,7 @@ void SerialPort::loop() {
         if (input_overflowed)
             continue; // discard the rest of an over-long line
         if (input_buffer_pos >= INPUT_BUFFER_SIZE - 1) {
-            input_overflowed = true; // 255th character: mark the line, drop it at '\n'
+            input_overflowed = true; // buffer full: mark the line, drop it at '\n'
             continue;
         }
         input_buffer[input_buffer_pos++] = c;

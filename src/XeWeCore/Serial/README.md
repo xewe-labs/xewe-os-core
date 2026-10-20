@@ -13,21 +13,25 @@
 
 ```cpp
 struct SerialPortConfig {
-    unsigned long baud_rate        = 115200;
-    std::size_t   tx_buffer_size   = 2048;
-    std::size_t   rx_buffer_size   = 1024;
-    uint32_t      startup_delay_ms = 1000;  // give USB CDC time to enumerate
-    bool          echo             = true;  // echo typed characters back
+    unsigned long baud_rate        = XEWE_CORE_SERIAL_BAUD;
+    std::size_t   tx_buffer_size   = XEWE_CORE_SERIAL_TX_BUF;
+    std::size_t   rx_buffer_size   = XEWE_CORE_SERIAL_RX_BUF;
+    uint32_t      startup_delay_ms = XEWE_CORE_SERIAL_DELAY_MS;  // give USB CDC time to enumerate
+    bool          echo             = XEWE_CORE_SERIAL_ECHO != 0; // echo typed characters back
 };
 ```
 
-| Field | Default | |
-|---|---|---|
-| `baud_rate` | `115200` | passed to `Serial.begin` |
-| `tx_buffer_size` | `2048` | set **before** `Serial.begin`; a table or header can be several hundred bytes in one burst |
-| `rx_buffer_size` | `1024` | the hardware buffer, separate from the 255-byte line buffer |
-| `startup_delay_ms` | `1000` | a plain `delay()` after opening the port |
-| `echo` | `true` | echo each received character back, so a terminal shows what is typed |
+| Field | Default | Define | |
+|---|---|---|---|
+| `baud_rate` | `115200` | `XEWE_CORE_SERIAL_BAUD` | passed to `Serial.begin` |
+| `tx_buffer_size` | `2048` | `XEWE_CORE_SERIAL_TX_BUF` | set **before** `Serial.begin`; a table or header can be several hundred bytes in one burst |
+| `rx_buffer_size` | `1024` | `XEWE_CORE_SERIAL_RX_BUF` | the hardware buffer, separate from the 255-byte line buffer |
+| `startup_delay_ms` | `1000` | `XEWE_CORE_SERIAL_DELAY_MS` | a plain `delay()` after opening the port |
+| `echo` | `true` | `XEWE_CORE_SERIAL_ECHO` (`1`) | echo each received character back, so a terminal shows what is typed |
+
+The defaults are the runtime defaults of the core's [`Config.h`](../Config.h)
+([configuration](../../../doc/config.md)); a build flag or the project's `Config.h` changes them for
+the whole build, a field set in code changes them for that port.
 
 ### begin
 
@@ -264,7 +268,8 @@ of the sketch's `loop()`. It never blocks: it reads only what is already availab
 
 Per character: `'\r'` is discarded, `'\n'` ends the line, anything else is appended. When `echo` is
 on, the character is written back first. Each completed line is pushed onto a FIFO of up to four
-lines (`INPUT_QUEUE_LINES`), so several lines arriving in one pass are all kept, in order.
+lines (`INPUT_QUEUE_LINES`, from `XEWE_CORE_INPUT_QUEUE`), so several lines arriving in one pass
+are all kept, in order.
 
 ### has_line
 
@@ -296,13 +301,15 @@ not answer it.
 
 ### Notes
 
-* **A line holds 255 bytes** (`INPUT_BUFFER_SIZE`), 254 usable. From the 255th character on, the
-  rest of the line is discarded up to the newline. Then the **whole line is dropped** and
-  `! Input line too long (max 254 chars): dropped` is printed once. Nothing of it is queued or
-  executed. Long input (a Wi-Fi password, a URL, a JSON blob) must fit in 254 characters.
-* **Up to four completed lines are queued** (`INPUT_QUEUE_LINES`). A line that completes while
-  four are waiting is dropped; the queued ones are kept. Each dropped line prints
-  `! Input overflow: line dropped`.
+* **A line holds 255 bytes** (`INPUT_BUFFER_SIZE`, from the compile-time constant
+  `XEWE_CORE_INPUT_BUF_SIZE`), 254 usable. From the 255th character on, the rest of the line is
+  discarded up to the newline. Then the **whole line is dropped** and
+  `! Input line too long (max 254 chars): dropped` is printed once (the number is the usable
+  length). Nothing of it is queued or executed. Long input (a Wi-Fi password, a URL, a JSON blob)
+  must fit in 254 characters.
+* **Up to four completed lines are queued** (`INPUT_QUEUE_LINES`, from `XEWE_CORE_INPUT_QUEUE`). A
+  line that completes while four are waiting is dropped; the queued ones are kept. Each dropped
+  line prints `! Input overflow: line dropped`.
 * **One burst must fit the RX buffer** (`rx_buffer_size`, 1024 bytes by default, see
   [config](#serialportconfig-and-begin)). The ESP32 USB console (HWCDC) has no flow control: bytes that arrive while
   its RX queue is full are lost before `loop()` sees them. On an S3, a command sent after 1024 other

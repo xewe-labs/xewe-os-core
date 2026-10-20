@@ -33,9 +33,12 @@ for std in c++17 gnu++2b; do
         "$CXX" -std="$std" "${FLAGS[@]}" -c "$p" -o "$OUT/$(basename "$p").$std.o"
         echo "   ok $(basename "$p")"
     done
+    "$CXX" -std="$std" "${FLAGS[@]}" -DXEWE_CORE_DEVICE_NAME='"x"' -c "$HERE/probe/Config.probe.cpp" \
+        -o "$OUT/Config.preanswered.$std.o"
+    echo "   ok Config.probe.cpp with XEWE_CORE_DEVICE_NAME (no prompt)"
 
     echo "== $std: host-includable headers (standard library only, no Arduino shim)"
-    for h in Utils/Color.h Utils/String.h Utils/Pins.h Utils/Listeners.h; do
+    for h in Config.h Utils/Color.h Utils/String.h Utils/Pins.h Utils/Listeners.h; do
         printf '#include <XeWeCore/%s>\n' "$h" | "$CXX" -std="$std" -Wall -Wextra -fno-exceptions -I "$SRC" -x c++ -fsyntax-only -
         echo "   ok $h"
     done

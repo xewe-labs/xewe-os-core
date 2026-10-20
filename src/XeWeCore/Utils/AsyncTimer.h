@@ -8,6 +8,7 @@
 #include <cinttypes>
 #include <type_traits>
 
+#include "../Config.h"
 #include "Debug.h"
 
 #ifndef DEBUG_AsyncTimer
@@ -22,7 +23,7 @@ template <typename T> class AsyncTimer {
 private:
     mutable uint32_t start_time{};
     mutable uint32_t last_calc_time{};
-    static constexpr uint32_t calc_interval_ms = 5;
+    static constexpr uint32_t calc_interval_ms = XEWE_CORE_TIMER_TICK_MS;
 
     uint32_t delay_ms;
     T start_val, target_val;

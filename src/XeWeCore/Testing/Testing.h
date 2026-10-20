@@ -6,8 +6,9 @@
 // XEWE_TESTING is defined; a production build gets zero bytes from this file and Testing.cpp.
 //
 // Enable with the tools:  xewe build --chip s3 --define XEWE_TESTING=1
-//   (the define lands in the generated <XeWeBuildInfo.h>, which is read below)
+//   (the define lands in the generated XeWeOverrides.h, which every file gets before line 1)
 // or with plain arduino-cli: --build-property compiler.cpp.extra_flags=-DXEWE_TESTING=1
+//   (the <XeWeBuildInfo.h> read below serves a plain build whose own flags add that header)
 #pragma once
 
 #if !defined(XEWE_TESTING) && defined(__has_include)

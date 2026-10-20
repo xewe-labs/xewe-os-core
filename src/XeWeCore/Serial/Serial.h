@@ -12,16 +12,18 @@
 #include <string_view>
 #include <vector>
 
+#include "../Config.h"
 #include "../Utils/Utils.h"
 
 namespace xewe {
 
+// defaults from Config.h
 struct SerialPortConfig {
-    unsigned long baud_rate = 115200;
-    std::size_t tx_buffer_size = 2048;
-    std::size_t rx_buffer_size = 1024;
-    uint32_t startup_delay_ms = 1000; // give USB CDC time to enumerate
-    bool echo = true; // echo typed characters back
+    unsigned long baud_rate = XEWE_CORE_SERIAL_BAUD;
+    std::size_t tx_buffer_size = XEWE_CORE_SERIAL_TX_BUF;
+    std::size_t rx_buffer_size = XEWE_CORE_SERIAL_RX_BUF;
+    uint32_t startup_delay_ms = XEWE_CORE_SERIAL_DELAY_MS; // give USB CDC time to enumerate
+    bool echo = XEWE_CORE_SERIAL_ECHO != 0; // echo typed characters back
 };
 
 class SerialPort {
@@ -119,9 +121,11 @@ private:
 
     void push_line();
 
-    // in-progress line plus a FIFO of completed lines (ring buffer)
-    static constexpr std::size_t INPUT_BUFFER_SIZE = 255; // per line, 254 usable
-    static constexpr std::size_t INPUT_QUEUE_LINES = 4; // completed lines held
+    // in-progress line plus a FIFO of completed lines (ring buffer); a line's size includes the
+    // terminator
+    static constexpr std::size_t INPUT_BUFFER_SIZE = XEWE_CORE_INPUT_BUF_SIZE;
+    static constexpr std::size_t INPUT_QUEUE_LINES = XEWE_CORE_INPUT_QUEUE; // completed lines held
+    static_assert(INPUT_BUFFER_SIZE >= 2 && INPUT_QUEUE_LINES >= 1, "room for one line of input");
     static_assert(
         INPUT_BUFFER_SIZE <= 256 && INPUT_QUEUE_LINES <= 255, "lengths and indices are uint8_t");
     char input_buffer[INPUT_BUFFER_SIZE] = {};

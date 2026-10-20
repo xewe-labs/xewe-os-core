@@ -9,7 +9,6 @@
 
 ```cpp
 XeWeOs os({
-    .project_name    = "blink-device",
     .version         = "0.1.0",
     .build_timestamp = __DATE__ " " __TIME__,
 });
@@ -24,23 +23,27 @@ void loop()  { os.loop();  }
 
 ```cpp
 struct OsConfig {
-    std::string            project_name    = "xewe-device";
-    std::string            version         = "0.0.0";
+    std::string            version         = {};
     std::string            build_timestamp = {};
     std::string            url             = "https://github.com/xewe-labs/xewe-os-core";
     SerialPortConfig       serial          = {};
-    bool                   print_banner    = true;
+    bool                   print_banner    = XEWE_CORE_PRINT_BANNER != 0;
 };
 ```
 
 | Field | Default | |
 |---|---|---|
-| `project_name` | `"xewe-device"` | first line of the boot header |
-| `version` | `"0.0.0"` | printed as `Version <version>` |
-| `build_timestamp` | empty | printed only when set; `__DATE__ " " __TIME__` is the usual value |
+| `version` | `BUILD_VERSION`, else `"0.0.0"` | printed as `Version <version>` |
+| `build_timestamp` | `BUILD_TIMESTAMP`, else empty | printed only when set; `__DATE__ " " __TIME__` is the usual value |
 | `url` | this library's repo | printed under a separator; **set it to your own project or clear it** |
-| `serial` | see [SerialPortConfig](../Serial/README.md#serialportconfig-and-begin) | `115200` baud, 2048/1024 buffers, 1000 ms startup delay, echo on |
-| `print_banner` | `true` | the ASCII XeWe banner at the top of the boot log |
+| `serial` | see [SerialPortConfig](../Serial/README.md#serialportconfig-and-begin) | `115200` baud, 2048/1024 buffers, 1000 ms startup delay, echo on, from the `XEWE_CORE_SERIAL_*` defines |
+| `print_banner` | `XEWE_CORE_PRINT_BANNER` (`1`) | the ASCII XeWe banner at the top of the boot log |
+
+`version` and `build_timestamp` left empty are filled by the constructor from `BUILD_VERSION` and
+`BUILD_TIMESTAMP` of the tools' generated `<XeWeBuildInfo.h>`, which `XeWeOs.cpp` includes when the
+build has it ([configuration](../../../doc/config.md#build-info)). Without it `version` is
+`"0.0.0"` and `build_timestamp` stays empty. A value set in the sketch always wins. The defaults
+that come from defines are listed in the core's [`Config.h`](../Config.h).
 
 ### Core services
 
@@ -102,29 +105,47 @@ Call once from `setup()`. In order:
 `os.begin()` in `setup()` does not run on that boot. Anything with a one-time side effect outside
 NVS has to tolerate running again.
 
-Boot output order: banner → queued errors → the `System` project/version header → each module's
-`<name> Setup` header → `System Setup Complete`.
+Boot output order: banner → queued errors → the `System` header (device name, version) → each
+module's `<name> Setup` header → `System Setup Complete`.
 
-#### Build-time device name
+#### First-boot device name
 
-`XEWE_DEVICE_NAME` (a string literal) pre-answers the first-boot name prompt, so provisioning can
-run unattended:
+The device name (`system/device_name`) is a first-boot value of the core's
+[`Config.h`](../Config.h) ([configuration](../../../doc/config.md)):
+
+```c
+// Device name (system/device_name), string literal, up to 254 characters; suggested at first boot
+#ifndef XEWE_CORE_DEVICE_NAME
+#define XEWE_CORE_DEVICE_NAME "xewe-device"
+#define XEWE_CORE_DEVICE_NAME_PROMPT 1
+#endif
+```
+
+* **Not pre-answered** (`XEWE_CORE_DEVICE_NAME_PROMPT` defined): the first boot asks for the name
+  and shows `XEWE_CORE_DEVICE_NAME` as the suggestion; an empty answer takes it
+  ([begin_routines_init](#begin_routines_init)).
+* **Pre-answered** (`XEWE_CORE_DEVICE_NAME` defined before `Config.h` is read, so the
+  `_PROMPT` define is not set): no prompt. If `system/device_name` is empty, the first boot writes
+  `XEWE_CORE_DEVICE_NAME` there. Either way it prints `Device name: <name>`. A name already in NVS is
+  kept, and `$system set_device_name` still renames the device afterwards.
+
+Pre-answer it with a build flag, a string literal:
 
 ```bash
-xewe build --chip s3 --define 'XEWE_DEVICE_NAME="Laptop Chiller"'
-arduino-cli compile --build-property "compiler.cpp.extra_flags='-DXEWE_DEVICE_NAME=\"Laptop Chiller\"'" ...
+xewe build --chip s3 --define 'XEWE_CORE_DEVICE_NAME="Laptop Chiller"'
+arduino-cli compile --build-property "compiler.cpp.extra_flags='-DXEWE_CORE_DEVICE_NAME=\"Laptop Chiller\"'" ...
 ```
 
 The inner single quotes keep a name with spaces in one compiler argument. arduino-cli splits the
 recipe on spaces outside quotes; without them `Chiller"` becomes a stray file name.
 
-When it is defined, `System`'s first-boot setup does not prompt. If `system/device_name` is empty
-it writes `XEWE_DEVICE_NAME` there. Either way it prints `Device name: <name>`. A name already in
-NVS is kept, and `$system set_device_name` still renames the device afterwards.
+In an xewe project the line `// #define XEWE_CORE_DEVICE_NAME "xewe-device"` of the project's
+`Config.h` does the same once uncommented, and `#define XEWE_CORE_DEVICE_NAME INJECTED_FROM_DOTENV`
+takes the name from the dotenv file at build time ([override ladder](../../../doc/config.md#override-ladder)).
 
 A `#define` in the sketch does **not** work. The name is read by `XeWeOs.cpp`, a library file, so
-it has to be a build flag or come from the tools' generated `<XeWeBuildInfo.h>`, which
-`XeWeOs.cpp` includes when present. Without the define the device prompts for a name.
+it has to reach every translation unit: a build flag, or the headers the tools put in front of
+every file.
 
 ### loop
 
@@ -171,7 +192,7 @@ const OsConfig&               get_config ()                    const;
 to reach a module you hold no reference to. For a real dependency, prefer a constructor reference
 plus `add_requirement` ([Module](../Module/README.md#add_requirement)).
 
-`get_config` is how `System` reads the project name and version for the boot header.
+`get_config` is how `System` reads the version, build timestamp and url for the boot header.
 
 ### Declaration order
 
@@ -269,8 +290,9 @@ Every module's [settings](../Settings/README.md) as JSON Lines: a header
 
 ### begin_routines_required
 
-Prints the boot header from the Os config: `<project_name>`, `Version <version>`,
-`Build Timestamp <build_timestamp>` when set, and the url when set. Then it calls:
+Prints the boot header: the device name (`system/device_name`, or `XEWE_CORE_DEVICE_NAME` while
+none is stored), `Version <version>`, `Build Timestamp <build_timestamp>` when set, and the url when
+set, the last three from the Os config. Then it calls:
 
 ```cpp
 esp_log_level_set("*", ESP_LOG_NONE);
@@ -289,7 +311,7 @@ Nvs errors at the serial console.
 The one-time device naming, run until it is confirmed:
 
 ```
-Name your device (ex: Kitchen Lights):
+Name your device (Enter for "xewe-device"):
 >
 Kitchen Lights
 Confirm "Kitchen Lights"?
@@ -297,14 +319,15 @@ Confirm "Kitchen Lights"?
 y
 ```
 
-The `>` marker is printed on its own line, so typed input echoes on the line below it.
+The `>` marker is printed on its own line, so typed input echoes on the line below it. The
+suggestion in the prompt is `XEWE_CORE_DEVICE_NAME`; an empty answer takes it, so the confirmation
+then reads `Confirm "xewe-device"?`. A "no" asks for the name again.
 
-The confirmed value is written to `system/device_name`. An empty name is accepted if the user
-confirms it.
+The confirmed value is written to `system/device_name`.
 
-Built with `XEWE_DEVICE_NAME`, there is no prompt: the build-time name is written when
+With a pre-answered `XEWE_CORE_DEVICE_NAME` there is no prompt: the name is written when
 `system/device_name` is empty and `Device name: <name>` is printed. See
-[Build-time device name](#build-time-device-name).
+[First-boot device name](#first-boot-device-name).
 
 ### status
 

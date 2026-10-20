@@ -19,7 +19,6 @@
 // Declaration order is registration order is begin() order is loop() order.
 // The Os comes first; a module comes after everything it depends on.
 XeWeOs os({
-    .project_name = "sensor-alert",
     .version = "0.1.0",
     .build_timestamp = __DATE__ " " __TIME__,
     .url = "", // clear the default, which points at the library repo

@@ -13,6 +13,7 @@
 #include <mbedtls/sha256.h>
 
 #include "esp_log.h"
+#include "../Config.h"
 #include "../Module/Module.h"
 
 // library version (library.properties); `$system schema` reports it in its header line
@@ -23,13 +24,14 @@
 
 namespace xewe {
 
+// Left empty, version and build_timestamp take BUILD_VERSION and BUILD_TIMESTAMP from the tools'
+// generated <XeWeBuildInfo.h> when the build has it; otherwise version is "0.0.0".
 struct OsConfig {
-    std::string project_name = "xewe-device";
-    std::string version = "0.0.0";
+    std::string version = {};
     std::string build_timestamp = {};
     std::string url = "https://github.com/xewe-labs/xewe-os-core";
     SerialPortConfig serial = {};
-    bool print_banner = true;
+    bool print_banner = XEWE_CORE_PRINT_BANNER != 0;
 };
 
 class System : public Module {

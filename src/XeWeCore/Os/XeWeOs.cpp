@@ -8,8 +8,9 @@
 #include <cstdio>
 #include "../Testing/Testing.h"
 
-// XEWE_DEVICE_NAME may come from the tools' generated header, like XEWE_TESTING
-#if !defined(XEWE_DEVICE_NAME) && defined(__has_include)
+// BUILD_VERSION and BUILD_TIMESTAMP: the tools -include the generated header into every file; a
+// plain build that has it on the include path gets it here
+#if defined(__has_include)
 #if __has_include(<XeWeBuildInfo.h>)
 #include <XeWeBuildInfo.h>
 #endif
@@ -20,6 +21,17 @@ namespace xewe {
 // ---- Os ------------------------------------------------------------------
 
 Os::Os(OsConfig config) : config(std::move(config)), cli{serial}, system(*this) {
+    if (this->config.version.empty()) {
+#ifdef BUILD_VERSION
+        this->config.version = BUILD_VERSION;
+#else
+        this->config.version = "0.0.0";
+#endif
+    }
+#ifdef BUILD_TIMESTAMP
+    if (this->config.build_timestamp.empty())
+        this->config.build_timestamp = BUILD_TIMESTAMP;
+#endif
     // modules may claim pins from their constructors: report_error queues until begin()
     pins::error_context = this;
     pins::error_handler = [](void* os, const char* message) {
@@ -226,7 +238,11 @@ System::System(Os& os)
 
 void System::begin_routines_required() {
     const auto& cfg = os.get_config();
-    std::string header = cfg.project_name + "\\sep" + "Version " + cfg.version;
+    // before the first boot has stored a name, the build's suggestion stands in
+    std::string name = get_device_name();
+    if (name.empty())
+        name = XEWE_CORE_DEVICE_NAME;
+    std::string header = name + "\\sep" + "Version " + cfg.version;
     if (!cfg.build_timestamp.empty())
         header += "\nBuild Timestamp " + cfg.build_timestamp;
     if (!cfg.url.empty())
@@ -237,21 +253,23 @@ void System::begin_routines_required() {
 }
 
 void System::begin_routines_init() {
-#ifdef XEWE_DEVICE_NAME
-    // build-time name: no prompt; a name already in NVS is kept (src/XeWeCore/Os/README.md,
-    // "Build-time device name")
-    if (os.nvs.read<std::string>(id, "device_name").empty()) {
-        os.nvs.write<std::string>(id, "device_name", XEWE_DEVICE_NAME);
-    }
-    os.serial.print("Device name: " + os.nvs.read<std::string>(id, "device_name"));
-#else
-    std::string name = "";
+#ifdef XEWE_CORE_DEVICE_NAME_PROMPT
+    // asked until confirmed; an empty answer takes the suggested name
+    std::string name;
     bool confirmed = false;
     while (!confirmed) {
-        name = os.serial.get_string("Name your device (ex: Kitchen Lights):");
+        name = os.serial.get_string("Name your device (Enter for \"" XEWE_CORE_DEVICE_NAME "\"):");
+        if (name.empty())
+            name = XEWE_CORE_DEVICE_NAME;
         confirmed = os.serial.get_yn("Confirm \"" + name + "\"?");
     }
     os.nvs.write<std::string>(id, "device_name", name);
+#else
+    // pre-answered by the build: no prompt; a name already in NVS is kept
+    if (os.nvs.read<std::string>(id, "device_name").empty()) {
+        os.nvs.write<std::string>(id, "device_name", XEWE_CORE_DEVICE_NAME);
+    }
+    os.serial.print("Device name: " + os.nvs.read<std::string>(id, "device_name"));
 #endif
 }
 

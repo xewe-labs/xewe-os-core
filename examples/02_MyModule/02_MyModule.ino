@@ -20,7 +20,7 @@
 #include "MyModule.h"
 
 // Declaration order is registration order: the Os first, then the modules.
-XeWeOs os({.project_name = "my-module", .version = "0.1.0"});
+XeWeOs os({.version = "0.1.0"});
 MyModule my(os, {.heartbeat = true}); // set false to silence the heartbeat
 
 // A listener: told about every change of the number.

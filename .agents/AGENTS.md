@@ -55,14 +55,16 @@ this file is silent.
 
 ### Layout
 
-- `src/XeWeCore.h` is the only top-level header; everything else is in `src/XeWeCore/`, one
-  directory per component: `Utils/` (`Utils.h` + `*.h`, header-only), `Serial/`, `Cli/`, `Nvs/`
-  (`Nvs` + `Nvs.tpp` + `FlexData.h`), `Settings/`, `Module/`, `Os/` (`XeWeOs`), `Testing/`.
-  Files include each other with relative quotes. Each component directory except `Testing/`
-  has a `README.md` with its reference documentation.
-- Include direction: Utils ← Serial ← Cli; FlexData ← Nvs; Serial ← Settings (Nvs only
-  forward-declared); all ← Module ← XeWeOs. `Module.h` forward-declares `class Os;`; only `.cpp`
-  files include `XeWeOs.h`.
+- `src/XeWeCore.h` is the only top-level header; everything else is in `src/XeWeCore/`:
+  `Config.h` (the core's configuration values, `doc/config.md`) and one directory per component:
+  `Utils/` (`Utils.h` + `*.h`, header-only), `Serial/`, `Cli/`, `Nvs/` (`Nvs` + `Nvs.tpp` +
+  `FlexData.h`), `Settings/`, `Module/`, `Os/` (`XeWeOs`), `Testing/`. Files include each other
+  with relative quotes. Each component directory except `Testing/` has a `README.md` with its
+  reference documentation.
+- Include direction: `Config.h` is above everything and includes nothing (pure preprocessor, so
+  any header may read it, the host-includable ones too); Utils ← Serial ← Cli; FlexData ← Nvs;
+  Serial ← Settings (Nvs only forward-declared); all ← Module ← XeWeOs. `Module.h` forward-declares
+  `class Os;`; only `.cpp` files include `XeWeOs.h`.
 - One namespace `xewe` (plus `xewe::str`, `xewe::color`, `xewe::pins`, `xewe::detail`,
   `xewe::testing`). Global symbols: `XeWeOs`, the `DBG_*`/`DEBUG_*`/`STRINGIFY_XEWE`/`TO_STRING`
   macros and `XEWE_CORE_VERSION` (+ `_MAJOR/_MINOR/_PATCH`, equal to `library.properties`).
@@ -73,7 +75,7 @@ this file is silent.
 ### Check your work
 
 ```bash
-tests/unit/run.sh        # host tests: c++17 (98 tests) and gnu++2b (123 tests), -fno-exceptions; expect "0 failed checks"
+tests/unit/run.sh        # host tests: c++17 (100 tests) and gnu++2b (125 tests), -fno-exceptions; expect "0 failed checks"
 ```
 
 - **Host tests** build the probes and `tests/unit/test/*.cpp` against the shims in
@@ -160,8 +162,10 @@ rules (layout, `library.properties`, `library.json`, names) are `doc/library-rul
   through `set_error_handler` and does not include `Utils.h` or `Serial.h`.
 - **Os, Module, System.** `System` is the only module here. `disable()` resets (wipes the
   namespace) and cascades to dependents; with `verbose == false` there is no confirmation.
-  `System::reset()` erases the whole partition. `XEWE_DEVICE_NAME` must be a build flag (or come
-  from `<XeWeBuildInfo.h>`); a sketch `#define` never reaches `XeWeOs.cpp`. The lifecycle order in
+  `System::reset()` erases the whole partition. The first-boot name prompt runs only under
+  `#ifdef XEWE_CORE_DEVICE_NAME_PROMPT` (set by `Config.h` while `XEWE_CORE_DEVICE_NAME` is not
+  pre-answered); a pre-answer is a build flag or, with the tools, a project `Config.h` line or a
+  dotenv value, since a sketch `#define` never reaches `XeWeOs.cpp`. The lifecycle order in
   `Module::begin()` is contractual (`src/XeWeCore/Module/README.md`). The private `modules` vector is declared
   before the service members in `Os`; do not reorder them. `Module` is neither copyable nor
   movable. `System::begin_routines_required()` silences the ESP log on purpose. Settings tables:

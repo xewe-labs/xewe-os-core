@@ -15,7 +15,7 @@ Arduino IDE: **Library Manager → search `XeWeCore` → Install**. With arduino
 ```cpp
 #include <XeWeCore.h>
 
-XeWeOs os({.project_name = "my-device", .version = "0.1.0"});
+XeWeOs os({.version = "0.1.0"});
 
 void setup() { os.begin(); }
 void loop()  { os.loop();  }
@@ -37,7 +37,8 @@ each; see [doc/examples.md](doc/examples.md).
 ## Documentation
 
 [`doc/`](doc/README.md) explains what the core is and why it is built this way, then documents
-every public type, command and stored key. Building and testing the library itself:
+every public type, command and stored key. Build-time values (serial defaults, the first-boot
+device name) and how a build overrides them: [doc/config.md](doc/config.md). Building and testing the library itself:
 [doc/tests.md](doc/tests.md).
 
 ## Releasing

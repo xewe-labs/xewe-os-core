@@ -391,9 +391,11 @@ Prints the full internal state through `DBG_PRINTF`, so it produces output only 
 
 ### Notes
 
-* **Progress is recomputed at most every 5 ms** (`calc_interval_ms`, private), and only from
-  `get_current_value()` and `is_done()`. `get_progress()` returns the cached value, so it can be
-  up to 5 ms stale — or `0.0` if neither of the other two has been called since `initiate()`.
+* **Progress is recomputed at most every 5 ms** (`calc_interval_ms`, private, from the
+  compile-time constant `XEWE_CORE_TIMER_TICK_MS` of the core's [`Config.h`](../Config.h); `0`
+  recomputes on every call), and only from `get_current_value()` and `is_done()`.
+  `get_progress()` returns the cached value, so it can be up to one tick stale — or `0.0` if
+  neither of the other two has been called since `initiate()`.
 * All the state getters are `const`; the cached fields are `mutable` to allow it.
 * **Integral `T` truncates.** The interpolation is done in `double` and cast back, so an
   `AsyncTimer<int>` steps rather than glides, and a short `delay` over a wide range skips values.
