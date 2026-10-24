@@ -2,6 +2,8 @@
 
 XeWeCore is an Arduino library for ESP32 firmware authors: a serial console, a `$group command` command line, typed NVS storage and a module framework.
 
+<p align="center"><img src="static/media/thumbnails/full_size.webp" alt="XeWeCore" width="240"></p>
+
 ## Problem
 
 - Each project rewrites its serial console and command parser, with its own syntax and error messages.
