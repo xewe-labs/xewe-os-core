@@ -22,11 +22,6 @@ namespace xewe {
 
 class Os;
 
-// Base class for everything that plugs into XeWe OS.
-//
-// A module registers itself with the Os object on construction, so the order
-// modules are declared in the sketch is the order they begin in. Per-module
-// settings are passed to the derived constructor and stored with their real type.
 class Module {
 public:
     Module(Os& os, std::string id, std::string name, std::string description,

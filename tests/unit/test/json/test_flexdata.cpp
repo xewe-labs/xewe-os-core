@@ -278,9 +278,8 @@ TEST(flex_presence_nested_and_set_by_blob) {
     CHECK(p.set_field("b", true) && p.has("b")); // set_field does not clear it
 }
 
-// Modules check has("schema") after Nvs::read_flex; with presence JSON-only that was always false,
-// so every stored blob was treated as foreign ("stored settings have schema 1, this firmware reads
-// schema 1; using the default") and settings changes were lost at every restart.
+// Modules check has("schema") after Nvs::read_flex, so a blob load marks every field present.
+// Otherwise every stored blob reads as foreign and settings fall back to the defaults at restart.
 TEST(flex_presence_after_blob_load_has_schema) {
     Versioned stored;
     stored.schema = 1;

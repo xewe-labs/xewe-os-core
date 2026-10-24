@@ -1,176 +1,60 @@
-# AGENTS.md — xewe-os-core
+# AGENTS.md
 
-This is **WAX 1.3**, the WAX Agentic Workspace. The rules, preferences, and skills below belong
-to this version. Human documentation lives at https://github.com/maxdokukin/wax_agents.
+This is **xewe 2.3**, the agentic workspace. Human documentation and the source of every
+global file: https://github.com/maxdokukin/dot_agents
 
-This folder is the agentic part of the project. It gives you boundaries, context, and tools,
-in that order. Read it as described below before doing anything else in the repository.
+Two roots. `./.agents/` is this project's folder; `~/.agents/` is the global install on this
+machine (may be absent, e.g. in a cloud session). Paths below say which one they mean.
 
-## Read in this order
+| Layer | Contents | Ownership |
+|---|---|---|
+| global | `./.agents/README.md`, `./.agents/AGENTS.md`, `./.agents/RULES.md`; and, only in `~/.agents/`: the global skills (`xewe_handoff`, `xewe_doc`, `sample_skill`), `users/<me>/PREFERENCES.md`, `harnesses/` | The three files here are overwritten from the central repo on every session start. Read-only (R-03). |
+| project | `./.agents/PREFERENCES.md` (P-xx), `./.agents/skills/*` | Owned by the project, committed with it. |
+| user | `./.agents/users/<me>/handoffs/` | Written only by `xewe_handoff`. Committed with the project. |
 
-1. **`RULES.md` — root boundaries.** Absolute rules, the same in every project. Cite them by
-   ID when you explain a decision or a refusal.
-2. **`PREFERENCES.md` — user boundaries.** This project's chosen defaults (R-15). They bind
-   like rules until a human changes them; cite them by ID too.
-3. **`handoffs/HANDOFF.md` — context.** The head of the work record: where the last session
-   stopped and what is open. Reach it only through the `pickup` procedure of the
-   `wax_handoff` skill (R-04), because the directory has invariants that the skill checks
-   before you rely on anything in it.
-4. **`skills/` — tools.** One folder per skill, each with a `SKILL.md`. Discover them by
-   reading the frontmatter of every `skills/*/SKILL.md` (R-10); a folder without a valid one
-   is not a skill (R-11).
+`<me>` is the GitHub login: `gh api user -q .login 2>/dev/null || git config github.user || echo "$USER"`.
 
-## Session shape
+## Read in this order (R-01)
 
-- **Pickup → work → handoff.** Start with `wax_handoff` pickup, do the work, end with
-  `wax_handoff` handoff. A session that changed anything and did not end with a handoff is
-  incomplete (R-06); say so rather than letting it pass.
+1. `./.agents/RULES.md` — absolute, identical everywhere. Cite by ID.
+2. `./.agents/PREFERENCES.md` — project preferences, if the file exists. Cite by ID.
+3. `~/.agents/users/<me>/PREFERENCES.md` — the current user's preferences, if the file exists.
+   Cite by ID.
+4. The frontmatter of every `./.agents/skills/*/SKILL.md` (project skills) and every
+   `~/.agents/skills/*/SKILL.md` (global skills; the harness may already list them as native
+   skills) — that is the whole skill index (R-12).
+
+Project knowledge written for agents lives in the project skill `doc`, whose `SKILL.md` is the
+index, and in topic skills for procedures that keep coming back. Every documentation change,
+including recording something you learned, goes through `xewe_doc` (R-11).
+
+## Handoffs are voluntary
+
+`./.agents/users/<me>/handoffs/` is a record of past sessions, committed with the project. Use
+`xewe_handoff read` to resume from it and `xewe_handoff write` to leave a trail; run
+`xewe_handoff init` once per project and user before the first write. Nothing under
+`handoffs/` is touched except through that skill (R-14). Skipping handoffs is allowed;
+corrupting them is not. Write nothing there you would not publish.
 
 ## Never do these without being asked
 
-- **Edit `RULES.md`, `PREFERENCES.md`, or this file** (R-15, P-05). Propose changes in the
-  handoff instead (P-10).
-- **Touch anything under `handoffs/` by hand** (R-04). The skill is the only door.
-- **Add, rename, or remove a top-level item in `.agents/`** (R-13).
-- **Commit, push, tag, release, publish, or delete what you did not create** (P-09).
+- Edit a global file. Propose the change for the central repo instead; a local edit is gone
+  at the next session start.
+- Name a project skill after a global skill.
+- Touch `users/*/handoffs/` by hand (R-14).
 
-## Precedence
+Conduct (no secrets, honest and brief reporting, staying focused, no deleting or publishing,
+no git or GitHub writes) is in `RULES.md`, R-04 to R-10.
 
-- **Human instruction in this session > `RULES.md` > `PREFERENCES.md` > this file > a
-  skill** (R-03). A project's own `.agents/` wins over any organization-level agent file. Record every
-  human-instructed deviation in the handoff, quoting the instruction.
+## Precedence (R-02)
 
-## Reporting back
+Human instruction in this session > `RULES.md` > `PREFERENCES.md` > `users/<me>/PREFERENCES.md`
+> this file > a skill. Record every human-instructed deviation in the handoff, quoting the
+instruction, if a handoff is written.
 
-- **Say what you actually ran** and label anything unverified as unverified (P-07).
-- **Never report a skipped or failed step as done** (P-08). Failures come with their output.
+## Harnesses
 
-## Project: xewe-os-core (XeWeCore)
-
-The Arduino library XeWeCore: a serial console, a `$group command` CLI, typed NVS storage,
-helpers and a module framework for ESP32. Human documentation: `README.md` and `doc/` (start at
-`doc/README.md` and `doc/concepts.md`). Project rules are X-01 … X-15 at the end of `RULES.md`.
-Organization rules: `https://github.com/xewe-labs/.github/blob/main/AGENTS.md`; they apply where
-this file is silent.
-
-### Layout
-
-- `src/XeWeCore.h` is the only top-level header; everything else is in `src/XeWeCore/`:
-  `Config.h` (the core's configuration values, `doc/config.md`) and one directory per component:
-  `Utils/` (`Utils.h` + `*.h`, header-only), `Serial/`, `Cli/`, `Nvs/` (`Nvs` + `Nvs.tpp` +
-  `FlexData.h`), `Settings/`, `Module/`, `Os/` (`XeWeOs`), `Testing/`. Files include each other
-  with relative quotes. Each component directory except `Testing/` has a `README.md` with its
-  reference documentation.
-- Include direction: `Config.h` is above everything and includes nothing (pure preprocessor, so
-  any header may read it, the host-includable ones too); Utils ← Serial ← Cli; FlexData ← Nvs;
-  Serial ← Settings (Nvs only forward-declared); all ← Module ← XeWeOs. `Module.h` forward-declares
-  `class Os;`; only `.cpp` files include `XeWeOs.h`.
-- One namespace `xewe` (plus `xewe::str`, `xewe::color`, `xewe::pins`, `xewe::detail`,
-  `xewe::testing`). Global symbols: `XeWeOs`, the `DBG_*`/`DEBUG_*`/`STRINGIFY_XEWE`/`TO_STRING`
-  macros and `XEWE_CORE_VERSION` (+ `_MAJOR/_MINOR/_PATCH`, equal to `library.properties`).
-- `examples/01_Hello`, `02_MyModule` teach levels 1 and 2; `11_Utils` … `15_Os` are reference
-  demos. `tests/unit` runs on the host, `tests/board` on a board. `doc/` is the human guide and
-  index; the reference is the component `README.md` files under `src/XeWeCore/`.
-
-### Check your work
-
-```bash
-tests/unit/run.sh        # host tests: c++17 (100 tests) and gnu++2b (125 tests), -fno-exceptions; expect "0 failed checks"
-```
-
-- **Host tests** build the probes and `tests/unit/test/*.cpp` against the shims in
-  `tests/unit/shim/` (Arduino, FreeRTOS, NVS in memory, ESP log). FlexData and Settings tests need
-  ArduinoJson: `ARDUINOJSON_SRC=<path to ArduinoJson/src>` (a clone of bblanchon/ArduinoJson at v7.4.3, the tag
-  CI uses); `run.sh` stops when it is unset.
-- **Examples** compile for esp32c3, esp32c6 and esp32s3 (CI: the `examples` job). With plain
-  arduino-cli: `arduino-cli compile --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc --library . examples/01_Hello`.
-- **Format:** `xewe --project . format --check` (clang-format with the tools' style, ruff for the
-  Python). CI blocks on it.
-- **Lint:** `arduino-lint --compliance strict --library-manager update .` Run it from a clone
-  whose folder name is a valid library name; in a working copy only LS003 (folder name) may fail.
-- **Board tests** (`tests/board`) run only through the `xewe-os-tools` pytest plugin from an xewe
-  project with a board attached, never on their own: `doc/tests.md` has the command.
-  Take the board lock (`flock <project>/.board.lock`). Never flash a board unasked.
-- **Test hooks:** `XEWE_TESTING` compiles in the `$test` group (`src/XeWeCore/Testing/Testing.{h,cpp}`)
-  that the `test_hooks_*` files drive. Build it with `xewe build --chip s3 --define XEWE_TESTING=1`
-  then `xewe flash --no-build`, or `XEWE_HWTEST_DEFINES=XEWE_TESTING=1` for the pytest run, or
-  arduino-cli `--build-property compiler.cpp.extra_flags=-DXEWE_TESTING=1`. Without the define a
-  build gets 0 bytes from it (X-09).
-
-### Adding or changing a core feature
-
-One change carries all four:
-
-1. **Code** in `src/XeWeCore/`, inside the layout and include direction above.
-2. **A host test** in `tests/unit/test/` (and the board table too when the case also runs through
-   `$test`, see X-10).
-3. **The component README** (`src/XeWeCore/<Component>/README.md`, or the page in `doc/`) for
-   every public function, lifecycle step, command, prompt, NVS key or build define it adds or
-   changes (X-13).
-4. **An example**, when users see it: keep `examples/02_MyModule` in step with every new hook or
-   changed signature; it is what module authors copy.
-
-Then run the host tests, compile the examples and lint. A version bump changes
-`library.properties`, `library.json` and `XEWE_CORE_VERSION*` together; `scripts/release.sh
---prepare <version>` does it (X-14). Releasing is the owner's, in two runs (README "Releasing"):
-`--prepare <version> [--hardware c3,c6,s3]` (no git change) sets the version, stops with exit 2
-until `releases/<version>/notes.txt` is filled, then runs the host tests, arduino-lint, format,
-brand-lint, the example builds and the `tests/board` files per chip (in a harness project; without
-`--hardware` they are compiled, not run) through `xewe release-card record`, and renders the
-generated `releases/<version>/release_card.md` (no hand-written test card; the run logs stay in
-`releases/<version>/logs/`, gitignored); the owner commits it all as one `prepare <version>` commit.
-Then `scripts/release.sh <version>` (try `--dry-run` first) checks that HEAD is that pushed, clean
-`main` with every version location at `<version>`, runs `xewe release-card verify`, waits for the
-`tests` workflow on HEAD with its card check green, and only then tags HEAD and creates the GitHub
-Release with the card as its only asset. Agents run `--dry-run` only, and `--prepare` only on a
-scratch copy unless asked. `--ci-timeout <min>` (default 30), `--skip-ci` (emergencies).
-Re-running with a tag but no GitHub Release only creates the release (if the tagged commit's files
-say `<version>`); tag and release both present means already released. The Library Manager
-rules (layout, `library.properties`, `library.json`, names) are `doc/library-rules.md`.
-
-### Component notes
-
-- **Utils.** Header-only. `Color.h`, `String.h`, `Pins.h`, `Listeners.h` are host-includable
-  (standard library only; `Pins.h` may include `<sdkconfig.h>` behind `__has_include`): code in
-  other repositories includes them in host tests, and `run.sh` compiles each without the shim.
-  `color::hsv_to_rgb` is pinned bit for bit (`color_hsv_to_rgb_pinned`). `color::parse_hex_color`
-  (also reachable as `str::` through `String.h`) accepts exactly `rrggbb` / `#rrggbb` and leaves
-  outputs untouched on failure; `to_hex_color` writes uppercase `#RRGGBB`. `xewe::pins` is a fixed
-  table; `claim` refuses a pin held by another owner or out of range and only warns on a strapping
-  pin; strapping lists cite datasheets in `src/XeWeCore/Utils/README.md`. `lower` and `to_lower` are both
-  public with callers; keep both.
-  `xewe::validate` delegates to `str::parse_int` / `parse_float`.
-- **Serial.** The type is `xewe::SerialPort` because `Serial` is a core macro. Prompts:
-  `retry_count == 0` means infinite, `timeout_ms == 0` means no timeout; modules rely on those
-  defaults. The core's own confirmations (`Module::disable`, `System::reset`) are bounded:
-  `get_yn("OK?", 2, 15000, false, answered)`. `get_core` sets `success_sink` on every exit path;
-  a new prompt type goes through it. Lines: 255-byte buffer (254 usable), 4-line queue, an
-  over-long line dropped whole with one notice. Output is CRLF; `print` wraps only when
-  `message_width > 0`. There is no `println`: use `print` or `printf`. Table cells are
-  `std::string_view`; callers keep them alive.
-- **Cli.** Handlers get a `xewe::span` into a local vector: copy what you keep. The parsed
-  `execute` matches on name only, the direct one on name and `arg_count`. `$<group>`,
-  `$<group> help` and `$help <group>` all print the group. The argument count is checked before a
-  handler runs. `add_group` on an existing id keeps its commands; module ids are validated earlier
-  by `Os::register_module` through `Cli::name_error`.
-- **Nvs and FlexData.** Everything here persists across reflashes. Version a struct with a
-  `schema` field, not `kBlobVersion` (one shared constant). `from_blob` overwrites in place.
-  Read misses are silent; name errors, init failures (once), the automatic partition erase and
-  open/set/commit failures are reported verbatim as in `src/XeWeCore/Nvs/README.md`. FlexData JSON assignment
-  is type-matched (`is<M>()` before `as<M>()`); field presence is a `uint32_t` set only by the
-  JSON load, never stored, at most 32 fields. `FlexData.h` stays platform-neutral; Nvs reports
-  through `set_error_handler` and does not include `Utils.h` or `Serial.h`.
-- **Os, Module, System.** `System` is the only module here. `disable()` resets (wipes the
-  namespace) and cascades to dependents; with `verbose == false` there is no confirmation.
-  `System::reset()` erases the whole partition. The first-boot name prompt runs only under
-  `#ifdef XEWE_CORE_DEVICE_NAME_PROMPT` (set by `Config.h` while `XEWE_CORE_DEVICE_NAME` is not
-  pre-answered); a pre-answer is a build flag or, with the tools, a project `Config.h` line or a
-  dotenv value, since a sketch `#define` never reaches `XeWeOs.cpp`. The lifecycle order in
-  `Module::begin()` is contractual (`src/XeWeCore/Module/README.md`). The private `modules` vector is declared
-  before the service members in `Os`; do not reorder them. `Module` is neither copyable nor
-  movable. `System::begin_routines_required()` silences the ESP log on purpose. Settings tables:
-  the engine is reached only through `settings_engine`, so a firmware without a table does not
-  link it; never call `detail::settings_*` or `register_settings_commands` from code that always
-  links. Secrets are never printed. A schema line format change raises `"schema":1` in
-  `Settings::header` and updates `src/XeWeCore/Settings/README.md`. `ListenerSet::notify` re-reads each slot,
-  so `remove` during `notify` is safe.
+`~/.agents/harnesses/<harness>/` holds material specific to one host tool, named after the
+tool's own dotfolder. Claude Code: `harnesses/.claude/` (`setup.sh` links the global skills
+into `~/.claude/skills` and installs the session hook, `sync.sh` is that hook). Harnesses are
+not copied into projects. No harness-specific rules exist yet.

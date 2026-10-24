@@ -61,16 +61,10 @@ inline std::string to_hex(const uint8_t* b, size_t n) {
     return s;
 }
 
-// --------------------------------------------------------------------------------------
 // Hex colour strings: defined in Color.h (xewe::color), reachable here under the same names
-// --------------------------------------------------------------------------------------
 
 using color::parse_hex_color;
 using color::to_hex_color;
-
-// --------------------------------------------------------------------------------------
-// Time and Timezone String Helpers
-// --------------------------------------------------------------------------------------
 
 // accepts GMT, GMT0, UTC, UTC0, GMT±H, GMT±HH, GMT±H:MM, GMT±HH:MM, GMT±HMM and GMT±HHMM
 // (any case); nothing may follow the offset
@@ -184,10 +178,6 @@ inline bool parse_time(std::string_view time_str, uint16_t& minutes) {
     return false;
 }
 
-// --------------------------------------------------------------------------------------
-// Scheduler & JSON Parsing
-// --------------------------------------------------------------------------------------
-
 inline std::vector<std::string> extract_commands(std::string_view blob) {
     std::vector<std::string> cmds;
     bool in_quotes = false, escaped = false;
@@ -237,10 +227,6 @@ inline std::string escape_json(std::string_view s) {
     }
     return res;
 }
-
-// --------------------------------------------------------------------------------------
-// Small, header-only string utilities intended for embedded targets.
-// --------------------------------------------------------------------------------------
 
 inline constexpr char kCRLF[] = "\r\n";
 

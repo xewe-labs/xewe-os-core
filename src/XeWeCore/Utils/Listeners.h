@@ -1,24 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
 // xewe-os-core/src/XeWeCore/Utils/Listeners.h
-//
-// xewe::ListenerSet<Iface, N>: a fixed-capacity set of listener pointers for module-to-module
-// change notifications. Standard library only (host-includable), no heap, no locking.
-//
-//   struct FanListener { virtual void on_speed(uint8_t pct, const void* origin) = 0; };
-//   xewe::ListenerSet<FanListener> listeners;                  // N = 4 by default
-//   listeners.add(&web);                                        // false when full or null
-//   listeners.notify([&](FanListener& l) { l.on_speed(pct, origin); });
-//
-// Origin rule: every event carries the `const void* origin` the caller passed to the setter
-// (nullptr from the CLI). A listener that both listens and sets passes `this` as origin and skips
-// events whose origin is itself, so a change it made is not echoed back to it:
-//
-//   void on_speed(uint8_t pct, const void* origin) override { if (origin == this) return; ... }
-//
-// notify() runs in the caller's task. remove() during notify() is safe (a removed listener that has
-// not been called yet is skipped); add() during notify() may or may not see the current event.
-// Full documentation: src/XeWeCore/Module/README.md#listeners.
 #pragma once
 
 #include <cstddef>

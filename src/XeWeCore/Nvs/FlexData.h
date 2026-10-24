@@ -20,9 +20,6 @@ namespace xewe {
 template <typename Derived> struct FlexData; // forward decl so the codec / converters can detect it
 } // namespace xewe
 
-// ----------------------------------------------------------------------------
-// std::vector<T> <-> JSON (works for scalars, strings, AND nested FlexData).
-// ----------------------------------------------------------------------------
 namespace ArduinoJson {
 template <typename T> struct Converter<std::vector<T>> {
     static void toJson(const std::vector<T>& src, JsonVariant dst) {
@@ -44,10 +41,8 @@ template <typename T> struct Converter<std::vector<T>> {
 
 namespace xewe {
 
-// ----------------------------------------------------------------------------
 // Binary codec: little-endian, length-prefixed strings/arrays. Nested FlexData
 // structs are written field-by-field (no per-element version byte).
-// ----------------------------------------------------------------------------
 struct BlobWriter {
     std::vector<uint8_t> bytes;
     void raw(const void* p, size_t n) {
@@ -129,9 +124,6 @@ template <typename T> void blob_read(BlobReader& r, std::vector<T>& v) {
     }
 }
 
-// ----------------------------------------------------------------------------
-// Field registry helpers.
-// ----------------------------------------------------------------------------
 template <typename C, typename M> struct Field {
     const char* name;
     M C::* ptr;
@@ -140,11 +132,9 @@ template <typename C, typename M> constexpr Field<C, M> fld(const char* n, M C::
     return {n, p};
 }
 
-// ----------------------------------------------------------------------------
 // JSON type mismatches (a string in a bool field, a number in a string field, ...)
 // are rejected field by field and reported here; Os::begin points it at the
 // console. Unset (the default) means silent.
-// ----------------------------------------------------------------------------
 inline std::function<void(std::string_view message)> flex_error_handler;
 
 namespace flex_detail {
@@ -190,10 +180,8 @@ inline const char* json_kind(JsonVariantConst x, bool want_integer) {
 }
 } // namespace flex_detail
 
-// ----------------------------------------------------------------------------
 // FlexData<Derived>: all generic methods, written once. Derived supplies a
 // static constexpr fields() tuple of fld("name", &Derived::member) entries.
-// ----------------------------------------------------------------------------
 template <typename Derived> struct FlexData {
     static constexpr uint8_t kBlobVersion = 1;
 
@@ -364,10 +352,8 @@ private:
 
 } // namespace xewe
 
-// ----------------------------------------------------------------------------
 // ArduinoJson converter for any FlexData-derived type. This is what makes a
 // FlexData usable as a JSON object AND as a vector element (nested structs).
-// ----------------------------------------------------------------------------
 namespace ArduinoJson {
 template <typename T>
 struct Converter<T, typename std::enable_if<std::is_base_of<::xewe::FlexData<T>, T>::value>::type> {

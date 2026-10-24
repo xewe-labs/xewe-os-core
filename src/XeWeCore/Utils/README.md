@@ -12,7 +12,7 @@
 
 ## xewe::str
 
-`src/XeWeCore/Utils/String.h` — string helpers: case, hex, trimming, splitting, wrapping, box
+`src/XeWeCore/Utils/String.h`: string helpers: case, hex, trimming, splitting, wrapping, box
 drawing, and parsers for numbers, times and days.
 
 Everything here is `inline` and header-only. Arguments are taken as `std::string_view` where the
@@ -175,7 +175,7 @@ inline bool parse_float(std::string_view s, T& out);
 ```
 
 The same contract for floating-point types, through `strtod`. It trims, rejects trailing
-characters, and reports `false` on overflow (`ERANGE`) — which also fires on denormal
+characters, and reports `false` on overflow (`ERANGE`), which also fires on denormal
 **underflow**, so `parse_float<double>("1e-320", d)` returns `false`. Unlike `parse_int` it is not
 base 10 only: `strtod` also reads `inf`, `nan` and hex forms such as `0x1p3`.
 
@@ -201,7 +201,7 @@ end-of-day marker. Anything else returns `false`.
 |---|---|---|---|---|---|---|
 | 0 | 1 | 2 | 3 | 4 | 5 | 6 |
 
-Only the two-letter form is accepted — `"Mon"` and `"Monday"` both fail.
+Only the two-letter form is accepted: `"Mon"` and `"Monday"` both fail.
 
 **`parse_gmt_offset`** normalizes a timezone offset into `GMT±HH:MM`:
 
@@ -228,14 +228,14 @@ inline std::string              escape_json     (std::string_view s);
 
 `extract_commands` pulls double-quoted segments out of a blob, honouring `\` escapes. If exactly
 one segment comes out and that segment itself contains two or more unescaped quotes, it recurses
-once into it — which unwraps a command list that arrived as a JSON string inside a JSON string.
+once into it, which unwraps a command list that arrived as a JSON string inside a JSON string.
 
 `escape_json` escapes `"` and `\` only. It is not a general JSON escaper: control characters,
 newlines and non-ASCII bytes pass through unchanged.
 
 ## xewe::validate
 
-`src/XeWeCore/Utils/Validator.h` — parse a string into `T` and range-check it in one call.
+`src/XeWeCore/Utils/Validator.h`: parse a string into `T` and range-check it in one call.
 
 ```cpp
 if (auto level = xewe::validate<uint8_t>(args[0], 0, 255)) {
@@ -254,7 +254,7 @@ std::optional<T> validate(std::string_view value, LimitT min, LimitT max);
 
 Returns the parsed value, or `std::nullopt` if it does not parse or falls outside `[min, max]`.
 
-`LimitT` is a separate template parameter so plain literals deduce naturally — `validate<uint8_t>(s, 0, 255)`
+`LimitT` is a separate template parameter so plain literals deduce naturally: `validate<uint8_t>(s, 0, 255)`
 compiles without casting the bounds.
 
 | `T` | What `min`/`max` mean | Parsed with |
@@ -263,7 +263,7 @@ compiles without casting the bounds.
 | signed integral | numeric range, inclusive | `xewe::str::parse_int<T>` |
 | unsigned integral | numeric range, inclusive | `xewe::str::parse_int<T>` |
 | `float`, `double` | numeric range, inclusive | `xewe::str::parse_float` |
-| anything else, **including `bool`** | — | compile error |
+| anything else, **including `bool`** | none | compile error |
 
 An unsupported `T` fails with `static_assert`:
 `"Unsupported Validator::validate<T>() type."`
@@ -280,7 +280,7 @@ An unsupported `T` fails with `static_assert`:
 * **The value must fit `T` itself**, whatever the bounds: `validate<int8_t>("300", 0, 1000)`
   returns `std::nullopt`, never a truncated `44`.
 * **It allocates.** Each call copies the view into a `std::string` before parsing.
-* `min` and `max` are **not** swapped if you pass them inverted — an inverted range simply matches
+* `min` and `max` are **not** swapped if you pass them inverted. An inverted range simply matches
   nothing and every call returns `std::nullopt`. (The `SerialPort` numeric prompts do swap; this
   does not.)
 * The header also exposes `template <typename> struct always_false : std::false_type {};`, used
@@ -288,7 +288,7 @@ An unsupported `T` fails with `static_assert`:
 
 ## xewe::AsyncTimer\<T\>
 
-`src/XeWeCore/Utils/AsyncTimer.h` — non-blocking interpolation between two values over a fixed
+`src/XeWeCore/Utils/AsyncTimer.h`: non-blocking interpolation between two values over a fixed
 duration.
 
 ```cpp
@@ -338,7 +338,7 @@ void reset(T new_start, T new_target);
 void reset(uint32_t new_delay, T new_start, T new_target);
 ```
 
-Clears all state — including `initiated`, so **a fresh `initiate()` is required** before the timer
+Clears all state, including `initiated`, so **a fresh `initiate()` is required** before the timer
 runs again. The two- and three-argument overloads replace the endpoints (and the delay) first,
 then do the same reset.
 
@@ -365,7 +365,7 @@ bool     is_active       () const;
 
 | | |
 |---|---|
-| `get_progress` | `0.0`-`1.0`. **Does not recompute** — see the note below |
+| `get_progress` | `0.0`-`1.0`. **Does not recompute**, see the note below |
 | `is_done` | recomputes, then reports whether the run has finished |
 | `is_not_done` | `!is_done()` |
 | `is_active` | whether `initiate()` has been called and `terminate()`/`reset()` has not |
@@ -394,7 +394,7 @@ Prints the full internal state through `DBG_PRINTF`, so it produces output only 
 * **Progress is recomputed at most every 5 ms** (`calc_interval_ms`, private, from the
   compile-time constant `XEWE_CORE_TIMER_TICK_MS` of the core's [`Config.h`](../Config.h); `0`
   recomputes on every call), and only from `get_current_value()` and `is_done()`.
-  `get_progress()` returns the cached value, so it can be up to one tick stale — or `0.0` if
+  `get_progress()` returns the cached value, so it can be up to one tick stale, or `0.0` if
   neither of the other two has been called since `initiate()`.
 * All the state getters are `const`; the cached fields are `mutable` to allow it.
 * **Integral `T` truncates.** The interpolation is done in `double` and cast back, so an
@@ -403,18 +403,18 @@ Prints the full internal state through `DBG_PRINTF`, so it produces output only 
   `T`'s promoted type: `uint8_t` and `uint16_t` promote to `int` and are fine, but an
   `AsyncTimer<uint32_t>` with `target < start` wraps around and produces nonsense. Use a signed
   type for a countdown.
-* Nothing here uses interrupts or tasks — progress advances only when you call a getter.
+* Nothing here uses interrupts or tasks. Progress advances only when you call a getter.
 
 ## xewe::color
 
-`src/XeWeCore/Utils/Color.h` — HSV ⇄ RGB conversion for 8-bit channels, and hex colour strings.
+`src/XeWeCore/Utils/Color.h`: HSV ⇄ RGB conversion for 8-bit channels, and hex colour strings.
 
 **Host-includable:** the header uses the standard library only (no `<Arduino.h>`), so pure code
 such as effect math can include it and build in host tests. `tests/unit/run.sh` compiles it
 without the Arduino shim to keep it that way.
 
 **All six HSV/RGB channels are `0-255`,** including hue and saturation. Hue is *not* 0-360 and saturation
-and value are *not* 0-100 — this is the most common mistake with these two functions.
+and value are *not* 0-100. This is the most common mistake with these two functions.
 
 ### hsv_to_rgb
 
@@ -463,7 +463,7 @@ if (!xewe::color::parse_hex_color(args[0], r, g, b)) { os.serial.print("! Expect
 
 * **Conversion is lossy.** Both functions work in `float` internally and truncate with
   `static_cast<uint8_t>` on the way out, so a round trip does not always return the original
-  triplet — expect drift of a unit or so, most visibly at hue boundaries.
+  triplet. Expect drift of a unit or so, most visibly at hue boundaries.
 * No clamping is needed or performed: `uint8_t` inputs are already in range.
 * Everything here is `inline` and header-only; there is nothing to link.
 * **`hsv_to_rgb` is pinned bit for bit** by `tests/unit` (`color_hsv_to_rgb_pinned`: spot values
@@ -473,7 +473,7 @@ if (!xewe::color::parse_hex_color(args[0], r, g, b)) { os.serial.print("! Expect
 
 ## xewe::pins
 
-`src/XeWeCore/Utils/Pins.h` — which module owns which GPIO, and which GPIOs are strapping pins on
+`src/XeWeCore/Utils/Pins.h`: which module owns which GPIO, and which GPIOs are strapping pins on
 the chip being built for. Header-only, host-includable, no heap.
 
 ```cpp
@@ -556,7 +556,7 @@ always sets `error_handler` and `error_context` (two pointers and a one-line fun
 
 ## xewe::span
 
-`src/XeWeCore/Utils/Span.h` — a contiguous view over elements someone else owns.
+`src/XeWeCore/Utils/Span.h`: a contiguous view over elements someone else owns.
 
 On C++20 and later `xewe::span<T>` **is** `std::span<T>`, an alias and nothing more. On C++17 it
 is a small stand-in with only the operations the XeWe code uses.
@@ -580,7 +580,7 @@ void handler(xewe::span<const std::string> args) {
 |---|---|
 | `span()` | empty |
 | `span(pointer, size_type)` | pointer and length |
-| `span(C&)` / `span(const C&)` | any contiguous container whose `data()` converts — `std::vector`, `std::array` |
+| `span(C&)` / `span(const C&)` | any contiguous container whose `data()` converts, such as `std::vector`, `std::array` |
 | `span(T (&)[N])` | a C array |
 | `size()`, `empty()`, `data()` | |
 | `operator[]` | unchecked |
@@ -599,7 +599,7 @@ void handler(xewe::span<const std::string> args) {
 
 ## xewe::LockGuard
 
-`src/XeWeCore/Utils/LockGuard.h` — RAII guard for a FreeRTOS mutex.
+`src/XeWeCore/Utils/LockGuard.h`: RAII guard for a FreeRTOS mutex.
 
 This header includes `<freertos/FreeRTOS.h>` and `<freertos/semphr.h>`, so it needs a core with
 FreeRTOS, which every ESP32 core has. `<XeWeCore.h>` always includes it.
@@ -637,7 +637,7 @@ LockGuard& operator=(const LockGuard&) = delete;
 ```
 
 Non-copyable. No move constructor is declared either, and declaring the copy operations as deleted
-suppresses the implicit ones — so a `LockGuard` **cannot be moved or returned from a function**.
+suppresses the implicit ones, so a `LockGuard` **cannot be moved or returned from a function**.
 It is a scope-local object only.
 
 ### Notes
@@ -653,7 +653,7 @@ It is a scope-local object only.
 
 ## Debug macros
 
-`src/XeWeCore/Utils/Debug.h` — opt-in debug printing, enabled per class from build flags.
+`src/XeWeCore/Utils/Debug.h`: opt-in debug printing, enabled per class from build flags.
 
 The macros are in the global namespace, not `xewe::`. They print to `Serial`, so a sketch using
 them must have called `Serial.begin()` (or `xewe::SerialPort::begin()`, which does).
@@ -704,7 +704,7 @@ string: `DBG_PRINTLN(MyClass, "started")`.
 DBG_PRINTF(cls, fmt, ...)
 ```
 
-Same prefix, then the formatted text. No trailing newline is added — put `\n` in the format
+Same prefix, then the formatted text. No trailing newline is added, so put `\n` in the format
 string. Formats with `snprintf` into a stack buffer and prints the result, so it does not depend on
 `Print::printf`. Output longer than
 `DBG_PRINTF_BUFFER_SIZE` (128 by default) is truncated; raise it from build flags if you need
@@ -717,7 +717,7 @@ more. For formatting outside a debug macro, use
   `do { if (DEBUG_<cls>) { ... } } while (0)`, so the arguments are still compiled and `Serial` is
   still referenced at link time even when the flag is `0`. The compiler drops the dead branch, but
   a `msg` expression with side effects still has to compile, and a `Serial` must exist.
-* A missing flag is a compile error, not a silent `0` — `DEBUG_##cls` has to expand to something.
+* A missing flag is a compile error, not a silent `0`, because `DEBUG_##cls` has to expand to something.
   That is why each class defines its own default.
 
 ## Listeners

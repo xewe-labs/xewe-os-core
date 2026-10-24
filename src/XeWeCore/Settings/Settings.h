@@ -1,21 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
 // xewe-os-core/src/XeWeCore/Settings/Settings.h
-//
-// Settings table: a module declares its plain persistent settings as a constexpr table of
-// SettingDef rows, and the core provides `$<id> set|get|schema`, the status lines, `$system schema`
-// and the load at begin (table default, then the NVS value). Full documentation:
-// src/XeWeCore/Settings/README.md.
-//
-//   xewe::Settings settings() const override {
-//       static constexpr xewe::SettingDef table[] = {
-//           xewe::setting<&MyModule::number>("number", 0, 1000, 0, "Remembered number"),
-//           xewe::setting<&MyModule::beat>  ("beat", true, "Print the heartbeat"),
-//           xewe::setting<&MyModule::label> ("label", 16, "my", "Heartbeat prefix"),
-//       };
-//       return {table, this};
-//   }
-//
 // The key is the NVS key (namespace = module id) and the CLI name: 1-15 characters, no whitespace,
 // not a core key (is_enabled, not_first_boot, init_complete). A bad key, a default outside
 // [min, max] or bounds outside the member's type stop the build (the table must be constexpr).

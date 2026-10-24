@@ -2,7 +2,7 @@
 
 What keeps XeWeCore a valid Arduino library in the Library Manager (and on PlatformIO). CI checks
 the Library Manager side with `arduino-lint --compliance strict --library-manager update` (the
-`arduino-lint` job of the tools' `xewe-core-tests.yml`, [tests.md](tests.md#ci)); the rest is
+`arduino-lint` job of the tools' `xewe-core-tests.yml`, [TESTS.md](TESTS.md#ci)); the rest is
 kept by hand and by `scripts/release.sh`.
 
 ## Layout
@@ -16,7 +16,7 @@ kept by hand and by `scripts/release.sh`.
   collide with other libraries or, on macOS and Windows, with system headers. Everything else is
   under `src/XeWeCore/`, and files include each other with relative quotes.
 * Other libraries are included only through their entry header (`#include <ArduinoJson.h>`).
-* Every example compiles for esp32c3, esp32c6 and esp32s3 ([tests.md](tests.md)).
+* Every example compiles for esp32c3, esp32c6 and esp32s3 ([TESTS.md](TESTS.md)).
 
 ## `library.properties`
 
@@ -47,5 +47,5 @@ kept by hand and by `scripts/release.sh`.
 
 XeWeCore is registered in `arduino/library-registry`, so its `name=` can no longer change. The
 Library Manager picks up each new tag by itself, usually within a day; a tag is never moved or
-reused, so a fix is a new version. Releases
-go through `scripts/release.sh` (README "Releasing").
+reused, so a fix is a new version. Releases go through `scripts/release.sh`
+([scripts/README.md](../scripts/README.md)).

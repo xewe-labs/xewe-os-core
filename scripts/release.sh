@@ -5,58 +5,6 @@
 #
 # release.sh: test, card, tag and publish XeWeCore <version>.
 # Usage: scripts/release.sh --prepare <version> [--hardware c3,c6,s3] [--harness <dir>] [--resume] [--dry-run] | <version> [--dry-run] [--ci-timeout <min>] [--skip-ci]
-# A release is two runs with a commit in between.
-# `scripts/release.sh --prepare <version>` (9 stages) makes no git change:
-#   1 preflight: refuses a detached HEAD, a merge/rebase/cherry-pick/revert in progress, unmerged
-#     paths, any change outside the version lines of VERSION_LOCATIONS and releases/<version>/, a
-#     releases/<version>/testcard.md, and a .gitignore that does not ignore releases/*/logs/; finds
-#     the tools ref (tests.yml's xewe-core-tests.yml@<ref>), Python >= 3.11, g++, curl and the
-#     harness project (an xewe project: --harness, else XEWE_RELEASE_HARNESS, else ../xewe-os);
-#   2 versions: sets library.properties, library.json and XEWE_CORE_VERSION* to <version>;
-#   3 release notes: releases/<version>/notes.txt; when it is missing a skeleton is written, and
-#     while the skeleton marker is in it the run stops with exit 2 (fill it, run again);
-#   4 card run: a venv with the tools (build/release-venv/card), then `xewe release-card init` on
-#     releases/<version>/logs/ (gitignored);
-#   5 setup (recorded): the checkers' venv (tools + ruff + clang-format, as CI's format job),
-#     ArduinoJson at the CI tag, and the harness: a copy of the harness project in
-#     build/release-harness/project with this tree's tests/board as its tests/, set up with
-#     XEWE_CORE_SOURCE=<this tree, exported to build/release-venv/XeWeCore> and the modules the
-#     board tests drive;
-#   6 checks (recorded): tests/unit/run.sh (unit, core-host rows: c++17 and gnu++2b),
-#     arduino-lint --compliance strict --library-manager update on the export (validate; the
-#     official binary is installed into build/release-venv/bin when missing), `xewe format
-#     --check`, `xewe brand-lint .`;
-#   7 examples (recorded, per chip): every examples/*/*.ino compiled as CI does (`arduino-cli
-#     compile --fqbn <tools FQBN> --warnings default --library .`), with the harness toolchain;
-#   8 board (recorded, per chip): the 19 tests/board files through `xewe test` in the harness. A
-#     chip without --hardware is built with XEWE_NO_BOARD=1: its board tests are "compiled, not
-#     run". A --hardware chip is built, flashed (a flash step) and tested with --require-board;
-#   9 card: `xewe release-card render` writes releases/<version>/release_card.md (or refuses: the
-#     draft is in the logs folder); prints the commit command.
-# A failing step does not stop the others; the card refuses it. --resume (after a failed step):
-# keeps the run when commit and tree are unchanged and re-runs only the steps that are not green.
-# Commit the listed files as "prepare <version>" and push; the tests workflow's card job then checks
-# the card against its own host test run. The board steps build with XEWE_TESTING=1 (the $test
-# hooks); XEWE_ENV, else the harness's .env, else the tools checkout's .env is the dotenv the board
-# run uses (Wi-Fi, test pins, defines): the script never reads it, the tools do.
-# `scripts/release.sh <version>` (5 stages), the tag run:
-#   1 preflight: version X.Y.Z without `v`; on main, clean, level with origin/main after a fetch;
-#     tag free locally and on origin; notes.txt (no skeleton marker) and release_card.md committed
-#     in releases/<version>/; no testcard.md; every version location says <version>; gh logged in;
-#   2 release card: `xewe release-card verify` (the card is as rendered, its tested tree is HEAD's
-#     clean tree, the local logs it lists are present with their sha256);
-#   3 CI gate on HEAD: the newest `tests` run for HEAD on main must succeed, with the card job's
-#     verify step run and green (waits; --ci-timeout minutes, default 30);
-#   4 annotated tag <version> on HEAD, push it, `gh release create` (--verify-tag, notes from
-#     notes.txt, release_card.md the only asset);
-#   5 print where to check the Arduino Library Manager (it picks the tag up by itself).
-# Re-running the tag run resumes: a tag without a GitHub Release only creates the release (pushing
-# the tag first if origin lacks it) from the tagged commit's notes.txt and release_card.md, provided
-# its files say <version>. Tag and release both present: already released. --skip-ci skips the CI
-# gate (emergencies only). --dry-run prints every command and changes nothing: only read-only git,
-# gh and tool lookups and `release-card verify` run; it reports every failed check, never waits,
-# and exits 1 if a check failed.
-# Exit codes: 0 done, 1 a refusal or a failed check, 2 releases/<version>/notes.txt to fill.
 set -euo pipefail
 
 REPO="xewe-labs/xewe-os-core"
@@ -230,7 +178,7 @@ find_python() {
 
 # short_secrets: names of environment variables the card's redactor treats as secrets whose value
 # is 4-7 characters. It replaces such a value anywhere in a log, so it can rewrite the core host
-# test ids parsed from run.sh's log (tools REREVIEW L1); CI then sees other ids and blocks.
+# test ids parsed from run.sh's log; CI then sees other ids and blocks.
 short_secrets() {
   local key value
   while IFS= read -r key; do
@@ -481,7 +429,7 @@ scripts/release.sh --prepare $1 and attached to this release.
 EOF
 }
 
-# prepare VERSION: the 9 stages of --prepare (see the header).
+# prepare VERSION: the 9 stages of --prepare (see scripts/README.md).
 prepare() {
   local v="$1" dir="releases/$1" notes="releases/$1/notes.txt" card="releases/$1/release_card.md"
   local problems loc file changed=() x py chip hw lint cli data out bin aj rc keys

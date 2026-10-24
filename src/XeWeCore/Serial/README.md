@@ -7,7 +7,7 @@
 
 ## SerialPortConfig and begin
 
-`src/XeWeCore/Serial/Serial.h` — how the port is opened.
+`src/XeWeCore/Serial/Serial.h`: how the port is opened.
 
 ### SerialPortConfig
 
@@ -30,7 +30,7 @@ struct SerialPortConfig {
 | `echo` | `true` | `XEWE_CORE_SERIAL_ECHO` (`1`) | echo each received character back, so a terminal shows what is typed |
 
 The defaults are the compile-time constants of the core's [`Config.h`](../Config.h)
-([configuration](../../../doc/config.md)); a build flag or the project's `Config.h` changes them for
+([configuration](../../../doc/CONFIG.md)); a build flag or the project's `Config.h` changes them for
 the whole build, a field set in code changes them for that port.
 
 ### begin
@@ -67,7 +67,7 @@ set before `Serial.begin`, so they cannot change after `begin()`.
 
 ## Printing
 
-`src/XeWeCore/Serial/Serial.h` — formatted output: plain lines, boxed text, separators, headers and
+`src/XeWeCore/Serial/Serial.h`: formatted output: plain lines, boxed text, separators, headers and
 tables.
 
 Every function here writes CRLF line endings (`xewe::str::kCRLF`).
@@ -244,7 +244,7 @@ table is destroyed before the table is rendered.
 
 ## Reading lines
 
-`src/XeWeCore/Serial/Serial.h` — the non-blocking input path.
+`src/XeWeCore/Serial/Serial.h`: the non-blocking input path.
 
 ```cpp
 void loop() {
@@ -320,7 +320,7 @@ not answer it.
 
 ## Prompts
 
-`src/XeWeCore/Serial/Serial.h` — typed questions asked over the serial console.
+`src/XeWeCore/Serial/Serial.h`: typed questions asked over the serial console.
 
 **Every `get_*` function blocks** until it gets a valid answer, times out, or runs out of
 attempts. It busy-waits, calling `loop()` and `yield()`. Co-operative tasks keep running; the

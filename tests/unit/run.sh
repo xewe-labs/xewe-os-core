@@ -5,9 +5,6 @@
 #
 # Host-native checks for the hardware-free parts of XeWeCore: Utils, Serial, Cli and FlexData, and
 # at gnu++2b Nvs and Settings against an in-memory NVS shim. Needs ARDUINOJSON_SRC (ArduinoJson's src/).
-# Builds the compile probes and the unit tests with the host g++ against the
-# Arduino/FreeRTOS shim, once at -std=c++17 (exercises the xewe::span fallback)
-# and once at -std=gnu++2b (what the ESP32 core uses), and runs the tests.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
 // xewe-os-core/src/XeWeCore/Utils/Pins.h
-//
-// GPIO registry: which module owns which pin, and which pins are strapping pins on this chip.
-// Fixed table, no heap; nothing is linked in unless claim/release/owner_of is called.
-// Host-includable (standard library only; <sdkconfig.h> when the ESP32 core provides it).
 #pragma once
 
 #include <cstdint>

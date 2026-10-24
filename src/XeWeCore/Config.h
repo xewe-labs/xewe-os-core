@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // xewe-os-core/src/XeWeCore/Config.h
 /*
- * The core's configuration values (doc/config.md). Pure preprocessor and no includes, so every
+ * The core's configuration values (doc/CONFIG.md). Pure preprocessor and no includes, so every
  * header can read it. Each value is a fallback: a build flag, the project's Config.h or the
  * tools' generated headers define the name first and win.
  */

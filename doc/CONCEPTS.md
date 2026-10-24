@@ -99,7 +99,7 @@ dotenv file and `xewe build --define` replace it in a fixed order. A value the f
 for when the build already answers it. Modules declare their values the same way, so one page describes
 them all.
 
-See [Configuration](config.md).
+See [Configuration](CONFIG.md).
 
 ## Principles
 

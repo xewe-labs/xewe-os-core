@@ -6,7 +6,7 @@
 
 ## xewe::Nvs
 
-`src/XeWeCore/Nvs/Nvs.h` — typed key-value storage on the ESP32 NVS partition.
+`src/XeWeCore/Nvs/Nvs.h`: typed key-value storage on the ESP32 NVS partition.
 
 Every value lives under a **namespace** and a **key**, both limited to 15 characters. NVS is
 initialised lazily on first use; there is nothing to call in `setup()`.
@@ -80,7 +80,7 @@ Returns `true` when the value was stored and committed.
 invisible to `nvs_get_*` and to external tools that walk typed entries, and a change of type
 (`float` → `double`) makes the stored value unreadable.
 
-Every `write` commits immediately — one flash commit per call.
+Every `write` commits immediately, one flash commit per call.
 
 ### read
 
@@ -110,7 +110,7 @@ std::vector<uint8_t> read_blob(std::string_view ns, std::string_view key);
 
 Raw bytes. The `vector` overload forwards to the `span` one, which writes the bytes directly.
 
-**`read_blob` cannot distinguish "missing" from "empty"** — both return an empty vector. Store a
+**`read_blob` cannot distinguish "missing" from "empty"**: both return an empty vector. Store a
 separate presence flag if that matters.
 
 ### write_flex and read_flex
@@ -120,8 +120,8 @@ template <typename T> bool write_flex(std::string_view ns, std::string_view key,
 template <typename T> bool read_flex (std::string_view ns, std::string_view key, T&       out);
 ```
 
-Persist a whole struct. `T` must derive from `xewe::FlexData<T>` — see
-[xewe::FlexData\<T\>](#xeweflexdatat) — or the call fails to compile. (The `static_assert` messages say
+Persist a whole struct. `T` must derive from `xewe::FlexData<T>` (see
+[xewe::FlexData\<T\>](#xeweflexdatat)), or the call fails to compile. (The `static_assert` messages say
 `Nvs::save<T>()` and `Nvs::load<T>()`; they mean these two.)
 
 `write_flex` is `write_blob(ns, key, obj.to_blob())`. `read_flex` returns `false` when the key is
@@ -154,7 +154,7 @@ libraries and to the ESP-IDF itself (Wi-Fi calibration data, for example). In Xe
 * **Lazy init with an automatic erase.** The first operation calls `nvs_flash_init()`. If that
   returns `ESP_ERR_NVS_NO_FREE_PAGES` or `ESP_ERR_NVS_NEW_VERSION_FOUND`, the library
   **deinitialises and erases the whole NVS partition**, then initialises again. That recovers a
-  full or format-changed partition automatically, at the cost of every stored value — a device
+  full or format-changed partition automatically, at the cost of every stored value. A device
   that fills NVS loses its settings on the next boot; the erase is reported to the error handler.
 * **The 15-character limit applies to namespaces as well as keys.** An over-long or empty name is rejected
   before any flash access: `write` returns `false`, `read` returns the default, `read_blob`
@@ -166,7 +166,7 @@ libraries and to the ESP-IDF itself (Wi-Fi calibration data, for example). In Xe
 
 ## xewe::FlexData\<T\>
 
-`src/XeWeCore/Nvs/FlexData.h` — declare a struct's fields once and get both a compact binary form for
+`src/XeWeCore/Nvs/FlexData.h`: declare a struct's fields once and get both a compact binary form for
 flash and a JSON form for APIs.
 
 ```cpp
@@ -209,7 +209,7 @@ there.
 | a nested `FlexData` struct | inlined, field by field |
 | `std::vector<T>` | where `T` is any of the above, including nested structs and further vectors |
 
-**Not supported** — a hard compile error, `"no blob_write overload for this type"`: Arduino
+**Not supported**, a hard compile error, `"no blob_write overload for this type"`: Arduino
 `String`, enums and enum classes, `std::array`, pointers, `std::optional`, `std::map`. Use
 `std::string` instead of `String`, and store an enum as its underlying integer.
 
@@ -230,7 +230,7 @@ static Derived from_json     (std::string_view json);
 | `from_json_object` | assigns **only the keys present and non-null** in the source, each only if its JSON type matches (see Type rules); `false` if any was rejected |
 | `as_json_doc` | a `JsonDocument` by value (ArduinoJson 7 elastic document) |
 | `as_json_str` | the serialized object |
-| `update` | parse and merge — a partial update, leaving unmentioned fields alone; `false` on a parse error or a rejected field |
+| `update` | parse and merge, a partial update, leaving unmentioned fields alone; `false` on a parse error or a rejected field |
 | `from_json` | static factory: default-construct, then merge |
 
 ```cpp
@@ -313,7 +313,7 @@ std::string get_field(std::string_view name) const;
 `set_field` round-trips the value through a `JsonDocument` and applies the same
 [type rules](#type-rules): it returns `false` when no field has that name or the value's type does
 not match (`set_field("enabled", "true")` on a `bool` is rejected). `get_field` returns the value
-**JSON-serialized** — strings come back quoted, nested structs as `{...}` — and the literal string
+**JSON-serialized** (strings come back quoted, nested structs as `{...}`), and the literal string
 `"null"` for an unknown name.
 
 ### Binary form
@@ -353,8 +353,8 @@ field.
 
 This header injects two specializations into `ArduinoJson`:
 
-* `Converter<std::vector<T>>` — arrays of scalars, strings or nested `FlexData` structs.
-* `Converter<T>` for any `T` deriving from `xewe::FlexData<T>` — which is what makes a nested
+* `Converter<std::vector<T>>` for arrays of scalars, strings or nested `FlexData` structs.
+* `Converter<T>` for any `T` deriving from `xewe::FlexData<T>`, which is what makes a nested
   struct work as an object *and* as a vector element.
 
 They are global to the translation unit. If you serialize `std::vector<T>` with ArduinoJson
@@ -362,7 +362,7 @@ elsewhere in a sketch that includes `<XeWeCore.h>`, these are the converters tha
 
 ## Blob format and versioning
 
-`src/XeWeCore/Nvs/FlexData.h` — what `to_blob()` writes, and what happens when a struct changes.
+`src/XeWeCore/Nvs/FlexData.h`: what `to_blob()` writes, and what happens when a struct changes.
 
 ### Layout
 
@@ -416,7 +416,7 @@ Any of these changes the binary layout and invalidates every stored blob:
 * changing a field's type, including `uint8_t` → `uint16_t`,
 * changing a nested struct's fields.
 
-Renaming a `fld` name changes only the JSON key, not the layout — the binary form does not store
+Renaming a `fld` name changes only the JSON key, not the layout, because the binary form does not store
 names.
 
 Because there is no schema in the blob, a layout change **is not detected**: the old bytes are
@@ -426,7 +426,7 @@ unnoticed. The version byte only catches a change you make deliberately.
 
 #### kBlobVersion is not a per-struct version
 
-`kBlobVersion` is a single constant on `xewe::FlexData` — the **library's** wire-format version,
+`kBlobVersion` is a single constant on `xewe::FlexData`. It is the **library's** wire-format version,
 shared by every struct. Two things follow, and both are easy to get wrong:
 
 * **Shadowing it in your struct does nothing.** `to_blob()` resolves `kBlobVersion` in the base
@@ -460,7 +460,7 @@ if (!nvs.read_flex("app", "settings", s) || s.schema != Settings{}.schema) {
 Because `schema` is the first field it is the first thing decoded, so it is readable even when the
 rest of the layout has moved underneath it.
 
-There is no migration built in — a device with old data comes up with defaults. If the values have
+There is no migration built in, so a device with old data comes up with defaults. If the values have
 to survive, read the blob with the old struct definition, copy the fields across, and write the
 new one.
 

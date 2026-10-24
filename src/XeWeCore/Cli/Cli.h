@@ -31,9 +31,6 @@ struct CommandGroup {
     std::vector<Command> commands;
 };
 
-// Parses lines of the form `$<group> <command> [args...]` and dispatches them to
-// registered commands. Quoted arguments ("with spaces") and \-escapes are supported.
-// `$help` lists every group, `$help <group>` / `$<group>` lists one.
 class Cli {
 public:
     explicit Cli(SerialPort& serial);

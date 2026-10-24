@@ -26,7 +26,7 @@ public:
         pinMode(led_pin, OUTPUT);
     }
 
-    // Only called while this module is enabled — the Os skips loop()
+    // Only called while this module is enabled: the Os skips loop()
     // for disabled modules. It must not block.
     void loop() override {
         if (millis() - last_check < 1000)

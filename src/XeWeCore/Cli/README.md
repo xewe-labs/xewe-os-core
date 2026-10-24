@@ -6,7 +6,7 @@
 
 ## Commands and groups
 
-`src/XeWeCore/Cli/Cli.h` — the types a command is made of, and how groups are registered.
+`src/XeWeCore/Cli/Cli.h`: the types a command is made of, and how groups are registered.
 
 ### Types
 
@@ -151,7 +151,7 @@ id, so iterating it is alphabetical by id.
 
 ## Executing commands
 
-`src/XeWeCore/Cli/Cli.h` — the two `execute` overloads, the tokenizer, and every error the parsed path
+`src/XeWeCore/Cli/Cli.h`: the two `execute` overloads, the tokenizer, and every error the parsed path
 prints.
 
 ### execute (parsed)
@@ -252,7 +252,7 @@ $dev name "say \"hi\""           -> args: ["say \"hi\""]
 
 ## Help output
 
-`src/XeWeCore/Cli/Cli.h` — the generated `$help` tables.
+`src/XeWeCore/Cli/Cli.h`: the generated `$help` tables.
 
 ### print_all_commands
 

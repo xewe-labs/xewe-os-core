@@ -40,7 +40,7 @@ Repeat with `esp32c6` and `esp32s3`. CI does the same, one job per chip.
 
 `.github/workflows/tests.yml` calls the tools' `xewe-core-tests.yml` on every push and pull request.
 Every job blocks: the host unit tests, arduino-lint (`--compliance strict --library-manager update`,
-[library-rules.md](library-rules.md)), the example builds (c3, c6, s3),
+[LIBRARY_RULES.md](LIBRARY_RULES.md)), the example builds (c3, c6, s3),
 `xewe format --check` (clang-format with the tools' style, ruff for the Python) and
 `xewe brand-lint`. On a prepare commit (one that holds `releases/<version>/release_card.md` for its
 own tree) the `release card check` job compares the card's host test rows with this run's
@@ -50,8 +50,8 @@ reusable workflow and its `tools_ref` to the same tools tag.
 ## Release card
 
 `scripts/release.sh --prepare <version>` runs all of the above locally, plus the board tests for
-c3, c6 and s3, and writes the results into `releases/<version>/release_card.md` (README
-"Releasing"). Without `--hardware` the board tests are built but not run ("compiled, not run").
+c3, c6 and s3, and writes the results into `releases/<version>/release_card.md`
+([scripts/README.md](../scripts/README.md)). Without `--hardware` the board tests are built but not run ("compiled, not run").
 
 ## Board tests
 

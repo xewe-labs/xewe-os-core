@@ -24,5 +24,5 @@ The sketches in [`examples/`](../examples) open from the Arduino IDE under
   reboots.
 - [`15_Os`](../examples/15_Os/15_Os.ino): two modules where one requires the other.
 
-Every example compiles for ESP32-C3, C6 and S3. [tests.md](tests.md) shows how to compile them
+Every example compiles for ESP32-C3, C6 and S3. [TESTS.md](TESTS.md) shows how to compile them
 all at once.

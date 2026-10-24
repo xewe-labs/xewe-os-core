@@ -1,7 +1,5 @@
-# tests.yml: host unit tests, arduino-lint, example builds, format and brand-lint for every push and PR,
-# and on a prepare commit the release-card check (the card job compares releases/<v>/release_card.md
-# with this run's host tests). The workflow and tools_ref name the same tools tag as the card.
-# Nothing here publishes: releases are made with scripts/release.sh (un-prefixed X.Y.Z tags).
+# Host tests, arduino-lint, example builds, format and brand-lint on every push and PR, plus the
+# release-card check on a prepare commit. The workflow ref and tools_ref name the same tools tag.
 name: tests
 on:
   push:

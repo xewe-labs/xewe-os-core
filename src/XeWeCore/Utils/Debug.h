@@ -7,17 +7,6 @@
 
 #include <cstdio>
 
-// Debug output is opt-in per class. Each library defines its own flag with a
-// default of 0 next to its code:
-//
-//     #ifndef DEBUG_MyClass
-//     #define DEBUG_MyClass 0
-//     #endif
-//
-// Enable one from the build instead of editing the library, e.g.
-//     arduino-cli compile --build-property "compiler.cpp.extra_flags=-DDEBUG_MyClass=1"
-// or in PlatformIO: build_flags = -DDEBUG_MyClass=1
-
 #define DBG_ENABLED(cls) (DEBUG_##cls)
 
 #define DBG_PRINTLN(cls, msg) \

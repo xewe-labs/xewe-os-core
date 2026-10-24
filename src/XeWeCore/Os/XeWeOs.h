@@ -50,8 +50,6 @@ public:
     void restart(uint16_t delay_ms = 1000);
 };
 
-// Owns the core services (serial, nvs, cli, system) and every registered module.
-//
 // Declare the Os object before any module in the sketch: modules register
 // themselves from their constructors, and globals in one file are constructed
 // top to bottom.

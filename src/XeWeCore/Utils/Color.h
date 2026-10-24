@@ -1,12 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Maxim Dokukin (maxdokukin.com)
 // SPDX-License-Identifier: GPL-3.0-only
 // xewe-os-core/src/XeWeCore/Utils/Color.h
-//
-// Host-includable: the standard library only, no <Arduino.h> (tests/unit/run.sh compiles it
-// without the Arduino shim). Keep it that way so pure effect code can include it.
-//
-// parse_hex_color / to_hex_color are also reachable as xewe::str:: through String.h.
-//
 // hsv_to_rgb is pinned bit for bit by tests/unit (test_utils.cpp, color_hsv_to_rgb_pinned):
 // effect code depends on its exact output, so the arithmetic and its operation order stay as they
 // are.
@@ -114,9 +108,7 @@ inline std::array<uint8_t, 3> rgb_to_hsv(const std::array<uint8_t, 3>& rgb) {
     return {h, s, v};
 }
 
-// --------------------------------------------------------------------------------------
 // Hex colour strings: "rrggbb" or "#rrggbb", exactly six hex digits (either case)
-// --------------------------------------------------------------------------------------
 
 // true and r/g/b set on success; false and r/g/b untouched on anything else
 // ("#ff", "ff00zz", 7 digits, "", "0xff0000", spaces, a sign)

@@ -41,7 +41,7 @@ struct OsConfig {
 
 `version` and `build_timestamp` left empty are filled by the constructor from `BUILD_VERSION` and
 `BUILD_TIMESTAMP` of the tools' generated `<XeWeBuildInfo.h>`, which `XeWeOs.cpp` includes when the
-build has it ([configuration](../../../doc/config.md#build-info)). Without it `version` is
+build has it ([configuration](../../../doc/CONFIG.md#build-info)). Without it `version` is
 `"0.0.0"` and `build_timestamp` stays empty. A value set in the sketch always wins. The defaults
 that come from defines are listed in the core's [`Config.h`](../Config.h).
 
@@ -111,7 +111,7 @@ module's `<name> Setup` header → `System Setup Complete`.
 #### First-boot device name
 
 The device name (`system/device_name`) is a default runtime value of the core's
-[`Config.h`](../Config.h) ([configuration](../../../doc/config.md)):
+[`Config.h`](../Config.h) ([configuration](../../../doc/CONFIG.md)):
 
 ```c
 /* Device name (system/device_name), string literal, up to 254 characters; asked at first boot */
@@ -141,7 +141,7 @@ recipe on spaces outside quotes; without them `Chiller"` becomes a stray file na
 
 In an xewe project the line `// #define XEWE_CORE_DEVICE_NAME "xewe-device"` of the project's
 `Config.h` does the same once uncommented, and `#define XEWE_CORE_DEVICE_NAME INJECTED_FROM_DOTENV`
-takes the name from the dotenv file at build time ([override ladder](../../../doc/config.md#override-ladder)).
+takes the name from the dotenv file at build time ([override ladder](../../../doc/CONFIG.md#override-ladder)).
 
 A `#define` in the sketch does **not** work. The name is read by `XeWeOs.cpp`, a library file, so
 it has to reach every translation unit: a build flag, or the headers the tools put in front of

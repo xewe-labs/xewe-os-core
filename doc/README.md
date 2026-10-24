@@ -6,12 +6,12 @@ typed NVS storage, helpers and a module framework, in one Arduino library. Sketc
 
 ## Reading path
 
-1. **[Concepts](concepts.md)**: what the core is for, modules, the console, storage, the
+1. **[Concepts](CONCEPTS.md)**: what the core is for, modules, the console, storage, the
    settings schema, listeners, and the principles behind them.
 2. **Pick your level** (below) and run its example.
 3. **[Os](../src/XeWeCore/Os/README.md#os) → [Module](../src/XeWeCore/Module/README.md) → [Settings table](../src/XeWeCore/Settings/README.md)**: the three
    pages a module author needs.
-4. **[Configuration](config.md)**: the build-time values, their names and how a build overrides
+4. **[Configuration](CONFIG.md)**: the build-time values, their names and how a build overrides
    them; the same scheme for the core, the modules and xewe projects.
 5. **The reference pages** below, when you need the exact behaviour of a function, command or
    stored key.
@@ -33,13 +33,13 @@ always *your own* module.
 
 | Section | Covers |
 |---|---|
-| [The module Config.h](config.md#the-module-configh) | the file, its two sections, the entry form, the values the first boot asks for and `_PROMPT` |
-| [Names](config.md#names) | `XEWE_<SLUG>_<PARAM>`, the settings-key rule, no prefix nesting |
-| [The project's Config.h](config.md#the-projects-configh) | the core and module blocks, pre-answering, the `INJECTED_FROM_DOTENV` sentinel |
-| [Override ladder](config.md#override-ladder) | `--define`, dotenv, project, module fallback; the three generated or project headers |
-| [The dotenv file](config.md#the-dotenv-file), [Releases](config.md#releases) | injection, errors, provisioning keys; what a release refuses |
-| [Build info](config.md#build-info) | `XeWeBuildInfo.h`: `BUILD_VERSION`, `BUILD_TIMESTAMP`, `BUILD_CHIP`, `XEWE_CHIP_<X>` |
-| [What a validator checks](config.md#what-a-validator-checks) | the rules a module's `Config.h` passes |
+| [The module Config.h](CONFIG.md#the-module-configh) | the file, its two sections, the entry form, the values the first boot asks for and `_PROMPT` |
+| [Names](CONFIG.md#names) | `XEWE_<SLUG>_<PARAM>`, the settings-key rule, no prefix nesting |
+| [The project's Config.h](CONFIG.md#the-projects-configh) | the core and module blocks, pre-answering, the `INJECTED_FROM_DOTENV` sentinel |
+| [Override ladder](CONFIG.md#override-ladder) | `--define`, dotenv, project, module fallback; the three generated or project headers |
+| [The dotenv file](CONFIG.md#the-dotenv-file), [Releases](CONFIG.md#releases) | injection, errors, provisioning keys; what a release refuses |
+| [Build info](CONFIG.md#build-info) | `XeWeBuildInfo.h`: `BUILD_VERSION`, `BUILD_TIMESTAMP`, `BUILD_CHIP`, `XEWE_CHIP_<X>` |
+| [What a validator checks](CONFIG.md#what-a-validator-checks) | the rules a module's `Config.h` passes |
 
 ### Os: `src/XeWeCore/Os/XeWeOs.h`, `Module/Module.h`, `Settings/Settings.h`
 
@@ -93,10 +93,11 @@ always *your own* module.
 
 ## Also
 
-* [Configuration](config.md): build-time values for the core, the modules and xewe projects.
-* [Examples](examples.md): what each sketch in `examples/` shows.
-* [Tests](tests.md): the host unit tests and the board tests.
-* [Library rules](library-rules.md): what keeps XeWeCore a valid Arduino library (layout,
+* [Configuration](CONFIG.md): build-time values for the core, the modules and xewe projects.
+* [Examples](EXAMPLES.md): what each sketch in `examples/` shows.
+* [Tests](TESTS.md): the host unit tests and the board tests.
+* [Library rules](LIBRARY_RULES.md): what keeps XeWeCore a valid Arduino library (layout,
   `library.properties`, `library.json`, names).
-* Rules for changing the core (layout, include direction, what a change must carry):
-  [`.agents/AGENTS.md`](../.agents/AGENTS.md).
+* Changing the core: the layout and include direction are in [src/README.md](../src/README.md),
+  and what a change must carry is in the root README's
+  [Development](../README.md#development) section.
